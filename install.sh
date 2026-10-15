@@ -15,6 +15,7 @@
 #
 # Uso:
 #   ./install.sh [--help]
+#   curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-venjix/main/install.sh | bash
 
 # Si lo ejecutan con sh/dash, relanzar con bash (el script usa sintaxis de bash).
 if [ -z "${BASH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
@@ -34,7 +35,13 @@ PNPM_SHA256_x64="4c592fa410eb23b69691a9efb9bf21c87c15b3e9d88c6ec8acdd354a0eb8de7
 PNPM_SHA256_arm64="f1426231f365bdfd46c15fa3d1211c3936ee2c4e557afd304f6c66dbf1b2a8bf"
 
 # ---------------------------------------------------------------- rutas
-REPO="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Raíz del repo si el script corre desde un checkout; vacío si llega por tubería (curl | bash).
+SELF="${BASH_SOURCE[0]:-}"
+if [[ -n "$SELF" && -f "$SELF" ]]; then
+    REPO="$(cd -P "$(dirname "$SELF")" && pwd)"
+else
+    REPO=""
+fi
 CANON="$HOME/.config/opencode-venjix"
 BIN_DIR="$HOME/.local/bin"
 SHARE_DIR="$HOME/.local/share/opencode-venjix"
@@ -58,6 +65,9 @@ install.sh — instala opencode-venjix en Linux (x86_64 o arm64).
 
 Uso:
   ./install.sh [--help]
+
+También puedes instalarlo sin clonar antes (el instalador clona el repo solo):
+  curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-venjix/main/install.sh | bash
 
 Instala Node.js, OpenCode y engram si faltan, y configura el repositorio.
 No instala Ollama ni modelos: si tienes Ollama activo, se detecta al abrir.
@@ -89,6 +99,28 @@ link() { # link ORIGEN DESTINO
         warn "respaldado $dst -> $dst.bak-$STAMP"
     fi
     ln -sfn "$src" "$dst"
+}
+
+# Bootstrap para `curl ... | bash`: si no hay checkout, clona el repo en la ubicación
+# canónica y continúa la instalación desde ahí (re-ejecuta este mismo script).
+ensure_checkout() {
+    if [[ -n "$REPO" && -f "$REPO/package.json" && -f "$REPO/opencode.json" ]]; then
+        return
+    fi
+    say "instalador fuera de un checkout: preparando $CANON"
+    have git || die "git es necesario para clonar el repositorio (instálalo con el gestor de tu distribución)"
+    if [[ -e "$CANON" && ! -d "$CANON/.git" ]]; then
+        die "$CANON ya existe y no es un repositorio git; muévelo o bórralo y reintenta"
+    fi
+    if [[ ! -d "$CANON/.git" ]]; then
+        say "clonando https://github.com/runer0101/opencode-venjix.git"
+        git clone --depth 1 https://github.com/runer0101/opencode-venjix.git "$CANON" \
+            || die "no se pudo clonar el repositorio"
+    else
+        ok "ya hay un checkout en $CANON"
+        git -C "$CANON" pull --ff-only >/dev/null 2>&1 || warn "no se pudo actualizar el checkout; continúo con la versión instalada"
+    fi
+    exec "$CANON/install.sh" "$@"
 }
 
 # ---------------------------------------------------------------- 1. requisitos
@@ -356,6 +388,7 @@ main() {
         *) die "opción desconocida: $1 (usa --help)" ;;
     esac
 
+    ensure_checkout "$@"
     preflight
     ensure_node
     ensure_pnpm

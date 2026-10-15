@@ -3,6 +3,7 @@
 [![CI](https://github.com/runer0101/opencode-venjix/actions/workflows/ci.yml/badge.svg)](https://github.com/runer0101/opencode-venjix/actions/workflows/ci.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)](https://nodejs.org)
+[![pnpm](https://img.shields.io/badge/pnpm-11.22.0-orange.svg)](https://pnpm.io)
 
 **OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
 
@@ -49,6 +50,14 @@ Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots
 Alpine Linux (musl) no está soportado: Node.js y los binarios de OpenCode se distribuyen para glibc.
 
 ## Instalación rápida
+
+Un comando (el instalador clona el repo en `~/.config/opencode-venjix` y configura todo):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-venjix/main/install.sh | bash
+```
+
+¿Prefieres revisarlo antes de ejecutarlo? Es el mismo script, desde el repo:
 
 ```bash
 git clone https://github.com/runer0101/opencode-venjix.git ~/.config/opencode-venjix
@@ -226,7 +235,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 57 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
+pnpm test                           # 58 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 

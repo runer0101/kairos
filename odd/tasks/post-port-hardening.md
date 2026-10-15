@@ -73,6 +73,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T21 — Licencia MIT y README final (pedida por el usuario, después del plan) · Criterio: `LICENSE` MIT en la raíz, badge de licencia y sección de créditos coherente; README con pasada profesional (contribuir, estado, correcciones) · Prueba: `pnpm test` + revisión del README
 - [x] T22 — Visual nativo: pack de sonidos y pie de inicio (elegida por el usuario, después del plan) · Criterio: los tonos se integran con el sistema de atención nativo de OpenCode (pack `venjix`) y la pantalla de inicio muestra un pie con atajos · Prueba: `pnpm test` + smoke de TUI
 - [x] T23 — Arranque rápido de `ov` (reportado por el usuario) · Criterio: identificar la causa del arranque lento y corregirla · Prueba: TTFD oficial antes/después (10.005 ms → 4.889 ms)
+- [x] T24 — Instalación en un comando y pnpm asegurado en el repo público (pedida por el usuario) · Criterio: `curl | bash` clona y configura solo; el repo público mantiene pnpm (lock, workspace, packageManager, sin package-lock) · Prueba: `pnpm test` + bootstrap probado con stub de git + verificación del repo público
 
 ## Evidencia de verificación
 
@@ -95,6 +96,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T21: `LICENSE` MIT (© 2026 runer0101) en la raíz; README con badge de licencia y de Node, nota de estado activo, sección «Contribuir», corrección de «Qué no incluye» (los sonidos sí están) y créditos actualizados; la nota de licencia sin definir quedó retirada. `pnpm test` → 56 tests, 52 pass, 4 skipped, 0 fail.
 - T22: `tui-plugins/gentle-sounds.ts` registra el pack nativo `venjix` (done y subagent_done → `success`, error → `error`, permission y question → `attention`) con activación persistente vía `OPENCODE_VENJIX_SOUNDS=1`; el plugin de servidor deja de reproducir sonidos por su cuenta (guardas y aviso de escritorio siguen igual); el logo muestra bajo el arco la firma y los atajos (el slot `home_footer` no renderiza en OpenCode 1.18; se descartó); README actualizado con una fila de diagnóstico para el aviso interno `background dependency install failed` (OpenCode intenta npm en un proyecto pnpm; los plugins cargan igual). `pnpm test` → 57 tests, 53 pass, 4 skipped, 0 fail; smoke de TUI con el arte y los atajos visibles.
 - T23: causa raíz — OpenCode ejecuta npm sobre el directorio de configuración al arrancar (install de `@opencode-ai/plugin`) y npm 12 crashea al recorrer el layout de symlinks de pnpm (arborist `Link.matches` → null; reproducible con `npm install --package-lock-only` en el repo), esperando ~5 s por intento. Fix: `nodeLinker: hoisted` en `pnpm-workspace.yaml`. Verificado: npm ya no crashea, el install deja de fallar (0 avisos nuevos), TTFD oficial 10.005 ms → 4.889 ms y los plugins/atajos siguen renderizando; `pnpm install --frozen-lockfile` reproducible y `pnpm test` → 57/53/0.
+- T24: `install.sh` detecta si corre fuera de un checkout (tubería) y clona en la ruta canónica re-ejecutándose desde ahí; probado con stub de git (invoca `clone --depth 1` con la URL correcta) y `--help` por tubería no clona. Repo público verificado: `pnpm-lock.yaml` y `pnpm-workspace.yaml` presentes (HTTP 200), `packageManager: pnpm@11.22.0`, sin `package-lock.json` (404). README: instalación de un comando como método principal, opción de clonar para revisar y badge de pnpm. `pnpm test` → 58 tests, 54 pass, 4 skipped, 0 fail.
 
 ## Progreso
 
@@ -117,6 +119,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T21 (pedido del usuario): licencia MIT y pasada profesional final del README.
 - 2026-10-15 — T22 (pedido del usuario): sonidos integrados con el sistema nativo de OpenCode (pack `venjix`) y pie de la pantalla de inicio con atajos.
 - 2026-10-15 — T23 (reportado por el usuario): arranque de `ov` acelerado ~5 s — `nodeLinker: hoisted` para que el install con npm de OpenCode no crashee sobre el layout de pnpm.
+- 2026-10-15 — T24 (pedido del usuario): instalación de un comando (`curl | bash` con bootstrap) y pnpm verificado en el repo público.
 
 ## Siguiente paso
 

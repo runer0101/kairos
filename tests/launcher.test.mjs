@@ -50,3 +50,13 @@ test("install.sh crea el alias corto ov y el lanzador lo documenta", () => {
     const launcher = readFileSync(LAUNCHER, "utf8");
     assert.match(launcher, /alias corto/, "el lanzador debe documentar el alias");
 });
+
+test("install.sh soporta la instalación en un comando (curl | bash)", () => {
+    const install = readFileSync(join(ROOT, "install.sh"), "utf8");
+    assert.match(install, /ensure_checkout/, "falta el bootstrap para curl | bash");
+    assert.match(
+        install,
+        /raw\.githubusercontent\.com\/runer0101\/opencode-venjix\/main\/install\.sh/,
+        "falta la URL del instalador de un comando",
+    );
+});
