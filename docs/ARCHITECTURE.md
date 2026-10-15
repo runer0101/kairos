@@ -28,7 +28,7 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 
 | Componente en gentle-shell | Equivalente en opencode-venjix | Notas |
 |---|---|---|
-| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `venjix`, `venjix-deep`, `venjix-yolo` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
+| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `venjix`, `venjix-auto` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
 | `assets/orchestrator-*.md`, `chains/` | `gentle-assets/` | Se leen bajo demanda, igual que en Pi |
 | `assets/agents/*.md` | `agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
@@ -96,7 +96,7 @@ Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan
 Permisos:
 
 - **Normal** (global): lectura, búsqueda y subagentes permitidos. Edición y bash piden confirmación. Un conjunto de lecturas habituales de bash está permitido. El comodín `*` va primero, porque la última regla que coincide gana.
-- **Autónomo** (`venjix-yolo`): `permission: "allow"` a nivel de agente. Como la última regla que coincide gana, sobrescribe las de `ask`.
+- **Automático** (`venjix-auto`): `permission: "allow"` a nivel de agente. Como la última regla que coincide gana, sobrescribe las de `ask`.
 - **Auto de OpenCode**: `opencode-venjix --auto` pasa el flag al binario. Respeta los `deny`.
 - **Guarda de comandos**: `plugins/gentle-shell.ts` la aplica en `tool.execute.before`, en todos los modos.
 

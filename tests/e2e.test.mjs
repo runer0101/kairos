@@ -33,7 +33,7 @@ test("la lista de agentes incluye los perfiles", { skip: !enabled && "usa OPENCO
     execFileSync("/bin/sh", ["-c", `"$0" agent list > "$1" 2>&1`, OPENCODE, listing], { env, timeout: 120000 });
     const out = readFileSync(listing, "utf8");
     rmSync(listing, { force: true });
-    for (const name of ["venjix (primary)", "venjix-deep (primary)", "venjix-yolo (primary)"]) {
+    for (const name of ["venjix (primary)", "venjix-auto (primary)"]) {
         assert.ok(out.includes(name), `falta ${name}`);
     }
 });

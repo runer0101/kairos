@@ -24,8 +24,8 @@ test("el proveedor ollama global queda deshabilitado (evita modelos fantasma)", 
   assert.equal(cfg.provider, undefined, "no debe haber proveedores fijos en opencode.json");
 });
 
-test("existen los tres perfiles como agentes primarios con el mismo prompt", () => {
-  for (const name of ["venjix", "venjix-deep", "venjix-yolo"]) {
+test("existen los perfiles como agentes primarios con el mismo prompt", () => {
+  for (const name of ["venjix", "venjix-auto"]) {
     const a = cfg.agent[name];
     assert.ok(a, `falta el perfil ${name}`);
     assert.equal(a.mode, "primary", `${name} debe ser primario`);
@@ -36,7 +36,7 @@ test("existen los tres perfiles como agentes primarios con el mismo prompt", () 
 });
 
 test("todos los perfiles usan DeepSeek v4.1 Flash", () => {
-  for (const name of ["venjix", "venjix-deep", "venjix-yolo"]) {
+  for (const name of ["venjix", "venjix-auto"]) {
     assert.equal(cfg.agent[name].model, DEEPSEEK, `${name} debe usar DeepSeek v4.1 Flash`);
   }
 });
@@ -54,9 +54,15 @@ test("las lecturas habituales de bash están permitidas y van después del comod
   assert.equal(cfg.permission.bash["git status*"], "allow");
 });
 
-test("modo autónomo (yolo) permite todo; la guarda de comandos sigue en el plugin", () => {
-  assert.equal(cfg.agent["venjix-yolo"].permission, "allow");
+test("modo automático (venjix-auto) permite todo; la guarda de comandos sigue en el plugin", () => {
+  assert.equal(cfg.agent["venjix-auto"].permission, "allow");
   assert.ok(existsSync(join(ROOT, "plugins", "gentle-shell.ts")));
+});
+
+test("build, plan y el perfil duplicado quedan fuera del selector", () => {
+  assert.equal(cfg.agent.build?.disable, true, "build debe estar desactivado");
+  assert.equal(cfg.agent.plan?.disable, true, "plan debe estar desactivado");
+  assert.equal(cfg.agent["venjix-deep"], undefined, "venjix-deep se retiró");
 });
 
 test("subagentes con modelo propio: explorador con pasos acotados y juez B con el modelo por defecto", () => {

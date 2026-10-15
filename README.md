@@ -4,8 +4,8 @@ OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles d
 
 ## Qué incluye
 
-- **Perfiles de agente** (se cambian con `Tab`): `venjix` (equilibrado), `venjix-deep` (modelo profundo) y `venjix-yolo` (autónomo).
-- **Modos de permiso**: normal por defecto; autónomo con el perfil `venjix-yolo` o con `opencode-venjix --auto`. La guarda de comandos destructivos siempre está activa.
+- **Perfiles de agente** (se cambian con `Tab`): `venjix` (normal) y `venjix-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
+- **Modos de permiso**: normal por defecto; automático con el perfil `venjix-auto` o con `opencode-venjix --auto`. La guarda de comandos destructivos siempre está activa.
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
 - **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
 - **Memoria** persistente mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
@@ -59,10 +59,9 @@ Pulsa `Tab` para cambiar de perfil durante una sesión.
 | Perfil | Modelo | Permisos | Para qué |
 |---|---|---|---|
 | `venjix` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario |
-| `venjix-deep` | `opencode-go/deepseek-v4.1-flash` | Normales | Tareas difíciles |
-| `venjix-yolo` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
+| `venjix-auto` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
 
-Los tres perfiles usan el mismo modelo (DeepSeek v4.1 Flash, requiere suscripción OpenCode Go). Los subagentes sin modelo propio heredan el modelo del perfil activo. `gentle-ai-explore` limita a 15 pasos para acotar el costo de la exploración; el resto de subagentes (incluido `jd-judge-b`) usa DeepSeek v4.1 Flash.
+Los dos perfiles usan el mismo modelo (DeepSeek v4.1 Flash, requiere suscripción OpenCode Go). Los subagentes sin modelo propio heredan el modelo del perfil activo. `gentle-ai-explore` limita a 15 pasos para acotar el costo de la exploración; el resto de subagentes (incluido `jd-judge-b`) usa DeepSeek v4.1 Flash.
 
 Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar los prompts.
 
@@ -71,7 +70,7 @@ Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar l
 | Modo | Cómo se activa | Qué pasa |
 |---|---|---|
 | Normal | Por defecto | Edición y comandos de bash piden confirmación. Las lecturas habituales (`ls`, `git status`, `git diff`, `grep`…) no. |
-| Autónomo | Perfil `venjix-yolo` | No pide confirmación. La guarda de comandos destructivos sigue bloqueando. |
+| Automático | Perfil `venjix-auto` | No pide confirmación. La guarda de comandos destructivos sigue bloqueando. |
 | Auto (OpenCode) | `opencode-venjix --auto` | Aprueba lo que pediría confirmación. Las reglas `deny` siguen aplicando. |
 
 La guarda de comandos destructivos bloquea, en todos los modos, formas reconocibles como `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE` y `DELETE` sin `WHERE`. Es un filtro heurístico, no un sandbox.
@@ -200,7 +199,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 50 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas y sonidos
+pnpm test                           # 51 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas y sonidos
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
@@ -249,7 +248,7 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 - El repositorio no contiene claves ni credenciales. Las claves de proveedores se guardan fuera del repo (`~/.local/share/opencode/auth.json`).
 - `.gitignore` excluye `node_modules/`, respaldos, `.env`, `auth.json`, claves privadas y el marcador local de sincronización.
 - La guarda de comandos destructivos es heurística: reconoce formas comunes, no es un sandbox.
-- Los perfiles con permisos amplios (`venjix-yolo`, `--auto`) deben usarse solo en repositorios de confianza.
+- Los perfiles con permisos amplios (`venjix-auto`, `--auto`) deben usarse solo en repositorios de confianza.
 - Antes de compartir una sesión o un log, revisa que no incluya rutas o datos personales.
 
 ## Solución de problemas

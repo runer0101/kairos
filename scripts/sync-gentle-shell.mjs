@@ -131,7 +131,7 @@ if (existsSync(join(ASSETS_SRC, "chains"))) {
 }
 
 // 2) Prompt del orchestrator. No es un agente por sí mismo: opencode.json define los perfiles
-//    (venjix, venjix-deep, venjix-yolo) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
+//    (venjix, venjix-auto) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
 {
   const body = templ(readFileSync(join(ASSETS_SRC, "orchestrator.md"), "utf8"));
   writeFileSync(join(stagePrompts, "orchestrator.md"), RUNTIME_NOTE + body);

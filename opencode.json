@@ -52,22 +52,21 @@
     "doom_loop": "ask"
   },
   "agent": {
+    "build": {
+      "disable": true
+    },
+    "plan": {
+      "disable": true
+    },
     "venjix": {
-      "description": "Perfil equilibrado: orquestador con DeepSeek v4.1 Flash y permisos normales",
+      "description": "Perfil normal (por defecto): orquestador con DeepSeek v4.1 Flash y permisos normales",
       "mode": "primary",
       "model": "opencode-go/deepseek-v4.1-flash",
       "prompt": "{file:./prompts/orchestrator.md}",
       "color": "accent"
     },
-    "venjix-deep": {
-      "description": "Perfil profundo: orquestador con DeepSeek v4.1 Flash (requiere suscripción OpenCode Go)",
-      "mode": "primary",
-      "model": "opencode-go/deepseek-v4.1-flash",
-      "prompt": "{file:./prompts/orchestrator.md}",
-      "color": "secondary"
-    },
-    "venjix-yolo": {
-      "description": "Perfil autónomo (equivalente a YOLO): sin preguntas de permisos; la guarda de comandos destructivos sigue activa",
+    "venjix-auto": {
+      "description": "Perfil automático: sin preguntas de permisos; la guarda de comandos destructivos sigue activa",
       "mode": "primary",
       "model": "opencode-go/deepseek-v4.1-flash",
       "prompt": "{file:./prompts/orchestrator.md}",
