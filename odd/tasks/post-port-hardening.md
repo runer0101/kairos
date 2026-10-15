@@ -96,11 +96,11 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T12 (pedido del usuario): todos los perfiles, agentes y subagentes por defecto con DeepSeek v4.1 Flash (`0748201`). `jd-judge-b` pierde su modelo distinto; `venjix-deep` comparte modelo con `venjix`.
 - 2026-10-15 — T13: hardening de privacidad para publicar sin datos personales (rutas portables, instalador que no ensucia, prueba de privacidad, bits de ejecución). Commits: `16b3b72`, `13372be`, `69d031f`, `3ff9abd`; sin push.
 - 2026-10-15 — Reescritura de autoría de los 13 commits sin publicar (correo personal → noreply de GitHub) con el consentimiento del autor; el árbol quedó idéntico y este documento ya apunta a los hashes nuevos. Historia pública hasta `6f9cc2b` sin tocar (decisión del autor).
-- 2026-10-15 — T14: temas de gentle-shell portados a OpenCode (Gentle, Gentleman-Cute, Gentleman-Sexy) con enlace múltiple en `install.sh`, pruebas de esquema y smoke real en la TUI (`6e2aaf2`). Pendiente decidir sonidos y logo de texto personal.
-- 2026-10-15 — T14/T15: tema por defecto renombrado a `gentleman-venjix` (`b80b17b`); sonidos opt-in y texto del logo portados y verificados (`d5ce460`).
-- 2026-10-15 — T16: selector simplificado a `venjix` + `venjix-auto` (build/plan desactivados, venjix-deep retirado) a pedido del usuario (`6a779c9`).
-- 2026-10-15 — T17: alias corto `ov` creado por `install.sh` (`19e456a`).
-- 2026-10-15 — T18 (elegido por el usuario: seguridad primero): piso inviolable de rutas sensibles (config + plugin, también en bash y en `venjix-auto`) y `SECURITY.md` (`1a38734`).
+- 2026-10-15 — T14: temas de gentle-shell portados a OpenCode (Gentle, Gentleman-Cute, Gentleman-Sexy) con enlace múltiple en `install.sh`, pruebas de esquema y smoke real en la TUI (`8cfce85`). Pendiente decidir sonidos y logo de texto personal.
+- 2026-10-15 — T14/T15: tema por defecto renombrado a `gentleman-venjix` (`1b0f640`); sonidos opt-in y texto del logo portados y verificados (`b927949`).
+- 2026-10-15 — T16: selector simplificado a `venjix` + `venjix-auto` (build/plan desactivados, venjix-deep retirado) a pedido del usuario (`7cb2478`).
+- 2026-10-15 — T17: alias corto `ov` creado por `install.sh` (`a7a7927`).
+- 2026-10-15 — T18 (elegido por el usuario: seguridad primero): piso inviolable de rutas sensibles (config + plugin, también en bash y en `venjix-auto`) y `SECURITY.md` (`54b394b`).
 
 ## Siguiente paso
 
