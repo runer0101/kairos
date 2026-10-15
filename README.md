@@ -6,6 +6,7 @@ OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles d
 
 - **Perfiles de agente** (se cambian con `Tab`): `venjix` (normal) y `venjix-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
 - **Modos de permiso**: normal por defecto; automático con el perfil `venjix-auto` o con `opencode-venjix --auto`. La guarda de comandos destructivos siempre está activa.
+- **Rutas sensibles protegidas**: credenciales (`~/.ssh`, `~/.gnupg`, `~/.aws`, claves, `auth.json`) bloqueadas en todos los perfiles; `.env`/`.pem` piden confirmación en el perfil normal (ver `SECURITY.md`).
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
 - **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
 - **Memoria** persistente mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
@@ -76,6 +77,8 @@ Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar l
 | Auto (OpenCode) | `opencode-venjix --auto` | Aprueba lo que pediría confirmación. Las reglas `deny` siguen aplicando. |
 
 La guarda de comandos destructivos bloquea, en todos los modos, formas reconocibles como `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE` y `DELETE` sin `WHERE`. Es un filtro heurístico, no un sandbox.
+
+Además hay un **piso inviolable de rutas sensibles**: leer o escribir en `~/.ssh`, `~/.gnupg`, `~/.aws`, `.git-credentials`, `.netrc`, claves `id_*` o `auth.json` se bloquea para el agente en todos los perfiles (también `venjix-auto`, y también vía bash). Los `.env`, `*.pem` y configs de kube/docker piden confirmación en el perfil normal. Detalles y límites en [SECURITY.md](SECURITY.md).
 
 ## Comandos
 
@@ -201,7 +204,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 52 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas y sonidos
+pnpm test                           # 56 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 

@@ -41,9 +41,11 @@ test("todos los perfiles usan DeepSeek v4.1 Flash", () => {
   }
 });
 
-test("modo normal: edición y bash piden confirmación, lectura libre", () => {
+test("modo normal: edición y bash piden confirmación, lectura libre salvo rutas sensibles", () => {
   assert.equal(cfg.permission.edit, "ask");
-  assert.equal(cfg.permission.read, "allow");
+  assert.equal(cfg.permission.read["*"], "allow");
+  assert.equal(cfg.permission.read["**/.ssh/**"], "deny");
+  assert.equal(cfg.permission.read["**/.env"], "ask");
   assert.equal(cfg.permission.bash["*"], "ask");
   assert.equal(cfg.permission.bash["git push*"], "ask");
 });
