@@ -31,7 +31,7 @@ test("el pack nativo kairos mapea los eventos a los tonos y es opt-in", () => {
     assert.ok(tuiPlugin.includes("error: `${dir}/error.wav`"), "error debe usar error.wav");
     assert.ok(tuiPlugin.includes("permission: `${dir}/attention.wav`"), "permission debe usar attention.wav");
     assert.ok(tuiPlugin.includes("question: `${dir}/attention.wav`"), "question debe usar attention.wav");
-    assert.ok(tuiPlugin.includes("OPENCODE_KAIROS_SOUNDS"), "falta el interruptor opt-in");
+    assert.ok(tuiPlugin.includes("KAIROS_SOUNDS"), "falta el interruptor opt-in");
     assert.ok(tuiConfig.plugin.includes("./tui-plugins/gentle-sounds.ts"), "tui.json debe cargar el pack");
     assert.ok(!/paplay|pw-play|aplay|afplay/.test(serverPlugin), "el servidor ya no debe reproducir sonidos");
 });

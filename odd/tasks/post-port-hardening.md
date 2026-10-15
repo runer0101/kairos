@@ -121,7 +121,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T23 (reportado por el usuario): arranque de `ov` acelerado ~5 s — `nodeLinker: hoisted` para que el install con npm de OpenCode no crashee sobre el layout de pnpm.
 - 2026-10-15 — T24 (pedido del usuario): instalación de un comando (`curl | bash` con bootstrap) y pnpm verificado en el repo público.
 - 2026-10-15 — README: plataforma objetivo destacada (Linux, en especial Arch Linux) en intro, requisitos y badge.
-- 2026-10-15 — Renombre a Kairos (pedido del usuario): el repo pasa a `opencode-kairos`, perfiles `kairos`/`kairos-auto` y alias `kai`; tarea propia en `odd/tasks/rename-to-kairos.md` (R1–R5 hechos, R6–R8 pendientes).
+- 2026-10-15 — Renombre a Kairos (pedido del usuario): el repo pasa a `kairos`, perfiles `kairos`/`kairos-auto` y alias `kai`; tarea propia en `odd/tasks/rename-to-kairos.md` (R1–R5 hechos, R6–R8 pendientes).
 
 ## Siguiente paso
 

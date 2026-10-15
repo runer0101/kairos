@@ -1,6 +1,6 @@
 # Seguridad
 
-Qué protege opencode-kairos, qué no, y cómo ajustarlo. Resumen honesto: hay defensas reales y también límites conocidos.
+Qué protege kairos, qué no, y cómo ajustarlo. Resumen honesto: hay defensas reales y también límites conocidos.
 
 ## Modelo de amenaza
 
@@ -17,7 +17,7 @@ El agente trabaja en tu máquina con tus permisos. Las defensas son **capas heur
 | Permisos por perfil | `kairos` pregunta antes de editar y ejecutar; `kairos-auto` no pregunta, pero las guardas de arriba siguen aplicando. |
 | Cadena de suministro | pnpm con lockfile congelado, `minimumReleaseAge` (24 h), `trustPolicy: no-downgrade`, `blockExoticSubdeps`, scripts de instalación de dependencias bloqueados. El instalador fija versiones con SHA-256 y verifica atestaciones donde existen (`pnpm`, `engram`); el instalador oficial de OpenCode se ejecuta sin fijar versión (riesgo residual aceptado, ver T6 del plan). |
 | Privacidad del repositorio | `tests/privacy.test.mjs` falla si un archivo versionado contiene rutas de la máquina o correos personales. |
-| IA local | Opt-out por máquina (`touch .no-local-ai`) o por apertura (`OPENCODE_KAIROS_NO_LOCAL=1`). Los endpoints detectados son locales; no se envía nada a terceros por esta vía. |
+| IA local | Opt-out por máquina (`touch .no-local-ai`) o por apertura (`KAIROS_NO_LOCAL=1`). Los endpoints detectados son locales; no se envía nada a terceros por esta vía. |
 
 ## Límites conocidos
 

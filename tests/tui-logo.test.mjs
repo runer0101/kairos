@@ -45,7 +45,7 @@ test("la rama compacta usa compactArt, definido antes de usarse", () => {
 
 test("el logo muestra un texto personal bajo el arco", () => {
   assert.match(src, /const LOGO_TEXT =/, "falta LOGO_TEXT");
-  assert.match(src, /OPENCODE_KAIROS_LOGO_TEXT/, "el texto debe poder cambiarse por variable");
+  assert.match(src, /KAIROS_LOGO_TEXT/, "el texto debe poder cambiarse por variable");
   assert.match(src, /"kairos"/, "el texto por defecto es kairos");
   assert.match(src, /\{LOGO_TEXT\}/, "LOGO_TEXT debe renderizarse en la TUI");
 });

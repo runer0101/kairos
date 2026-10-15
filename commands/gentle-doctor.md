@@ -1,5 +1,5 @@
 ---
-description: Diagnóstico de la instalación gentle-shell en opencode-kairos
+description: Diagnóstico de la instalación gentle-shell en kairos
 ---
 Resume el estado de la instalación y señala solo lo que falte o esté roto.
 

@@ -1,7 +1,7 @@
 // gentle-shell portado a OpenCode: guarda de comandos destructivos, piso de rutas sensibles
 // y aviso de escritorio al terminar. Lógica de la guarda: copiada de gentle-pi
 // (lib/destructive-command-guard.ts), MIT. Los sonidos viven en el pack nativo "kairos"
-// (tui-plugins/gentle-sounds.ts; se activa con OPENCODE_KAIROS_SOUNDS=1).
+// (tui-plugins/gentle-sounds.ts; se activa con KAIROS_SOUNDS=1).
 import type { Plugin } from "@opencode-ai/plugin"
 import { recognizeDestructiveCommands } from "../lib/destructive-command-guard.ts"
 
@@ -59,7 +59,7 @@ export const GentleShellPlugin: Plugin = async ({ $ }) => {
     // Notificación de escritorio cuando la sesión queda inactiva (tarea terminada).
     event: async ({ event }) => {
       if (event.type !== "session.idle") return
-      await $`notify-send -a opencode-kairos "OpenCode" "Tarea terminada"`.nothrow().quiet()
+      await $`notify-send -a kairos "OpenCode" "Tarea terminada"`.nothrow().quiet()
     },
   }
 }

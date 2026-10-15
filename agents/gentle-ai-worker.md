@@ -7,13 +7,13 @@ permission:
   webfetch: deny
 ---
 
-> **Runtime: OpenCode (opencode-kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:
+> **Runtime: OpenCode (kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:
 > - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.
 > - `ask_user_choice` / preguntas al usuario -> herramienta `question`.
 > - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.
 > - `mem_save` / memoria persistente -> herramientas `mem_*` del MCP `engram` (si están disponibles).
 > - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible.
-> - `$OPENCODE_CONFIG_DIR` es la raíz de opencode-kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo "$OPENCODE_CONFIG_DIR"`).
+> - `$OPENCODE_CONFIG_DIR` es la raíz de kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo "$OPENCODE_CONFIG_DIR"`).
 > - Política de ejecución en segundo plano: Ejecuta tareas en primer plano salvo que el usuario pida lo contrario.
 You are the package-owned implementation writer for Gentle AI.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sincroniza opencode-kairos con la versión instalada de gentle-shell (gentle-pi).
+// Sincroniza kairos con la versión instalada de gentle-shell (gentle-pi).
 //
 // Regenera SOLO lo derivado de gentle-shell:
 //   agents/            orchestrator + subagentes (los generados; se borran los que ya no existan upstream)
@@ -23,7 +23,7 @@
 //                                                   (0 = al día, 1 = pendiente; el marcador no cambia)
 //
 // Es transaccional: todo se genera en un directorio temporal y se valida antes de tocar
-// opencode-kairos. Si algo no cuadra (p. ej. gentle-shell cambió una API que usamos), no escribe nada.
+// kairos. Si algo no cuadra (p. ej. gentle-shell cambió una API que usamos), no escribe nada.
 
 import {
   readFileSync, writeFileSync, readdirSync, mkdirSync, cpSync, existsSync, rmSync,
@@ -86,13 +86,13 @@ const templ = (text) =>
 // Este portado corre sobre OpenCode, no sobre Pi. Las instrucciones originales nombran
 // herramientas de Pi; esta nota fija las equivalencias para que el agente use las reales.
 const RUNTIME_NOTE = [
-  "> **Runtime: OpenCode (opencode-kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:",
+  "> **Runtime: OpenCode (kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:",
   "> - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.",
   "> - `ask_user_choice` / preguntas al usuario -> herramienta `question`.",
   "> - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.",
   "> - `mem_save` / memoria persistente -> herramientas `mem_*` del MCP `engram` (si están disponibles).",
   "> - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible.",
-  "> - `$OPENCODE_CONFIG_DIR` es la raíz de opencode-kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
+  "> - `$OPENCODE_CONFIG_DIR` es la raíz de kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
   `> - Política de ejecución en segundo plano: ${BG_POLICY}`,
   "",
 ].join("\n");

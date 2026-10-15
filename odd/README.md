@@ -1,4 +1,4 @@
-# ODD (Organic Driven Development) en opencode-kairos
+# ODD (Organic Driven Development) en kairos
 
 Flujo de trabajo para tareas que no caben en un solo paso:
 

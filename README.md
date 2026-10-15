@@ -1,6 +1,6 @@
-# opencode-kairos
+# kairos
 
-[![CI](https://github.com/runer0101/opencode-kairos/actions/workflows/ci.yml/badge.svg)](https://github.com/runer0101/opencode-kairos/actions/workflows/ci.yml)
+[![CI](https://github.com/runer0101/kairos/actions/workflows/ci.yml/badge.svg)](https://github.com/runer0101/kairos/actions/workflows/ci.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-11.22.0-orange.svg)](https://pnpm.io)
@@ -29,7 +29,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 ## Qué incluye
 
 - **Perfiles de agente** (se cambian con `Tab`): `kairos` (normal) y `kairos-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
-- **Modos de permiso**: normal por defecto; automático con el perfil `kairos-auto` o con `opencode-kairos --auto`. La guarda de comandos destructivos siempre está activa.
+- **Modos de permiso**: normal por defecto; automático con el perfil `kairos-auto` o con `kairos --auto`. La guarda de comandos destructivos siempre está activa.
 - **Rutas sensibles protegidas**: credenciales (`~/.ssh`, `~/.gnupg`, `~/.aws`, claves, `auth.json`) bloqueadas en todos los perfiles; `.env`/`.pem` piden confirmación en el perfil normal (ver `SECURITY.md`).
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
 - **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
@@ -54,17 +54,17 @@ El proyecto está pensado para **Arch Linux** (es el entorno de desarrollo y pru
 
 ## Instalación rápida
 
-Un comando (el instalador clona el repo en `~/.config/opencode-kairos` y configura todo):
+Un comando (el instalador clona el repo en `~/.config/kairos` y configura todo):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-kairos/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash
 ```
 
 ¿Prefieres revisarlo antes de ejecutarlo? Es el mismo script, desde el repo:
 
 ```bash
-git clone https://github.com/runer0101/opencode-kairos.git ~/.config/opencode-kairos
-cd ~/.config/opencode-kairos
+git clone https://github.com/runer0101/kairos.git ~/.config/kairos
+cd ~/.config/kairos
 ./install.sh
 ```
 
@@ -76,7 +76,7 @@ El instalador:
 4. Instala OpenCode si falta (instalador oficial de opencode.ai).
 5. Descarga engram 3.4.0 si falta, verificando su SHA-256.
 6. Instala las dependencias con `pnpm install --frozen-lockfile`.
-7. Enlaza el lanzador en `~/.local/bin/opencode-kairos` (con el alias corto `kai`) y los temas en `~/.config/opencode/themes/`.
+7. Enlaza el lanzador en `~/.local/bin/kairos` (con el alias corto `kai`) y los temas en `~/.config/opencode/themes/`.
 8. Ajusta las rutas locales de `tui.json` y `opencode.json`.
 9. Sincroniza con gentle-shell si está instalado.
 10. Verifica que OpenCode carga los perfiles antes de terminar.
@@ -85,7 +85,7 @@ No instala Ollama ni descarga modelos. Es idempotente: puedes ejecutarlo de nuev
 
 Si `~/.local/bin` no está en tu `PATH`, añade `export PATH="$HOME/.local/bin:$PATH"` a tu shell.
 
-Para abrirlo usa `opencode-kairos` o su alias corto `kai` (el instalador crea ambos enlaces; funciona en cualquier shell).
+Para abrirlo usa `kairos` o su alias corto `kai` (el instalador crea ambos enlaces; funciona en cualquier shell).
 
 ## Perfiles de agente
 
@@ -106,7 +106,7 @@ Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar l
 |---|---|---|
 | Normal | Por defecto | Edición y comandos de bash piden confirmación. Las lecturas habituales (`ls`, `git status`, `git diff`, `grep`…) no. |
 | Automático | Perfil `kairos-auto` | No pide confirmación. La guarda de comandos destructivos sigue bloqueando. |
-| Auto (OpenCode) | `opencode-kairos --auto` | Aprueba lo que pediría confirmación. Las reglas `deny` siguen aplicando. |
+| Auto (OpenCode) | `kairos --auto` | Aprueba lo que pediría confirmación. Las reglas `deny` siguen aplicando. |
 
 La guarda de comandos destructivos bloquea, en todos los modos, formas reconocibles como `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE` y `DELETE` sin `WHERE`. Es un filtro heurístico, no un sandbox.
 
@@ -150,7 +150,7 @@ Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la ta
 `assets/sounds/` trae los tres tonos originales de gentle-shell (MIT), integrados con el **sistema nativo de atención de OpenCode** como pack `kairos`: `done` y `subagent_done` usan `success`, `error` usa `error`, y `permission`/`question` usan `attention`. Actívalo al lanzar:
 
 ```bash
-OPENCODE_KAIROS_SOUNDS=1 opencode-kairos
+KAIROS_SOUNDS=1 kairos
 ```
 
 Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo a mano en la configuración de atención de OpenCode (`tui.json`), donde se controlan el volumen y si suenan solo cuando la ventana no tiene foco.
@@ -160,14 +160,14 @@ Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo 
 El arco lleva debajo un texto personal (`kairos` por defecto). Cámbialo editando `LOGO_TEXT` en `tui-plugins/gentle-logo.tsx` o al lanzar:
 
 ```bash
-OPENCODE_KAIROS_LOGO_TEXT=otro-texto opencode-kairos
+KAIROS_LOGO_TEXT=otro-texto kairos
 ```
 
 Bajo el texto del logo se recuerdan los atajos principales (`Tab`, `ctrl+p`, `/gentle-doctor`).
 
 ## IA local (opcional)
 
-El instalador no instala ni descarga modelos locales. Si instalas un runtime, opencode-kairos lo detecta al abrir, sin configurar nada:
+El instalador no instala ni descarga modelos locales. Si instalas un runtime, kairos lo detecta al abrir, sin configurar nada:
 
 | Runtime | Puerto por defecto | Proveedor en OpenCode |
 |---|---|---|
@@ -194,9 +194,9 @@ Reglas:
 En una máquina sin recursos puedes desactivar todo lo relacionado con IA local sin tocar el repositorio:
 
 ```bash
-touch ~/.config/opencode-kairos/.no-local-ai   # desactivar en esta máquina
-rm ~/.config/opencode-kairos/.no-local-ai      # volver a activarla
-OPENCODE_KAIROS_NO_LOCAL=1 opencode-kairos     # desactivar solo esta apertura
+touch ~/.config/kairos/.no-local-ai   # desactivar en esta máquina
+rm ~/.config/kairos/.no-local-ai      # volver a activarla
+KAIROS_NO_LOCAL=1 kairos     # desactivar solo esta apertura
 ```
 
 El marcador `.no-local-ai` no se versiona (está en `.gitignore`): en las demás máquinas la detección sigue activa.
@@ -205,13 +205,13 @@ Para ver qué detecta el lanzador: `node scripts/detect-local-models.mjs`.
 
 ## Actualizaciones de gentle-shell
 
-Al abrir `opencode-kairos`, el lanzador compara la versión instalada de gentle-shell con la última sincronizada. Si cambió, regenera los componentes derivados: subagentes, prompts del orquestador, guarda de comandos y las skills `gentle-ai` y `rdd-defect-workflow`.
+Al abrir `kairos`, el lanzador compara la versión instalada de gentle-shell con la última sincronizada. Si cambió, regenera los componentes derivados: subagentes, prompts del orquestador, guarda de comandos y las skills `gentle-ai` y `rdd-defect-workflow`.
 
 Todo se genera en un directorio temporal y se valida antes de escribir. Si gentle-shell cambió algo que el port usa, no se modifica nada y el lanzador abre con la versión anterior.
 
 ```bash
 node scripts/sync-gentle-shell.mjs --force       # sincronizar ahora
-OPENCODE_KAIROS_NO_SYNC=1 opencode-kairos        # abrir sin sincronizar
+KAIROS_NO_SYNC=1 kairos        # abrir sin sincronizar
 ```
 
 La sincronización no cambia `opencode.json`, el tema, el logo ni las skills propias. Si una versión nueva de gentle-shell requiere cambios de configuración, hay que aplicarlos a mano.
@@ -239,7 +239,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 
 ```bash
 pnpm test                           # 58 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
-OPENCODE_KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
+KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
 Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales. La prueba de privacidad recorre los archivos versionados y falla si aparece una ruta de tu máquina o un correo personal: el repositorio se publica tal cual.
@@ -247,8 +247,8 @@ Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por 
 ## Estructura del repositorio
 
 ```
-opencode-kairos/
-├── bin/opencode-kairos              Lanzador: fija variables, detecta IA local, sincroniza
+kairos/
+├── bin/kairos              Lanzador: fija variables, detecta IA local, sincroniza
 ├── install.sh                       Instalador para Linux
 ├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
@@ -296,12 +296,12 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
-| `falta .../opencode.json` | Repositorio incompleto o enlace roto | `opencode-kairos --where` muestra la ruta real |
+| `falta .../opencode.json` | Repositorio incompleto o enlace roto | `kairos --where` muestra la ruta real |
 | El tema no cambia | Enlace de tema ausente | Vuelve a ejecutar `./install.sh` |
 | `no se pudo sincronizar con gentle-shell` | gentle-shell no instalado o con una API distinta | `node scripts/sync-gentle-shell.mjs --force` para ver el detalle |
 | `ERR_PNPM_TRUST_DOWNGRADE` al instalar | Un paquete reciente perdió evidencia de confianza | No lo ignores: revisa la procedencia del paquete en el registro (atestaciones) y, si es legítimo, añade una excepción estrecha en `trustPolicyExclude` |
 | `ERR_PNPM_IGNORED_BUILDS` | Un script de instalación sin decisión | Decide en `allowBuilds` de `pnpm-workspace.yaml` |
-| El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `opencode-kairos run "ok"` para diagnosticar |
+| El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `kairos run "ok"` para diagnosticar |
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
 | Aviso `background dependency install failed` o arranque lento | npm (que OpenCode ejecuta sobre el directorio de config) crashea al recorrer el layout de symlinks de pnpm | Ya prevenido: el repo usa `nodeLinker: hoisted`; si reaparece, ejecuta `pnpm install` |
 

@@ -1,4 +1,4 @@
-# Renombre completo a Kairos (`opencode-venjix` → `opencode-kairos`)
+# Renombre completo a Kairos (`opencode-venjix` → `kairos`)
 
 > Documento ODD. Vive en el repositorio del proyecto, en `odd/tasks/rename-to-kairos.md`.
 > Se espeja en memoria (tema `odd/rename-to-kairos/tasks`) para poder retomar entre sesiones.
@@ -41,30 +41,31 @@ Pedido del usuario (2026-10-15). Kairos — el momento oportuno; en la tradició
 Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 
 - [x] R1 — Contenido del repo renombrado · Criterio: las únicas menciones de «venjix» viven en los documentos de tarea (transición e historia) · Prueba: `git grep -il venjix` → solo `odd/tasks/post-port-hardening.md` y `odd/tasks/rename-to-kairos.md`
-- [x] R2 — Archivos renombrados · Criterio: `bin/opencode-kairos` y `themes/gentleman-kairos.json` con historia de git · Prueba: `git status` (R/RM)
+- [x] R2 — Archivos renombrados · Criterio: `bin/kairos` y `themes/gentleman-kairos.json` con historia de git · Prueba: `git status` (R/RM)
 - [x] R3 — Alias `kai` e `install.sh` actualizados (enlace, mensajes, perfiles de verificación) · Prueba: `pnpm test` (launcher)
 - [x] R4 — Generados al día con el nombre nuevo · Criterio: sin diferencias contra el staging del sync · Prueba: `node scripts/sync-gentle-shell.mjs --check` → «al día» (sin necesidad de `--force`)
 - [x] R5 — Suite verde · Prueba: `pnpm test` → 58 tests, 54 pasan, 0 fallan, 4 omitidos
-- [ ] R6 — Instalación migrada (`~/.config/opencode-kairos`, symlinks `opencode-kairos`/`kai`, temas y share) · Prueba: `kai --where`
-- [x] R7 — GitHub recreado desde cero (`runer0101/opencode-kairos`): descripción y topics conservados, historia completa subida desde el primer commit y repositorio anterior eliminado · Prueba: `git ls-remote` + `gh repo view`
+- [ ] R6 — Instalación migrada (`~/.config/kairos`, symlinks `kairos`/`kai`, temas y share) · Prueba: `kai --where`
+- [x] R7 — GitHub recreado desde cero (`runer0101/kairos`): descripción y topics conservados, historia completa subida desde el primer commit y repositorio anterior eliminado · Prueba: `git ls-remote` + `gh repo view`
 - [ ] R8 — rc del shell y memoria sin referencias viejas · Prueba: revisión + `mem_list_projects`
 
 ## Evidencia de verificación
 
 - R1: `git grep -il venjix` → solo los documentos de tarea (`post-port-hardening.md` histórico y `rename-to-kairos.md` de transición); 0 menciones en código, docs vigentes y configuración.
-- R2: `git status` muestra `RM bin/opencode-venjix -> bin/opencode-kairos` y `R themes/gentleman-venjix.json -> themes/gentleman-kairos.json`.
+- R2: `git status` muestra `RM bin/opencode-venjix -> bin/kairos` y `R themes/gentleman-venjix.json -> themes/gentleman-kairos.json`.
 - R3/R5: `node --experimental-strip-types --test tests/*.test.mjs` → 58 tests, 54 pass, 0 fail, 4 skipped (E2E opt-in).
 - R4: `sync --check` → «al día (gentle-shell 4.2.0-1.2.0, gentle-pi 4.2.0)»; el sed quedó byte a byte igual al staging regenerado.
 - Diff total del renombre: 40 archivos de contenido (≈190 líneas) + 2 renombrados por git.
-- R7: `gh repo create runer0101/opencode-kairos --public` (descripción y 6 topics del repo anterior) + `git push -u origin main` con la historia completa desde el primer commit (56 commits al momento del push); respaldo espejo del remoto previo tomado antes de borrar; repositorio anterior eliminado con `gh repo delete`.
+- R7: repositorio recreado desde cero (`gh repo create runer0101/kairos --public`, descripción y 6 topics; `git push -u origin main` con la historia completa desde el primer commit) y repositorio anterior eliminado con `gh repo delete`; respaldo espejo del remoto previo tomado antes de borrar. El nombre intermedio `opencode-kairos` se descartó a pedido del autor: la publicación final va sin prefijo.
 - Commits de esta tarea: `02ee15f` (regla de idioma) y `5967f84` (renombre); identidad `runer0101 <203803429+runer0101@users.noreply.github.com>`, sin coautores.
 
 ## Progreso
 
 - 2026-10-15 — Tarea creada a pedido del usuario tras consulta mitológica. Decisión: corte limpio (sin alias ni variables heredadas; si hiciera falta, una línea reintroduce compatibilidad). Mitología corregida: Kairos = hijo menor de Zeus y contraparte de Chronos; no es hermano de Cronos (que es el Titán padre de Zeus).
 - 2026-10-15 — R1–R5 completos y verificados. Pendientes: R6 (instalación) y R8 (rc/memoria).
-- 2026-10-15 — R7 completo (decisión del autor: recrear el repositorio en vez de renombrarlo): repo `runer0101/opencode-kairos` creado desde cero, historia completa subida (desde el primer commit) y repositorio anterior eliminado.
+- 2026-10-15 — R7 completo (decisión del autor: recrear el repositorio en vez de renombrarlo): repo `runer0101/kairos` creado desde cero, historia completa subida (desde el primer commit) y repositorio anterior eliminado.
+- 2026-10-15 — Ajuste del autor: el nombre queda «Kairos» a secas (sin prefijo `opencode-`): repo `runer0101/kairos`, paquete `kairos`, comando `bin/kairos`, ruta `~/.config/kairos`, share y variables `KAIROS_*`; el repositorio intermedio se recreó con el nombre final.
 
 ## Siguiente paso
 
-Migrar la instalación (R6): renombrar `~/.config/opencode-venjix` → `~/.config/opencode-kairos`, actualizar symlinks (`opencode-kairos`, `kai`) y reabrir la TUI con el nombre nuevo (coordinar el reinicio). Actualizar además el script externo `publicar-opencode-venjix.sh` (rutas y nombre nuevos).
+Migrar la instalación (R6): renombrar `~/.config/opencode-venjix` → `~/.config/kairos`, actualizar symlinks (`kairos`, `kai`) y reabrir la TUI con el nombre nuevo (coordinar el reinicio). Actualizar además el script externo `publicar-opencode-venjix.sh` (rutas y nombre nuevos).

@@ -1,5 +1,5 @@
 ---
-description: Lista los modelos disponibles en opencode-kairos
+description: Lista los modelos disponibles en kairos
 ---
 Modelos disponibles:
 

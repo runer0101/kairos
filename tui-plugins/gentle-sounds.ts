@@ -1,5 +1,5 @@
 // Pack de sonidos nativo de OpenCode: registra los tonos de gentle-shell como pack "kairos".
-// Se activa de forma persistente solo con OPENCODE_KAIROS_SOUNDS=1; el volumen y el modo
+// Se activa de forma persistente solo con KAIROS_SOUNDS=1; el volumen y el modo
 // "solo cuando la ventana no tiene foco" los gestiona la configuración de atención de OpenCode.
 import type { TuiPlugin } from "@opencode-ai/plugin/tui"
 
@@ -29,7 +29,7 @@ const tui: TuiPlugin = async (api) => {
   }
   api.lifecycle.onDispose(() => unregister?.())
 
-  const enabled = typeof process !== "undefined" && process.env?.OPENCODE_KAIROS_SOUNDS === "1"
+  const enabled = typeof process !== "undefined" && process.env?.KAIROS_SOUNDS === "1"
   if (enabled && api.attention.soundboard.current() !== "kairos") {
     try {
       api.attention.soundboard.activate("kairos", { persist: true })
