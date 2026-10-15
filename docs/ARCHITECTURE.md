@@ -72,7 +72,7 @@ La configuración de modelos se reparte en dos capas:
 
 | Capa | Dónde | Qué aporta |
 |---|---|---|
-| Modelo por defecto | `opencode.json` (`model`, `small_model`) | `opencode/big-pickle`, gratuito de OpenCode |
+| Modelo por defecto | `opencode.json` (`model`, `small_model`) | `opencode-go/deepseek-v4.1-flash` (requiere suscripción OpenCode Go) |
 | Proveedores locales | Detectados en cada arranque | Ollama, LM Studio, llama.cpp, vLLM y endpoints de `local-providers.json` |
 
 En cada arranque, `bin/opencode-venjix` ejecuta `scripts/detect-local-models.mjs`. El script sondea los puertos por defecto con un timeout de 800 ms y devuelve un JSON de proveedores. El lanzador lo pasa en `OPENCODE_CONFIG_CONTENT`, que OpenCode fusiona por encima de la configuración del proyecto.
@@ -91,7 +91,7 @@ Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan
 | Agentes primarios | `opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`. |
 | Prompt común | `prompts/orchestrator.md` | Lo referencia cada perfil con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell. |
 | Herencia de modelo | OpenCode | Un subagente sin `model` usa el del agente que lo invoca. Así el perfil activo decide el modelo de todo el trabajo. |
-| Excepciones de subagentes | `opencode.json` | `gentle-ai-explore` (modelo gratuito, 15 pasos) y `jd-judge-b` (modelo distinto al de `jd-judge-a`). |
+| Excepciones de subagentes | `opencode.json` | `gentle-ai-explore` (15 pasos) y `jd-judge-b` usan el modelo por defecto (DeepSeek v4.1 Flash). |
 
 Permisos:
 
@@ -113,7 +113,7 @@ Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto 
 ## Pruebas
 
 - `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), y la guarda de comandos destructivos.
-- `OPENCODE_VENJIX_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo gratuito.
+- `OPENCODE_VENJIX_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo por defecto.
 - Las pruebas que consultan servicios usan `OPENCODE_VENJIX_LOCAL_PROVIDERS` para apuntar a servidores de prueba, y no asumen qué runtimes locales hay instalados.
 - Lección registrada: la salida de `opencode agent list` por tubería puede truncarse al cerrar el proceso. Por eso las pruebas y `install.sh` escriben la salida a un archivo.
 

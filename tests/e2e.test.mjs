@@ -13,6 +13,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const LAUNCHER = join(ROOT, "bin", "opencode-venjix");
 const OPENCODE = process.env.OPENCODE_BIN || join(homedir(), ".opencode", "bin", "opencode");
 const enabled = process.env.OPENCODE_VENJIX_E2E === "1";
+const CFG = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
 
 const env = {
     ...process.env,
@@ -42,8 +43,8 @@ test("el lanzador resuelve la configuración del repositorio", { skip: !enabled 
     assert.equal(where, ROOT);
 });
 
-test("el modelo gratuito por defecto responde", { skip: !enabled && "usa OPENCODE_VENJIX_E2E=1", timeout: 300000 }, () => {
-    const out = execFileSync(LAUNCHER, ["run", "-m", "opencode/big-pickle", "responde solo la palabra: ok"], {
+test("el modelo por defecto responde", { skip: !enabled && "usa OPENCODE_VENJIX_E2E=1", timeout: 300000 }, () => {
+    const out = execFileSync(LAUNCHER, ["run", "-m", CFG.model, "responde solo la palabra: ok"], {
         env,
         encoding: "utf8",
         timeout: 280000,

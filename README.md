@@ -9,7 +9,7 @@ OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles d
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
 - **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
 - **Memoria** persistente mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
-- **IA gratuita por defecto** (`opencode/big-pickle`). Si tienes Ollama, LM Studio, llama.cpp o vLLM activos, sus modelos aparecen automáticamente.
+- **DeepSeek v4.1 Flash por defecto** (`opencode-go/deepseek-v4.1-flash`; requiere suscripción OpenCode Go). Si tienes Ollama, LM Studio, llama.cpp o vLLM activos, sus modelos aparecen automáticamente.
 - **Calidad de código**: servidores LSP, formateadores y `snapshot` para deshacer cambios.
 - **Sincronización** con la versión instalada de gentle-shell.
 
@@ -58,14 +58,11 @@ Pulsa `Tab` para cambiar de perfil durante una sesión.
 
 | Perfil | Modelo | Permisos | Para qué |
 |---|---|---|---|
-| `venjix` (por defecto) | `opencode/big-pickle` (gratuito) | Normales | Trabajo diario |
-| `venjix-deep` | `opencode-go/deepseek-v4-pro` | Normales | Tareas difíciles; requiere suscripción OpenCode Go |
-| `venjix-yolo` | `opencode/big-pickle` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
+| `venjix` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario |
+| `venjix-deep` | `opencode-go/deepseek-v4.1-flash` | Normales | Tareas difíciles |
+| `venjix-yolo` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
 
-Los subagentes sin modelo propio heredan el modelo del perfil activo. Hay dos excepciones definidas en `opencode.json`:
-
-- `gentle-ai-explore` usa el modelo gratuito y tiene 15 pasos como máximo, para acotar el costo de la exploración.
-- `jd-judge-b` usa `opencode/nemotron-3-ultra-free`, distinto del modelo de `jd-judge-a`, para que el juicio tenga criterio independiente.
+Los tres perfiles usan el mismo modelo (DeepSeek v4.1 Flash, requiere suscripción OpenCode Go). Los subagentes sin modelo propio heredan el modelo del perfil activo. `gentle-ai-explore` limita a 15 pasos para acotar el costo de la exploración; el resto de subagentes (incluido `jd-judge-b`) usa DeepSeek v4.1 Flash.
 
 Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar los prompts.
 
@@ -172,8 +169,8 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 30 pruebas: configuración, agentes, comandos, detector y guarda
-OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo gratuito
+pnpm test                           # 42 pruebas: configuración, agentes, comandos, detector, guarda, lanzador y sincronización
+OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
 Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales.
@@ -184,7 +181,7 @@ Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por 
 opencode-venjix/
 ├── bin/opencode-venjix              Lanzador: fija variables, detecta IA local, sincroniza
 ├── install.sh                       Instalador para Linux
-├── opencode.json                    Perfiles, modo normal, modelo gratuito, MCP, LSP y formateo
+├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
 ├── prompts/orchestrator.md          Prompt común de los perfiles (generado)
 ├── agents/                          Subagentes de gentle-shell (generados)
@@ -233,7 +230,7 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 | `no se pudo sincronizar con gentle-shell` | gentle-shell no instalado o con una API distinta | `node scripts/sync-gentle-shell.mjs --force` para ver el detalle |
 | `ERR_PNPM_TRUST_DOWNGRADE` al instalar | Un paquete reciente perdió evidencia de confianza | No lo ignores: revisa el paquete con `npm audit signatures` y, si es legítimo, añade una excepción estrecha en `trustPolicyExclude` |
 | `ERR_PNPM_IGNORED_BUILDS` | Un script de instalación sin decisión | Decide en `allowBuilds` de `pnpm-workspace.yaml` |
-| El modelo gratuito no responde | Sin red o límite del proveedor | `opencode-venjix run -m opencode/big-pickle "ok"` para diagnosticar |
+| El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `opencode-venjix run "ok"` para diagnosticar |
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
 
 ## Créditos y licencia

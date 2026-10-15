@@ -7,15 +7,16 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
+const DEEPSEEK = "opencode-go/deepseek-v4.1-flash";
 
 test("el agente por defecto es el perfil equilibrado", () => {
   assert.equal(cfg.default_agent, "venjix");
   assert.equal(cfg.agent.venjix.mode, "primary");
 });
 
-test("el modelo por defecto es gratuito de OpenCode, no local", () => {
-  assert.equal(cfg.model, "opencode/big-pickle");
-  assert.equal(cfg.small_model, "opencode/big-pickle");
+test("el modelo por defecto es DeepSeek v4.1 Flash", () => {
+  assert.equal(cfg.model, DEEPSEEK);
+  assert.equal(cfg.small_model, DEEPSEEK);
 });
 
 test("el proveedor ollama global queda deshabilitado (evita modelos fantasma)", () => {
@@ -34,8 +35,10 @@ test("existen los tres perfiles como agentes primarios con el mismo prompt", () 
   assert.ok(existsSync(join(ROOT, "prompts", "orchestrator.md")), "falta prompts/orchestrator.md");
 });
 
-test("el perfil profundo usa un modelo distinto del equilibrado", () => {
-  assert.notEqual(cfg.agent["venjix-deep"].model, cfg.agent.venjix.model);
+test("todos los perfiles usan DeepSeek v4.1 Flash", () => {
+  for (const name of ["venjix", "venjix-deep", "venjix-yolo"]) {
+    assert.equal(cfg.agent[name].model, DEEPSEEK, `${name} debe usar DeepSeek v4.1 Flash`);
+  }
 });
 
 test("modo normal: edición y bash piden confirmación, lectura libre", () => {
@@ -56,10 +59,10 @@ test("modo autónomo (yolo) permite todo; la guarda de comandos sigue en el plug
   assert.ok(existsSync(join(ROOT, "plugins", "gentle-shell.ts")));
 });
 
-test("subagentes con modelo propio: explorador barato con pasos acotados, juez B distinto", () => {
-  assert.equal(cfg.agent["gentle-ai-explore"].model, "opencode/big-pickle");
+test("subagentes con modelo propio: explorador con pasos acotados y juez B con el modelo por defecto", () => {
+  assert.equal(cfg.agent["gentle-ai-explore"].model, DEEPSEEK);
   assert.ok(Number.isInteger(cfg.agent["gentle-ai-explore"].steps));
-  assert.notEqual(cfg.agent["jd-judge-b"].model, cfg.agent.venjix.model, "los dos jueces deben usar modelos distintos");
+  assert.equal(cfg.agent["jd-judge-b"].model, DEEPSEEK);
 });
 
 test("funciones de calidad activas: lsp, formatter, snapshot (undo)", () => {
