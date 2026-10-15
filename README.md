@@ -1,6 +1,22 @@
 # opencode-venjix
 
-OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles de agente, modos de permiso, flujo ODD con documento de feature, revisión por lentes, juicio adversarial, verificación independiente, memoria persistente y detección automática de IA local. Incluye temas, logo y sonidos propios.
+[![CI](https://github.com/runer0101/opencode-venjix/actions/workflows/ci.yml/badge.svg)](https://github.com/runer0101/opencode-venjix/actions/workflows/ci.yml)
+
+**OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
+
+```
+      /\
+     /  \
+    / /\ \
+   / /  \ \
+  /_/    \_\   venjix
+```
+
+Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
+
+## Índice
+
+[Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Créditos y licencia](#créditos-y-licencia)
 
 ## Qué incluye
 
@@ -250,6 +266,8 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 
 ## Seguridad
 
+Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.md).
+
 - El repositorio no contiene claves ni credenciales. Las claves de proveedores se guardan fuera del repo (`~/.local/share/opencode/auth.json`).
 - `.gitignore` excluye `node_modules/`, respaldos, `.env`, `auth.json`, claves privadas y el marcador local de sincronización.
 - La guarda de comandos destructivos es heurística: reconoce formas comunes, no es un sandbox.
@@ -263,13 +281,17 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 | `falta .../opencode.json` | Repositorio incompleto o enlace roto | `opencode-venjix --where` muestra la ruta real |
 | El tema no cambia | Enlace de tema ausente | Vuelve a ejecutar `./install.sh` |
 | `no se pudo sincronizar con gentle-shell` | gentle-shell no instalado o con una API distinta | `node scripts/sync-gentle-shell.mjs --force` para ver el detalle |
-| `ERR_PNPM_TRUST_DOWNGRADE` al instalar | Un paquete reciente perdió evidencia de confianza | No lo ignores: revisa el paquete con `npm audit signatures` y, si es legítimo, añade una excepción estrecha en `trustPolicyExclude` |
+| `ERR_PNPM_TRUST_DOWNGRADE` al instalar | Un paquete reciente perdió evidencia de confianza | No lo ignores: revisa la procedencia del paquete en el registro (atestaciones) y, si es legítimo, añade una excepción estrecha en `trustPolicyExclude` |
 | `ERR_PNPM_IGNORED_BUILDS` | Un script de instalación sin decisión | Decide en `allowBuilds` de `pnpm-workspace.yaml` |
 | El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `opencode-venjix run "ok"` para diagnosticar |
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
 
 ## Créditos y licencia
 
-- Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
-- Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai antes de este portado. Revisa su licencia de origen antes de redistribuirlas.
-- La licencia de este repositorio aún no está definida por el autor.
+Mantenido por [@runer0101](https://github.com/runer0101).
+
+- Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), de [Gentleman Programming](https://github.com/Gentleman-Programming), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
+- Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai. Revisa su licencia de origen antes de redistribuirlas.
+- Los tonos de `assets/sounds/` son originales de gentle-pi (MIT); su nota de licencia está junto a los archivos.
+- Los servidores MCP (`engram`, `context7`) son proyectos externos, cada uno con su propia licencia.
+- La licencia de este repositorio aún no está definida por el autor; hasta entonces, los componentes portados conservan su licencia MIT y el resto queda sujeto a los términos por defecto de GitHub.
