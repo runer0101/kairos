@@ -15,11 +15,12 @@ trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 525600
 
 # Excepción justificada y estrecha (solo esta versión exacta):
-# effect@4.0.0-beta.74 pasó de publicación confiable a procedencia SLSA. Verificado con
-# `npm audit signatures`: firma y atestación válidas, repositorio Effect-TS/effect-smol.
+# effect@4.0.0-beta.83 pasó de publicación confiable (trusted publisher) a procedencia SLSA.
+# Verificado contra la atestación del registro: el digest sha512 coincide con el tarball y la
+# procedencia SLSA viene de Effect-TS/effect-smol (.github/workflows/release.yml, refs/heads/main).
 # Dependencia transitiva de @opencode-ai/plugin. Revisar al actualizar @opencode-ai/plugin.
 trustPolicyExclude:
-  - "effect@4.0.0-beta.74"
+  - "effect@4.0.0-beta.83"
 
 # Las dependencias transitivas solo pueden venir del registro: no git ni URLs de tarball.
 blockExoticSubdeps: true

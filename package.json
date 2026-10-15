@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.7",
-    "@opencode-ai/plugin": "1.16.2",
+    "@opencode-ai/plugin": "1.18.35",
     "opencode-subagent-statusline": "^1.2.1"
   }
 }
