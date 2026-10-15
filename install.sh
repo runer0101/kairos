@@ -1,31 +1,82 @@
 #!/usr/bin/env bash
-# install.sh — instala o repara opencode-venjix en esta máquina.
+# install.sh — instala opencode-venjix y sus dependencias en cualquier Linux glibc
+# (x86_64 o arm64), sin depender de apt, dnf, pacman ni zypper.
 #
-# Es idempotente: puede ejecutarse varias veces. Nunca borra configuración del
-# usuario; si reemplaza un archivo real, lo respalda con sufijo .bak-<fecha>.
+# Instala solo lo que falta:
+#   - Node.js 24.21.0   tarball oficial de nodejs.org, verificado con SHA-256, sin root
+#   - OpenCode          script oficial: https://opencode.ai/install
+#   - engram 3.4.0      binario oficial de GitHub, verificado con SHA-256 (memoria MCP)
+#
+# No instala Ollama ni descarga modelos. Ollama es opcional: si lo tienes activo,
+# opencode-venjix detecta sus modelos al abrir (ver scripts/detect-local-models.mjs).
+#
+# Es idempotente: puedes ejecutarlo varias veces. Nunca borra nada tuyo; si reemplaza
+# un archivo real, lo respalda con sufijo .bak-<fecha>.
 #
 # Uso:
-#   ./install.sh
-#
-# Variables opcionales:
-#   OPENCODE_BIN   ruta al binario de OpenCode (por defecto ~/.opencode/bin/opencode)
+#   ./install.sh [--help]
 
+# Si lo ejecutan con sh/dash, relanzar con bash (el script usa sintaxis de bash).
+if [ -z "${BASH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
+# ---------------------------------------------------------------- versiones fijadas
+NODE_VERSION="24.21.0"
+NODE_SHA256_x64="6e1db87ef58b8819e5d5402eff1536491b18edd8eb7bee5ef7897876e88dc5ff"
+NODE_SHA256_arm64="724282c3b43aec998aa9527380465b45d229e021b58035f5f4f63095eabfe5d5"
+ENGRAM_VERSION="3.4.0"
+ENGRAM_SHA256_x64="715fda625556e46d65ddb4526bb7f88a3fee5339ca3c44ce44cc652f17fa57f1"
+ENGRAM_SHA256_arm64="3309e9c0bbb539d183fd5aa9f9a13cd7aa0e81ec2512b5bedefb8b2bdd35b3e5"
+
+# ---------------------------------------------------------------- rutas
 REPO="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CANON="$HOME/.config/opencode-venjix"
 BIN_DIR="$HOME/.local/bin"
+SHARE_DIR="$HOME/.local/share/opencode-venjix"
 OC_THEMES="$HOME/.config/opencode/themes"
 OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
 GS_PKG="$HOME/.gentle-shell/current/node_modules/gentle-pi"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
+ARCH=""
+ENGRAM_PATH=""
+
+# ---------------------------------------------------------------- salida
 say()  { printf '\033[36m▸\033[0m %s\n' "$*"; }
+ok()   { printf '\033[32m✓\033[0m %s\n' "$*"; }
 warn() { printf '\033[33m!\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
 
-# Crea o actualiza un enlace simbólico. Si el destino es un archivo real, lo respalda.
-link() {
+usage() {
+    cat <<'TXT'
+install.sh — instala opencode-venjix en Linux (x86_64 o arm64).
+
+Uso:
+  ./install.sh [--help]
+
+Instala Node.js, OpenCode y engram si faltan, y configura el repositorio.
+No instala Ollama ni modelos: si tienes Ollama activo, se detecta al abrir.
+TXT
+}
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# ---------------------------------------------------------------- utilidades
+fetch() { # fetch URL DESTINO
+    if have curl; then
+        curl -fL --retry 3 --connect-timeout 20 -o "$2" "$1"
+    else
+        wget -q -O "$2" "$1"
+    fi
+}
+
+verify_sha256() { # verify_sha256 ARCHIVO HASH_ESPERADO
+    printf '%s  %s\n' "$2" "$1" | sha256sum -c --status \
+        || die "el SHA-256 de $(basename "$1") no coincide: descarga abortada por seguridad"
+}
+
+# Enlace simbólico; si el destino es un archivo real, se respalda antes.
+link() { # link ORIGEN DESTINO
     local src="$1" dst="$2"
     mkdir -p "$(dirname "$dst")"
     if [[ -e "$dst" && ! -L "$dst" ]]; then
@@ -33,47 +84,159 @@ link() {
         warn "respaldado $dst -> $dst.bak-$STAMP"
     fi
     ln -sfn "$src" "$dst"
-    say "enlace $dst -> $src"
 }
 
-# 1. Requisitos ---------------------------------------------------------------
-command -v node >/dev/null 2>&1 || die "falta Node.js (probado con v26)"
-command -v npm  >/dev/null 2>&1 || die "falta npm"
-[[ -x "$OPENCODE_BIN" ]] || die "no encuentro OpenCode en $OPENCODE_BIN (instálalo o define OPENCODE_BIN)"
-command -v ollama >/dev/null 2>&1 || warn "ollama no está en el PATH: los modelos locales no funcionarán"
-[[ -d "$GS_PKG" ]] || warn "gentle-shell no está en ~/.gentle-shell: se omite la sincronización"
+# ---------------------------------------------------------------- 1. requisitos
+preflight() {
+    say "comprobando el sistema"
+    [[ "$(uname -s)" == "Linux" ]] || die "este instalador es para Linux (detectado: $(uname -s))"
 
-# 2. Ubicación canónica -------------------------------------------------------
-if [[ "$REPO" != "$CANON" ]]; then
+    case "$(uname -m)" in
+        x86_64|amd64)  ARCH="x64" ;;
+        aarch64|arm64) ARCH="arm64" ;;
+        *)             ARCH="" ;;
+    esac
+
+    if ldd --version 2>&1 | grep -qi musl; then
+        die "sistema musl (p. ej. Alpine) no soportado: Node.js, OpenCode y engram requieren glibc"
+    fi
+
+    local missing=()
+    for tool in tar gzip sha256sum grep; do
+        have "$tool" || missing+=("$tool")
+    done
+    have curl || have wget || missing+=("curl (o wget)")
+    if ((${#missing[@]})); then
+        die "faltan herramientas básicas: ${missing[*]}. Instálalas con el gestor de paquetes de tu distro, p. ej.: sudo apt install curl tar gzip  |  sudo dnf install curl tar gzip  |  sudo pacman -S curl tar gzip"
+    fi
+
+    if ! have git; then
+        warn "git no está instalado: no hace falta para instalar, pero sí para clonar y actualizar el repo"
+    fi
+    ok "sistema: Linux $(uname -m)"
+}
+
+# ---------------------------------------------------------------- 2. Node.js
+ensure_node() {
+    if have node && node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
+        ok "Node.js $(node -v) ya instalado"
+        return
+    fi
+    [[ -n "$ARCH" ]] || die "no hay Node.js oficial para esta arquitectura ($(uname -m)); instala Node.js 20 o superior y vuelve a ejecutar"
+
+    local name="node-v$NODE_VERSION-linux-$ARCH"
+    local dir="$SHARE_DIR/$name"
+    local sha_var="NODE_SHA256_$ARCH"
+    if [[ ! -x "$dir/bin/node" ]]; then
+        local tmp
+        tmp="$(mktemp -d)"
+        say "descargando Node.js $NODE_VERSION ($ARCH) desde nodejs.org"
+        fetch "https://nodejs.org/dist/v$NODE_VERSION/$name.tar.gz" "$tmp/node.tar.gz"
+        verify_sha256 "$tmp/node.tar.gz" "${!sha_var}"
+        mkdir -p "$SHARE_DIR"
+        tar -xzf "$tmp/node.tar.gz" -C "$SHARE_DIR"
+        rm -rf "$tmp"
+    fi
+    export PATH="$dir/bin:$PATH"
+    link "$dir/bin/node" "$BIN_DIR/node"
+    link "$dir/bin/npm"  "$BIN_DIR/npm"
+    link "$dir/bin/npx"  "$BIN_DIR/npx"
+    ok "Node.js $NODE_VERSION instalado en $dir"
+}
+
+# ---------------------------------------------------------------- 3. OpenCode
+ensure_opencode() {
+    if [[ -x "$OPENCODE_BIN" ]]; then
+        ok "OpenCode: $("$OPENCODE_BIN" --version 2>/dev/null | tail -1)"
+        return
+    fi
+    if have opencode; then
+        OPENCODE_BIN="$(command -v opencode)"
+        ok "OpenCode encontrado en PATH: $OPENCODE_BIN"
+        return
+    fi
+
+    say "instalando OpenCode (script oficial de opencode.ai)"
+    if have curl; then
+        curl -fsSL https://opencode.ai/install | bash
+    else
+        wget -qO- https://opencode.ai/install | bash
+    fi
+
+    if [[ ! -x "$OPENCODE_BIN" ]] && have opencode; then
+        OPENCODE_BIN="$(command -v opencode)"
+    fi
+    [[ -x "$OPENCODE_BIN" ]] || die "OpenCode no quedó instalado en $OPENCODE_BIN"
+    ok "OpenCode instalado: $("$OPENCODE_BIN" --version 2>/dev/null | tail -1)"
+}
+
+# ---------------------------------------------------------------- 4. engram
+ensure_engram() {
+    local matches=()
+    shopt -s nullglob
+    matches=("$HOME"/.gentle-shell/runtime/engram-*/engram)
+    shopt -u nullglob
+    if ((${#matches[@]})); then
+        ENGRAM_PATH="$(printf '%s\n' "${matches[@]}" | sort -V | tail -1)"
+    elif have engram; then
+        ENGRAM_PATH="$(command -v engram)"
+    fi
+
+    if [[ -z "$ENGRAM_PATH" ]]; then
+        if [[ -z "$ARCH" ]]; then
+            warn "engram no tiene binario para esta arquitectura: la memoria (MCP) quedará desactivada"
+            return
+        fi
+        local suffix sha_var="ENGRAM_SHA256_$ARCH"
+        if [[ "$ARCH" == "x64" ]]; then suffix="linux_amd64"; else suffix="linux_arm64"; fi
+        local tmp
+        tmp="$(mktemp -d)"
+        say "descargando engram $ENGRAM_VERSION ($ARCH) desde GitHub"
+        fetch "https://github.com/Gentleman-Programming/engram/releases/download/v$ENGRAM_VERSION/engram_${ENGRAM_VERSION}_${suffix}.tar.gz" "$tmp/engram.tar.gz"
+        verify_sha256 "$tmp/engram.tar.gz" "${!sha_var}"
+        tar -xzf "$tmp/engram.tar.gz" -C "$tmp" engram
+        mkdir -p "$BIN_DIR"
+        cp "$tmp/engram" "$BIN_DIR/engram"
+        chmod 0755 "$BIN_DIR/engram"
+        rm -rf "$tmp"
+        ENGRAM_PATH="$BIN_DIR/engram"
+    fi
+    ok "engram: $ENGRAM_PATH"
+}
+
+# ---------------------------------------------------------------- 5. ubicación
+canonical_location() {
+    if [[ "$REPO" == "$CANON" ]]; then
+        ok "repo en la ubicación canónica $CANON"
+        return
+    fi
     if [[ -e "$CANON" && ! -L "$CANON" ]]; then
         die "$CANON ya existe y no es un enlace. Clona el repo ahí o muévelo antes de instalar."
     fi
     mkdir -p "$(dirname "$CANON")"
     ln -sfn "$REPO" "$CANON"
-    warn "el repo está en $REPO; se creó el enlace $CANON. Lo recomendado es clonar directamente en $CANON."
-fi
+    warn "el repo está en $REPO; se creó el enlace $CANON (lo recomendado es clonar directamente en $CANON)"
+}
 
-# 3. Dependencias de plugins (node_modules no se versiona) --------------------
-say "instalando dependencias (npm install)"
-(cd "$REPO" && npm install --no-audit --no-fund --loglevel=error)
+# ---------------------------------------------------------------- 6. repo
+setup_repo() {
+    say "instalando dependencias de plugins (npm install)"
+    (cd "$REPO" && npm install --no-audit --no-fund --loglevel=error)
 
-# 4. Lanzador, scripts y tema -------------------------------------------------
-chmod +x "$REPO/bin/opencode-venjix" "$REPO/scripts/sync-gentle-shell.mjs"
-link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
-link "$REPO/themes/gentleman.json" "$OC_THEMES/gentleman.json"
-case ":$PATH:" in
-    *":$BIN_DIR:"*) ;;
-    *) warn "$BIN_DIR no está en el PATH; añádelo en tu shell para usar 'opencode-venjix'" ;;
-esac
+    chmod +x "$REPO/bin/opencode-venjix" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
+    link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
+    link "$REPO/themes/gentleman.json" "$OC_THEMES/gentleman.json"
 
-# 5. Rutas específicas de esta máquina ----------------------------------------
-say "ajustando rutas locales"
-REPO_DIR="$REPO" node --input-type=commonjs - <<'NODE'
+    say "ajustando rutas locales de esta máquina"
+    OVJ_REPO="$REPO" OVJ_CANON="$CANON" OVJ_ENGRAM="$ENGRAM_PATH" node --input-type=commonjs - <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
-const repo = process.env.REPO_DIR;
 
-function edit(file, mutate) {
+const repo = process.env.OVJ_REPO;
+const canon = process.env.OVJ_CANON;
+const engram = process.env.OVJ_ENGRAM;
+
+function editJson(file, mutate) {
     const p = path.join(repo, file);
     const before = fs.readFileSync(p, "utf8");
     const obj = JSON.parse(before);
@@ -85,50 +248,92 @@ function edit(file, mutate) {
     }
 }
 
-edit("tui.json", (o) => {
+function editText(file, mutate) {
+    const p = path.join(repo, file);
+    if (!fs.existsSync(p)) return;
+    const before = fs.readFileSync(p, "utf8");
+    const after = mutate(before);
+    if (after !== before) {
+        fs.writeFileSync(p, after);
+        console.log(`  actualizado: ${file}`);
+    }
+}
+
+editJson("tui.json", (o) => {
     o.plugin = (o.plugin || []).map((p) =>
         p.endsWith("tui-plugins/gentle-logo.tsx") ? path.join(repo, "tui-plugins/gentle-logo.tsx") : p,
     );
 });
-NODE
 
-ENGRAM="$(ls -d "$HOME"/.gentle-shell/runtime/engram-*/engram 2>/dev/null | sort -V | tail -1 || true)"
-if [[ -n "$ENGRAM" && -x "$ENGRAM" ]]; then
-    ENGRAM_BIN="$ENGRAM" REPO_DIR="$REPO" node --input-type=commonjs - <<'NODE'
-const fs = require("node:fs");
-const path = require("node:path");
-const file = path.join(process.env.REPO_DIR, "opencode.json");
-const before = fs.readFileSync(file, "utf8");
-const obj = JSON.parse(before);
-const engram = obj.mcp && obj.mcp.engram;
-if (engram && Array.isArray(engram.command)) {
-    engram.command[0] = process.env.ENGRAM_BIN;
+if (engram) {
+    editJson("opencode.json", (o) => {
+        if (o.mcp && o.mcp.engram && Array.isArray(o.mcp.engram.command)) {
+            o.mcp.engram.command[0] = engram;
+        }
+    });
 }
-const after = JSON.stringify(obj, null, 2) + "\n";
-if (after !== before) {
-    fs.writeFileSync(file, after);
-    console.log("  actualizado: opencode.json (ruta de engram)");
+
+// Los prompts generados llevan la ruta de gentle-assets; la fijamos a esta máquina.
+for (const file of ["agents/gentle-orchestrator.md", "gentle-assets/orchestrator.md"]) {
+    editText(file, (text) =>
+        text.replace(/Package assets root: `[^`]*`/, "Package assets root: `" + path.join(canon, "gentle-assets") + "`"),
+    );
 }
 NODE
-else
-    warn "no encuentro engram en ~/.gentle-shell/runtime: la memoria (MCP) no funcionará hasta instalar gentle-shell"
-fi
 
-# 6. Sincronización con gentle-shell ------------------------------------------
-if [[ -d "$GS_PKG" ]]; then
-    say "sincronizando agentes y guardas con gentle-shell"
-    node "$REPO/scripts/sync-gentle-shell.mjs" --force
-fi
+    ok "launcher: $BIN_DIR/opencode-venjix"
+    ok "tema: $OC_THEMES/gentleman.json"
+    case ":$PATH:" in
+        *":$BIN_DIR:"*) ;;
+        *) warn "$BIN_DIR no está en tu PATH: añade 'export PATH=\"\$HOME/.local/bin:\$PATH\"' a tu shell" ;;
+    esac
+}
 
-# 7. Verificación -------------------------------------------------------------
-say "verificando que OpenCode carga la configuración"
-OUT="$(OPENCODE_VENJIX_NO_SYNC=1 "$REPO/bin/opencode-venjix" agent list 2>&1 || true)"
-grep -q '^gentle-orchestrator ' <<<"$OUT" || die "OpenCode no carga el agente gentle-orchestrator. Salida:
-$OUT"
+# ---------------------------------------------------------------- 7. gentle-shell (opcional)
+sync_gentle_shell() {
+    if [[ -d "$GS_PKG" ]]; then
+        say "sincronizando agentes con gentle-shell instalado"
+        node "$REPO/scripts/sync-gentle-shell.mjs" --force
+    else
+        ok "gentle-shell no está instalado: se usan los agentes incluidos en el repo"
+    fi
+}
 
-echo
-say "instalación correcta"
-echo "  Abre OpenCode con:   opencode-venjix"
-echo "  Diagnóstico dentro:  /gentle-doctor"
-echo
-warn "no uses gentle-sync sobre $CANON: reemplazaría esta instalación."
+# ---------------------------------------------------------------- 8. verificación
+verify() {
+    say "verificando que OpenCode carga la configuración"
+    local out
+    out="$(OPENCODE_VENJIX_NO_SYNC=1 OPENCODE_BIN="$OPENCODE_BIN" "$REPO/bin/opencode-venjix" agent list 2>&1 || true)"
+    grep -q '^gentle-orchestrator ' <<<"$out" \
+        || die "OpenCode no carga el agente gentle-orchestrator. Salida:
+$out"
+    ok "configuración válida: agentes, comandos, plugin y tema"
+}
+
+# ---------------------------------------------------------------- main
+main() {
+    case "${1:-}" in
+        "") ;;
+        --help|-h) usage; exit 0 ;;
+        *) die "opción desconocida: $1 (usa --help)" ;;
+    esac
+
+    preflight
+    ensure_node
+    ensure_opencode
+    ensure_engram
+    canonical_location
+    setup_repo
+    sync_gentle_shell
+    verify
+
+    echo
+    ok "instalación completa"
+    echo "  Abre OpenCode con:    opencode-venjix"
+    echo "  Diagnóstico dentro:   /gentle-doctor"
+    echo "  Modelos locales:      opcional; instala Ollama y descarga modelos, opencode-venjix los detecta"
+    echo
+    warn "no uses gentle-sync sobre $CANON: reemplazaría esta instalación"
+}
+
+main "$@"
