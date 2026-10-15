@@ -86,7 +86,7 @@
     "engram": {
       "type": "local",
       "command": [
-        "$HOME/.gentle-shell/runtime/engram-3.4.0/engram",
+        "{env:HOME}/.gentle-shell/runtime/engram-3.4.0/engram",
         "mcp",
         "--tools=agent"
       ],

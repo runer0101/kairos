@@ -263,13 +263,13 @@ setup_repo() {
     link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
     link "$REPO/themes/gentleman.json" "$OC_THEMES/gentleman.json"
 
-    say "ajustando rutas locales de esta máquina"
-    OVJ_REPO="$REPO" OVJ_CANON="$CANON" OVJ_ENGRAM="$ENGRAM_PATH" node --input-type=commonjs - <<'NODE'
+    say "ajustando rutas locales de esta máquina (solo si hace falta)"
+    OVJ_REPO="$REPO" OVJ_HOME="$HOME" OVJ_ENGRAM="$ENGRAM_PATH" node --input-type=commonjs - <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
 
 const repo = process.env.OVJ_REPO;
-const canon = process.env.OVJ_CANON;
+const home = process.env.OVJ_HOME;
 const engram = process.env.OVJ_ENGRAM;
 
 function editJson(file, mutate) {
@@ -284,36 +284,20 @@ function editJson(file, mutate) {
     }
 }
 
-function editText(file, mutate) {
-    const p = path.join(repo, file);
-    if (!fs.existsSync(p)) return;
-    const before = fs.readFileSync(p, "utf8");
-    const after = mutate(before);
-    if (after !== before) {
-        fs.writeFileSync(p, after);
-        console.log(`  actualizado: ${file}`);
-    }
-}
-
-editJson("tui.json", (o) => {
-    o.plugin = (o.plugin || []).map((p) =>
-        p.endsWith("tui-plugins/gentle-logo.tsx") ? path.join(repo, "tui-plugins/gentle-logo.tsx") : p,
-    );
-});
+// Las rutas dentro de $HOME se escriben como {env:HOME}/...: el runtime las expande y el
+// repo queda sin datos de esta máquina (lo vigila tests/privacy.test.mjs).
+const portable = (p) => (p.startsWith(home + "/") ? "{env:HOME}" + p.slice(home.length) : p);
 
 if (engram) {
     editJson("opencode.json", (o) => {
-        if (o.mcp && o.mcp.engram && Array.isArray(o.mcp.engram.command)) {
-            o.mcp.engram.command[0] = engram;
+        const cmd = o.mcp && o.mcp.engram && o.mcp.engram.command;
+        if (!Array.isArray(cmd)) return;
+        if (cmd[0] === portable(engram)) return;
+        cmd[0] = portable(engram);
+        if (!cmd[0].startsWith("{env:HOME}")) {
+            console.log("  aviso: engram está fuera de $HOME; esa ruta no debería commitearse");
         }
     });
-}
-
-// Los prompts generados llevan la ruta de gentle-assets; la fijamos a esta máquina.
-for (const file of ["prompts/orchestrator.md", "gentle-assets/orchestrator.md"]) {
-    editText(file, (text) =>
-        text.replace(/Package assets root: `[^`]*`/, "Package assets root: `" + path.join(canon, "gentle-assets") + "`"),
-    );
 }
 NODE
 

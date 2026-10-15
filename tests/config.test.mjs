@@ -71,23 +71,19 @@ test("funciones de calidad activas: lsp, formatter, snapshot (undo)", () => {
   assert.equal(cfg.snapshot, true);
 });
 
-// Extrae las rutas absolutas de una configuración y exige que todas sean el
-// binario de engram (única ruta absoluta permitida en el repo, el resto deben
-// ser relativas o plantillas para que el port siga siendo portable).
-function validateAbsolutePaths(obj) {
+// La configuración no debe contener rutas absolutas de la máquina: el repo se publica
+// tal cual. El binario de engram se referencia como {env:HOME}/... y lo expande el runtime.
+function assertNoAbsolutePaths(obj) {
   const absolute = JSON.stringify(obj).match(/"\/[^"]+"/g) || [];
-  assert.ok(absolute.length > 0, "se esperaba el binario de engram como ruta absoluta");
-  for (const v of absolute) {
-    assert.match(v, /\/engram"?$/, `ruta absoluta inesperada: ${v}`);
-  }
+  assert.deepEqual(absolute, [], `rutas absolutas inesperadas: ${absolute.join(", ")}`);
 }
 
-test("la única ruta absoluta permitida es el binario de engram", () => {
-  validateAbsolutePaths(cfg);
+test("la configuración no contiene rutas absolutas", () => {
+  assertNoAbsolutePaths(cfg);
 });
 
 test("una ruta absoluta no permitida se detecta", () => {
   const bad = structuredClone(cfg);
   bad.mcp.engram.command = ["/tmp/opencode", "mcp"];
-  assert.throws(() => validateAbsolutePaths(bad), /ruta absoluta inesperada/);
+  assert.throws(() => assertNoAbsolutePaths(bad), /rutas absolutas inesperadas/);
 });

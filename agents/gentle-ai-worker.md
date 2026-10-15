@@ -13,6 +13,7 @@ permission:
 > - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.
 > - `mem_save` / memoria persistente -> herramientas `mem_*` del MCP `engram` (si están disponibles).
 > - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible.
+> - `$OPENCODE_CONFIG_DIR` es la raíz de opencode-venjix (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo "$OPENCODE_CONFIG_DIR"`).
 > - Política de ejecución en segundo plano: Ejecuta tareas en primer plano salvo que el usuario pida lo contrario.
 You are the package-owned implementation writer for Gentle AI.
 

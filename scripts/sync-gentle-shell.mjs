@@ -11,6 +11,10 @@
 // NO toca: themes/, tui-plugins/, tui.json, opencode.json, resto de skills/, plugins/,
 //          commands/, node_modules/, package*.json, LEEME.md.
 //
+// Los archivos generados no llevan rutas de esta máquina: el repo se publica tal cual
+// (ver tests/privacy.test.mjs). La raíz de gentle-assets se referencia con
+// $OPENCODE_CONFIG_DIR, que el lanzador exporta en tiempo de ejecución.
+//
 // Uso:
 //   node scripts/sync-gentle-shell.mjs              sincroniza solo si cambió la versión
 //   node scripts/sync-gentle-shell.mjs --force      sincroniza siempre
@@ -76,7 +80,7 @@ mkdirSync(stagePrompts);
 
 const templ = (text) =>
   text
-    .replaceAll("{{GENTLE_PI_ASSETS_ROOT}}", ASSETS_OUT)
+    .replaceAll("{{GENTLE_PI_ASSETS_ROOT}}", "$OPENCODE_CONFIG_DIR/gentle-assets")
     .replaceAll("{{GENTLE_PI_BACKGROUND_POLICY}}", BG_POLICY);
 
 // Este portado corre sobre OpenCode, no sobre Pi. Las instrucciones originales nombran
@@ -88,6 +92,7 @@ const RUNTIME_NOTE = [
   "> - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.",
   "> - `mem_save` / memoria persistente -> herramientas `mem_*` del MCP `engram` (si están disponibles).",
   "> - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible.",
+  "> - `$OPENCODE_CONFIG_DIR` es la raíz de opencode-venjix (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
   `> - Política de ejecución en segundo plano: ${BG_POLICY}`,
   "",
 ].join("\n");
