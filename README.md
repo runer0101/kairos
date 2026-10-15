@@ -1,6 +1,8 @@
 # opencode-venjix
 
 [![CI](https://github.com/runer0101/opencode-venjix/actions/workflows/ci.yml/badge.svg)](https://github.com/runer0101/opencode-venjix/actions/workflows/ci.yml)
+[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-yellow.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)](https://nodejs.org)
 
 **OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
 
@@ -14,9 +16,11 @@
 
 Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
 
+> Proyecto en desarrollo activo: cada push pasa la suite completa, `shellcheck` y un escaneo de privacidad en CI.
+
 ## Índice
 
-[Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Créditos y licencia](#créditos-y-licencia)
+[Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
 
 ## Qué incluye
 
@@ -260,7 +264,7 @@ Detalles de cada componente, el mapeo de Pi a OpenCode y el flujo de actualizaci
 
 Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi, y no se portaron:
 
-- La barra fullscreen, paneles de uso, animaciones, regiones de puntero y sonidos de la TUI de Pi.
+- La barra fullscreen, paneles de uso, animaciones y regiones de puntero de la TUI de Pi (los sonidos sí se portaron, opt-in).
 - La autoridad nativa de revisión (RDD), Herdr y el clasificador de la aprobación automática de Pi.
 - Los comandos `/gentle:*` que dependían de esas piezas.
 
@@ -286,12 +290,19 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 | El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `opencode-venjix run "ok"` para diagnosticar |
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
 
+## Contribuir
+
+- ¿Ideas o fallos? Abre un *issue* con el caso concreto: comando o ruta, resultado esperado y resultado observado.
+- ¿Código? Pasa `pnpm test` antes de enviar. El proyecto sigue su propio flujo ODD (`/odd-task`) y los commits van por unidad de trabajo.
+- No incluyas datos personales en issues, logs ni capturas: el repositorio mantiene una prueba de privacidad que falla ante rutas o correos.
+
 ## Créditos y licencia
 
 Mantenido por [@runer0101](https://github.com/runer0101).
+
+Este repositorio se distribuye bajo **licencia MIT** (ver [LICENSE](LICENSE)).
 
 - Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), de [Gentleman Programming](https://github.com/Gentleman-Programming), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
 - Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai. Revisa su licencia de origen antes de redistribuirlas.
 - Los tonos de `assets/sounds/` son originales de gentle-pi (MIT); su nota de licencia está junto a los archivos.
 - Los servidores MCP (`engram`, `context7`) son proyectos externos, cada uno con su propia licencia.
-- La licencia de este repositorio aún no está definida por el autor; hasta entonces, los componentes portados conservan su licencia MIT y el resto queda sujeto a los términos por defecto de GitHub.

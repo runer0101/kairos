@@ -34,7 +34,7 @@ El port se entregó sin CI y sin pruebas de TUI; hay un crash latente en termina
 
 ### Fuera
 
-- Licencia del repositorio (decisión del autor).
+- Licencia del repositorio (resuelta el 2026-10-15: MIT; ver T21).
 - RDD, Herdr y paneles de la TUI de Pi (dependen de su API).
 - macOS y Windows.
 
@@ -70,6 +70,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T18 — Seguridad: rutas sensibles + SECURITY.md (elegida por el usuario, después del plan) · Criterio: credenciales bloqueadas en todos los perfiles (incluido `venjix-auto` y vía bash); `.env`/`.pem` con confirmación en el perfil normal; modelo de seguridad documentado · Prueba: `pnpm test` (sensitive-paths) + verificación en vivo con señuelos
 - [x] T19 — Separación local/público (elegida por el usuario, después del plan) · Criterio: clon de publicación aparte con origin a GitHub, repo local sin remoto (imposible push accidental) y script de publicación que verifica privacidad antes de subir · Prueba: primer push al remoto con CI verde + `publicar-opencode-venjix.sh` en seco (hashes reescritos después, ver T20)
 - [x] T20 — Historia limpia y repositorio público (elegida por el usuario, después del plan) · Criterio: ningún commit con rutas de la máquina ni correos; repositorio público; README profesional · Prueba: escaneo de los 47 commits de `main` + `gh repo view`
+- [x] T21 — Licencia MIT y README final (pedida por el usuario, después del plan) · Criterio: `LICENSE` MIT en la raíz, badge de licencia y sección de créditos coherente; README con pasada profesional (contribuir, estado, correcciones) · Prueba: `pnpm test` + revisión del README
 
 ## Evidencia de verificación
 
@@ -89,6 +90,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T8: `.github/workflows/ci.yml` con dos jobs en push/PR: `tests` (Node 24, pnpm 11.22.0, lockfile congelado, `pnpm test`) y `shellcheck --severity=error` sobre `install.sh` y `bin/opencode-venjix`. Primer run: `38688720308` ✓ (tests 18 s, shellcheck 7 s).
 - T19: repo local sin remoto (imposible un push accidental desde la máquina); clon de publicación aparte con `origin` a GitHub; script `publicar-opencode-venjix.sh` (fuera de ambos repos) que exige árbol limpio, corre la prueba de privacidad y exporta solo archivos versionados antes de commitear y subir. Verificado en seco ("al día") y con el primer push real (después reescrito por T20) que dejó el CI verde.
 - T20: reescritura completa de la historia (47 commits) reemplazando `/home/runer` por `$HOME` en todo el contenido; verificado: 0 ocurrencias en todo `main` y solo queda el usuario público `runer0101`; force push del clon de publicación; visibilidad del repositorio cambiada a pública; README reestructurado (badge de CI, índice, logo ASCII, agradecimientos); refs de respaldo locales purgadas y objetos antiguos recolectados con `git gc` (local y clon público).
+- T21: `LICENSE` MIT (© 2026 runer0101) en la raíz; README con badge de licencia y de Node, nota de estado activo, sección «Contribuir», corrección de «Qué no incluye» (los sonidos sí están) y créditos actualizados; la nota de licencia sin definir quedó retirada. `pnpm test` → 56 tests, 52 pass, 4 skipped, 0 fail.
 
 ## Progreso
 
@@ -108,6 +110,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T18 (elegido por el usuario: seguridad primero): piso inviolable de rutas sensibles (config + plugin, también en bash y en `venjix-auto`) y `SECURITY.md` (`adfcb60`).
 - 2026-10-15 — T8/T19: CI en GitHub (primer run verde) y separación local/público (clon de publicación con origin, local sin remoto, script con verificación de privacidad); primer push al remoto tras reescribir la autoría de los 27 commits pendientes a la identidad noreply (hashes luego reescritos por T20).
 - 2026-10-15 — T20 (pedido del usuario): historia completa sin rutas de la máquina (47 commits reescritos), force push, repositorio público y README profesional.
+- 2026-10-15 — T21 (pedido del usuario): licencia MIT y pasada profesional final del README.
 
 ## Siguiente paso
 
