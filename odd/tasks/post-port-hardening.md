@@ -66,6 +66,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T14 — Temas de gentle-shell portados (pedida por el usuario, después del plan) · Criterio: los tres temas de `gentle-pi` (Gentle, Gentleman-Cute, Gentleman-Sexy) convertidos al formato de OpenCode, enlazados por `install.sh` y validados · Prueba: `pnpm test` (tests/themes.test.mjs) + smoke de TUI con `gentleman-sexy`
 - [x] T15 — Sonidos y logo personal (pedida por el usuario, después del plan) · Criterio: los 3 tonos portados con atribución y apagados por defecto (`OPENCODE_VENJIX_SOUNDS=1`); texto del logo configurable (`OPENCODE_VENJIX_LOGO_TEXT`, por defecto `venjix`) · Prueba: `pnpm test` (sounds + tui-logo) + smoke de TUI
 - [x] T16 — Selector de perfiles simplificado (pedida por el usuario, después del plan) · Criterio: `build`/`plan` desactivados, `venjix-deep` retirado y `venjix-yolo` renombrado a `venjix-auto`; solo `venjix` y `venjix-auto` visibles en el selector · Prueba: `pnpm test` + `opencode agent list`
+- [x] T17 — Alias corto `ov` (pedida por el usuario, después del plan) · Criterio: `install.sh` crea `~/.local/bin/ov` → lanzador y `ov` funciona en cualquier shell · Prueba: `pnpm test` (launcher) + `ov --where`
 
 ## Evidencia de verificación
 
@@ -80,6 +81,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T14: `themes/gentle.json`, `themes/gentleman-cute.json` y `themes/gentleman-sexy.json` (vars+colors de Pi → defs+theme de OpenCode, mismo juego de claves que `gentleman`); `install.sh` enlaza todos los temas; `pnpm test` → 47 tests, 43 pass, 4 skipped, 0 fail; smoke real: con `theme: gentleman-sexy` la TUI pinta el fondo `#060407` (ausente el de `gentleman`) y sale sin errores.
 - T15: tema por defecto renombrado a `gentleman-venjix` (el enlace viejo se retira solo en `install.sh`); `assets/sounds/{success,error,attention}.wav` + `LICENSE.md` portados con su atribución; el plugin reproduce en `session.idle`/`session.error`/`permission.asked|question.asked` (paplay→pw-play→aplay; macOS afplay) solo con `OPENCODE_VENJIX_SOUNDS=1`; el logo pinta `LOGO_TEXT` (env `OPENCODE_VENJIX_LOGO_TEXT`, por defecto `venjix`). `pnpm test` → 50 tests, 46 pass, 4 skipped, 0 fail; smoke real: tema renombrado pinta su fondo y `OPENCODE_VENJIX_LOGO_TEXT=personalizado` aparece en la captura.
 - T16: `opencode.json` con `build`/`plan` en `disable: true`, sin `venjix-deep` y con `venjix-auto` (antes `venjix-yolo`); README, ARCHITECTURE, `install.sh` (verifica ambos perfiles) y el comando `/gentle-usage` actualizados. `pnpm test` → 51 tests, 47 pass, 4 skipped, 0 fail; `opencode agent list` → solo `venjix` y `venjix-auto` como primarios visibles; `install.sh` completo pasa su verificación.
+- T17: enlace `~/.local/bin/ov` → lanzador creado por `install.sh` (verificado: `ov --where` resuelve el repo; `command -v ov` en zsh); el lanzador y el README lo documentan; `pnpm test` → 52 tests, 48 pass, 4 skipped, 0 fail.
 
 ## Progreso
 
@@ -95,6 +97,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T14: temas de gentle-shell portados a OpenCode (Gentle, Gentleman-Cute, Gentleman-Sexy) con enlace múltiple en `install.sh`, pruebas de esquema y smoke real en la TUI (`6e2aaf2`). Pendiente decidir sonidos y logo de texto personal.
 - 2026-10-15 — T14/T15: tema por defecto renombrado a `gentleman-venjix` (`b80b17b`); sonidos opt-in y texto del logo portados y verificados (`d5ce460`).
 - 2026-10-15 — T16: selector simplificado a `venjix` + `venjix-auto` (build/plan desactivados, venjix-deep retirado) a pedido del usuario (`6a779c9`).
+- 2026-10-15 — T17: alias corto `ov` creado por `install.sh` (`19e456a`).
 
 ## Siguiente paso
 
