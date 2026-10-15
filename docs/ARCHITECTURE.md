@@ -37,7 +37,7 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 | `gentle-notifications` (sonido y escritorio) | Evento `session.idle` → `notify-send` | Sonidos no portados |
 | Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
 | `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
-| `themes/` y TUI propia | `themes/gentleman.json`, `tui-plugins/`, `tui.json` | Logo y tema propios |
+| `themes/` y TUI propia | `themes/gentleman-venjix.json`, `tui-plugins/`, `tui.json` | Logo y tema propios |
 | Barra fullscreen, paneles, animaciones, regiones de puntero | No portado | Dependen de la API de Pi |
 
 ### Derivación de permisos de subagentes

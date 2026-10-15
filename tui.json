@@ -4,5 +4,5 @@
     "opencode-subagent-statusline",
     "./tui-plugins/gentle-logo.tsx"
   ],
-  "theme": "gentleman"
+  "theme": "gentleman-venjix"
 }

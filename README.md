@@ -102,7 +102,7 @@ Cuatro temas en `themes/` (los tres de gentle-shell portados a OpenCode, MIT):
 
 | Tema (`tui.json`) | Estilo |
 |---|---|
-| `gentleman` (por defecto) | Rosé Pine con azules profundos |
+| `gentleman-venjix` (por defecto) | Rosé Pine con azules profundos |
 | `gentle` | Azul frío con acento dorado |
 | `gentleman-cute` | Rosas suaves |
 | `gentleman-sexy` | Rosas intensos con violeta |
@@ -207,7 +207,7 @@ opencode-venjix/
 │   ├── detect-local-models.mjs      Detección de runtimes de IA local
 │   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
 ├── skills/                          Skills (33)
-├── themes/                          Temas (gentleman, gentle, gentleman-cute, gentleman-sexy)
+├── themes/                          Temas (gentleman-venjix, gentle, gentleman-cute, gentleman-sexy)
 ├── tui-plugins/gentle-logo.tsx      Logo para la TUI
 ├── tests/                           Pruebas (node:test)
 ├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
