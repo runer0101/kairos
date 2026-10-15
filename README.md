@@ -10,7 +10,8 @@ El proyecto no es un programa independiente: es un conjunto de agentes, comandos
 - **Subagentes especializados**: exploración, verificación, implementación, revisión (legibilidad, fiabilidad, resiliencia, riesgo) y jurado de *Judgment Day*.
 - **Guarda de comandos destructivos**: un plugin bloquea comandos bash reconocibles como destructivos (`rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE`, `DELETE` sin `WHERE`).
 - **Memoria persistente** mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
-- **Modelos locales** con Ollama por defecto.
+- **Modelo gratuito por defecto** de OpenCode (`opencode/big-pickle`). No requiere instalar nada más.
+- **IA local opcional**: si tienes Ollama, LM Studio, llama.cpp o vLLM activos, opencode-venjix detecta sus modelos al abrir y los muestra como proveedores locales. Si no hay ninguno, no pasa nada.
 - **Sincronización** con la versión instalada de gentle-shell: al abrir, el launcher detecta cambios y regenera los componentes derivados sin tocar el visual ni las skills propias.
 - **Tema y logo propios**, con colores de acento azules.
 
@@ -20,7 +21,6 @@ El proyecto no es un programa independiente: es un conjunto de agentes, comandos
 |---|---|---|
 | OpenCode | 1.18.35 | Base sobre la que corre todo |
 | Node.js | 26 | Script de sincronización y dependencias del plugin |
-| Ollama | — | Modelos locales (`ollama/jimscard/whiterabbit-neo:13b` por defecto) |
 | gentle-shell | 4.2.0 | Fuente de agentes y guardas; opcional, solo para sincronizar |
 | engram | 3.4.0 | Memoria persistente (MCP); viene con gentle-shell |
 | notify-send | — | Notificación de escritorio al terminar; opcional |
@@ -46,7 +46,8 @@ Algunos valores dependen de la máquina y deben revisarse tras clonar:
 
 - `tui.json`: ruta absoluta a `tui-plugins/gentle-logo.tsx`.
 - `opencode.json`: ruta absoluta al binario de `engram` (`mcp.engram.command`).
-- `opencode.json`: modelos y proveedor (`provider`, `model`, `small_model`).
+- `opencode.json`: modelo por defecto (`model`, `small_model`). Los modelos locales no se configuran aquí: se detectan.
+- `local-providers.json` (opcional): endpoints propios de IA local (ver sección *IA local*).
 - `agents/` y `gentle-assets/`: contienen la ruta local del repositorio. El launcher los regenera al abrir la primera vez (no hay marcador de sincronización tras clonar), así que no hace falta editarlos.
 
 ## Uso
@@ -65,6 +66,39 @@ Comandos disponibles dentro de OpenCode:
 | `/gentle-status` | Cambios del repositorio actual y siguiente paso |
 
 El agente por defecto es `gentle-orchestrator`. Con `Tab` se cambia entre agentes.
+
+## IA local (opcional)
+
+El instalador **no instala ni descarga modelos locales**. Si quieres usar IA en tu propia máquina, instala el runtime que prefieras; opencode-venjix lo detecta al abrir (cada arranque, sin configurar nada):
+
+| Runtime | Puerto por defecto | Proveedor en OpenCode |
+|---|---|---|
+| Ollama | 11434 | `local-ollama` |
+| LM Studio | 1234 | `local-lmstudio` |
+| llama.cpp (`llama-server`) | 8080 | `local-llamacpp` |
+| vLLM | 8000 | `local-vllm` |
+
+Cualquier servidor compatible con OpenAI que responda en `GET /v1/models` se puede añadir con un archivo `local-providers.json` en la raíz del repo (no se versiona):
+
+```json
+[
+  { "id": "local-jan", "name": "Jan (local)", "baseURL": "http://127.0.0.1:1337/v1" }
+]
+```
+
+Reglas:
+
+- El id debe empezar por `local-` para no mezclarse con proveedores de la configuración global.
+- Los modelos aparecen en el selector de modelos de OpenCode (`/models`). El modelo por defecto no cambia: sigue siendo el gratuito de `opencode.json`.
+- Los modelos de embeddings se omiten.
+- Las capacidades (herramientas, contexto) son supuestas: OpenAI-compatible no las informa. Si un modelo no usa herramientas bien, no lo selecciones para agentes.
+- Si el runtime no está activo, se ignora sin error.
+
+Comprobar qué detecta el lanzador:
+
+```bash
+node scripts/detect-local-models.mjs
+```
 
 ## Actualizaciones de gentle-shell
 
@@ -90,7 +124,8 @@ La sincronización no cambia `opencode.json`. Si una versión nueva de gentle-sh
 ```
 opencode-venjix/
 ├── bin/opencode-venjix            Lanzador: fija las variables de OpenCode y sincroniza
-├── opencode.json                  Modelos, proveedor, MCPs, agente por defecto, permisos
+├── opencode.json                  Modelo gratuito por defecto, MCPs, agente, permisos
+├── scripts/detect-local-models.mjs  Detecta runtimes de IA local al abrir
 ├── tui.json                       Tema, logo y statusline de la TUI
 ├── agents/                        Orchestrator y subagentes (generados)
 ├── gentle-assets/                 Referencias perezosas del orchestrator (generadas)

@@ -66,6 +66,22 @@ Los prompts originales nombran herramientas de Pi (`subagent_run`, `ask_user_cho
 
 Esta nota es una mitigación, no una reescritura: los prompts siguen siendo los de gentle-shell.
 
+## Modelos y detección de IA local
+
+La configuración de modelos se reparte en dos capas:
+
+| Capa | Dónde | Qué aporta |
+|---|---|---|
+| Modelo por defecto | `opencode.json` (`model`, `small_model`) | `opencode/big-pickle`, gratuito de OpenCode |
+| Proveedores locales | Detectados en cada arranque | Ollama, LM Studio, llama.cpp, vLLM y endpoints de `local-providers.json` |
+
+En cada arranque, `bin/opencode-venjix` ejecuta `scripts/detect-local-models.mjs`. El script sondea los puertos por defecto con un timeout de 800 ms y devuelve un JSON de proveedores. El lanzador lo pasa en `OPENCODE_CONFIG_CONTENT`, que OpenCode fusiona por encima de la configuración del proyecto.
+
+Dos decisiones de diseño:
+
+- **IDs propios**: los proveedores detectados usan IDs `local-*`. Si usaran `ollama`, se fusionarían con el proveedor `ollama` de la configuración global del usuario (`~/.config/opencode/opencode.jsonc`), que puede declarar modelos que ya no existen.
+- **`disabled_providers: ["ollama"]`** en `opencode.json`: oculta ese proveedor global. El `ollama-cloud` global se conserva porque son modelos de nube, no locales.
+
 ## Ciclo de vida de los archivos
 
 | Archivo o carpeta | Origen | ¿Lo modifica la sincronización? |
