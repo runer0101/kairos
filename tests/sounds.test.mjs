@@ -1,5 +1,5 @@
-// Pruebas de sonidos: los tonos portados de gentle-pi existen y el plugin los conecta
-// de forma opcional (OPENCODE_VENJIX_SOUNDS=1; apagados por defecto).
+// Pruebas de sonidos: los tonos portados de gentle-pi existen y el plugin TUI los registra
+// como pack nativo de OpenCode ("venjix"); el plugin de servidor ya no reproduce por su cuenta.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
@@ -8,7 +8,9 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SOUNDS = join(ROOT, "assets", "sounds");
-const pluginSrc = readFileSync(join(ROOT, "plugins", "gentle-shell.ts"), "utf8");
+const tuiPlugin = readFileSync(join(ROOT, "tui-plugins", "gentle-sounds.ts"), "utf8");
+const serverPlugin = readFileSync(join(ROOT, "plugins", "gentle-shell.ts"), "utf8");
+const tuiConfig = JSON.parse(readFileSync(join(ROOT, "tui.json"), "utf8"));
 
 test("los tres tonos portados existen y son WAV válidos", () => {
     for (const name of ["success", "error", "attention"]) {
@@ -21,11 +23,15 @@ test("los tres tonos portados existen y son WAV válidos", () => {
     assert.ok(existsSync(join(SOUNDS, "LICENSE.md")), "falta la atribución de los tonos");
 });
 
-test("el plugin reproduce sonidos solo con el interruptor y mapea los tres eventos", () => {
-    assert.match(pluginSrc, /OPENCODE_VENJIX_SOUNDS/, "falta el interruptor opt-in");
-    assert.match(pluginSrc, /if \(!SOUNDS_ENABLED\) return/, "sin interruptor no debe sonar nada");
-    assert.match(pluginSrc, /"session\.idle"\) playSound\("success"\)/, "falta fin de tarea -> success");
-    assert.match(pluginSrc, /"session\.error"\) playSound\("error"\)/, "falta error -> error");
-    assert.match(pluginSrc, /"permission\.asked"/, "falta el evento de permiso");
-    assert.match(pluginSrc, /"question\.asked"\) playSound\("attention"\)/, "falta pregunta -> attention");
+test("el pack nativo venjix mapea los eventos a los tonos y es opt-in", () => {
+    assert.ok(tuiPlugin.includes("registerPack("), "falta registerPack");
+    assert.ok(tuiPlugin.includes('id: "venjix"'), "el pack debe llamarse venjix");
+    assert.ok(tuiPlugin.includes("done: `${dir}/success.wav`"), "done debe usar success.wav");
+    assert.ok(tuiPlugin.includes("subagent_done: `${dir}/success.wav`"), "subagent_done debe usar success.wav");
+    assert.ok(tuiPlugin.includes("error: `${dir}/error.wav`"), "error debe usar error.wav");
+    assert.ok(tuiPlugin.includes("permission: `${dir}/attention.wav`"), "permission debe usar attention.wav");
+    assert.ok(tuiPlugin.includes("question: `${dir}/attention.wav`"), "question debe usar attention.wav");
+    assert.ok(tuiPlugin.includes("OPENCODE_VENJIX_SOUNDS"), "falta el interruptor opt-in");
+    assert.ok(tuiConfig.plugin.includes("./tui-plugins/gentle-sounds.ts"), "tui.json debe cargar el pack");
+    assert.ok(!/paplay|pw-play|aplay|afplay/.test(serverPlugin), "el servidor ya no debe reproducir sonidos");
 });

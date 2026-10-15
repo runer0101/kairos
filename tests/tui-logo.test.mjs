@@ -49,3 +49,8 @@ test("el logo muestra un texto personal bajo el arco", () => {
   assert.match(src, /"venjix"/, "el texto por defecto es venjix");
   assert.match(src, /\{LOGO_TEXT\}/, "LOGO_TEXT debe renderizarse en la TUI");
 });
+
+test("el logo incluye los atajos principales bajo el arco", () => {
+  assert.match(src, /Tab: perfiles/, "el logo debe recordar los atajos");
+  assert.ok(!src.includes("home_footer"), "el pie separado no se usa (no renderiza en OpenCode 1.18)");
+});

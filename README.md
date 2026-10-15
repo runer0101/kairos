@@ -135,13 +135,13 @@ Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la ta
 
 ### Sonidos de aviso (opcional)
 
-`assets/sounds/` trae los tres tonos originales de gentle-shell (MIT). Están apagados por defecto; actívalos al lanzar:
+`assets/sounds/` trae los tres tonos originales de gentle-shell (MIT), integrados con el **sistema nativo de atención de OpenCode** como pack `venjix`: `done` y `subagent_done` usan `success`, `error` usa `error`, y `permission`/`question` usan `attention`. Actívalo al lanzar:
 
 ```bash
 OPENCODE_VENJIX_SOUNDS=1 opencode-venjix
 ```
 
-Suenan al terminar una tarea (`success`), ante un error de sesión (`error`) y cuando OpenCode pide permiso o hace una pregunta (`attention`). En Linux usa `paplay`, `pw-play` o `aplay` (el primero que exista); en macOS, `afplay`. Sin reproductor disponible se ignoran sin error.
+Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo a mano en la configuración de atención de OpenCode (`tui.json`), donde se controlan el volumen y si suenan solo cuando la ventana no tiene foco.
 
 ### Logo
 
@@ -150,6 +150,8 @@ El arco lleva debajo un texto personal (`venjix` por defecto). Cámbialo editand
 ```bash
 OPENCODE_VENJIX_LOGO_TEXT=otro-texto opencode-venjix
 ```
+
+Bajo el texto del logo se recuerdan los atajos principales (`Tab`, `ctrl+p`, `/gentle-doctor`).
 
 ## IA local (opcional)
 
@@ -224,7 +226,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 56 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
+pnpm test                           # 57 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
@@ -289,6 +291,7 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 | `ERR_PNPM_IGNORED_BUILDS` | Un script de instalación sin decisión | Decide en `allowBuilds` de `pnpm-workspace.yaml` |
 | El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `opencode-venjix run "ok"` para diagnosticar |
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
+| Aviso `background dependency install failed` al abrir | OpenCode intenta instalar dependencias de plugins con npm en un proyecto gestionado con pnpm (limitación de OpenCode; los plugins cargan igual) | Ignóralo: las dependencias ya están instaladas con `pnpm install` |
 
 ## Contribuir
 

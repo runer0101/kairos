@@ -1,39 +1,9 @@
-// gentle-shell portado a OpenCode: guarda de comandos destructivos + aviso y sonidos al terminar.
-// Lógica de la guarda: copiada de gentle-pi (lib/destructive-command-guard.ts), MIT.
-// Sonidos: tonos originales de gentle-pi (assets/sounds), MIT; apagados salvo OPENCODE_VENJIX_SOUNDS=1.
+// gentle-shell portado a OpenCode: guarda de comandos destructivos, piso de rutas sensibles
+// y aviso de escritorio al terminar. Lógica de la guarda: copiada de gentle-pi
+// (lib/destructive-command-guard.ts), MIT. Los sonidos viven en el pack nativo "venjix"
+// (tui-plugins/gentle-sounds.ts; se activa con OPENCODE_VENJIX_SOUNDS=1).
 import type { Plugin } from "@opencode-ai/plugin"
 import { recognizeDestructiveCommands } from "../lib/destructive-command-guard.ts"
-import { spawn } from "node:child_process"
-import { existsSync } from "node:fs"
-import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
-
-const SOUNDS_ENABLED = process.env.OPENCODE_VENJIX_SOUNDS === "1"
-const SOUNDS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "assets", "sounds")
-
-// Reproduce un tono sin bloquear: prueba reproductores en orden y sigue con el siguiente
-// si el anterior no existe. Sin reproductor disponible, se ignora en silencio.
-function playSound(name: "success" | "error" | "attention") {
-  if (!SOUNDS_ENABLED) return
-  const file = join(SOUNDS_DIR, `${name}.wav`)
-  if (!existsSync(file)) return
-  const candidates: [string, string[]][] =
-    process.platform === "darwin"
-      ? [["afplay", [file]]]
-      : [
-          ["paplay", [file]],
-          ["pw-play", [file]],
-          ["aplay", ["-q", file]],
-        ]
-  const tryNext = (index: number) => {
-    const candidate = candidates[index]
-    if (!candidate) return
-    const child = spawn(candidate[0], candidate[1], { stdio: "ignore", detached: true })
-    child.on("error", () => tryNext(index + 1))
-    child.unref()
-  }
-  tryNext(0)
-}
 
 // Rutas sensibles: piso inviolable para todos los agentes (incluido venjix-auto, que se
 // salta las preguntas de permiso). Leer o escribir aquí se bloquea siempre.
@@ -86,14 +56,9 @@ export const GentleShellPlugin: Plugin = async ({ $ }) => {
         )
       }
     },
-    // Notificación de escritorio al terminar y sonidos opcionales: fin de tarea (success),
-    // error de sesión (error) y petición de permiso o pregunta (attention).
+    // Notificación de escritorio cuando la sesión queda inactiva (tarea terminada).
     event: async ({ event }) => {
-      const type: string = event.type
-      if (type === "session.idle") playSound("success")
-      else if (type === "session.error") playSound("error")
-      else if (type === "permission.asked" || type === "question.asked") playSound("attention")
-      if (type !== "session.idle") return
+      if (event.type !== "session.idle") return
       await $`notify-send -a opencode-venjix "OpenCode" "Tarea terminada"`.nothrow().quiet()
     },
   }

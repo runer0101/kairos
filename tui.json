@@ -2,7 +2,8 @@
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     "opencode-subagent-statusline",
-    "./tui-plugins/gentle-logo.tsx"
+    "./tui-plugins/gentle-logo.tsx",
+    "./tui-plugins/gentle-sounds.ts"
   ],
   "theme": "gentleman-venjix"
 }

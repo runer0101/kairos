@@ -71,6 +71,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T19 — Separación local/público (elegida por el usuario, después del plan) · Criterio: clon de publicación aparte con origin a GitHub, repo local sin remoto (imposible push accidental) y script de publicación que verifica privacidad antes de subir · Prueba: primer push al remoto con CI verde + `publicar-opencode-venjix.sh` en seco (hashes reescritos después, ver T20)
 - [x] T20 — Historia limpia y repositorio público (elegida por el usuario, después del plan) · Criterio: ningún commit con rutas de la máquina ni correos; repositorio público; README profesional · Prueba: escaneo de los 47 commits de `main` + `gh repo view`
 - [x] T21 — Licencia MIT y README final (pedida por el usuario, después del plan) · Criterio: `LICENSE` MIT en la raíz, badge de licencia y sección de créditos coherente; README con pasada profesional (contribuir, estado, correcciones) · Prueba: `pnpm test` + revisión del README
+- [x] T22 — Visual nativo: pack de sonidos y pie de inicio (elegida por el usuario, después del plan) · Criterio: los tonos se integran con el sistema de atención nativo de OpenCode (pack `venjix`) y la pantalla de inicio muestra un pie con atajos · Prueba: `pnpm test` + smoke de TUI
 
 ## Evidencia de verificación
 
@@ -91,6 +92,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T19: repo local sin remoto (imposible un push accidental desde la máquina); clon de publicación aparte con `origin` a GitHub; script `publicar-opencode-venjix.sh` (fuera de ambos repos) que exige árbol limpio, corre la prueba de privacidad y exporta solo archivos versionados antes de commitear y subir. Verificado en seco ("al día") y con el primer push real (después reescrito por T20) que dejó el CI verde.
 - T20: reescritura completa de la historia (47 commits) reemplazando `/home/runer` por `$HOME` en todo el contenido; verificado: 0 ocurrencias en todo `main` y solo queda el usuario público `runer0101`; force push del clon de publicación; visibilidad del repositorio cambiada a pública; README reestructurado (badge de CI, índice, logo ASCII, agradecimientos); refs de respaldo locales purgadas y objetos antiguos recolectados con `git gc` (local y clon público).
 - T21: `LICENSE` MIT (© 2026 runer0101) en la raíz; README con badge de licencia y de Node, nota de estado activo, sección «Contribuir», corrección de «Qué no incluye» (los sonidos sí están) y créditos actualizados; la nota de licencia sin definir quedó retirada. `pnpm test` → 56 tests, 52 pass, 4 skipped, 0 fail.
+- T22: `tui-plugins/gentle-sounds.ts` registra el pack nativo `venjix` (done y subagent_done → `success`, error → `error`, permission y question → `attention`) con activación persistente vía `OPENCODE_VENJIX_SOUNDS=1`; el plugin de servidor deja de reproducir sonidos por su cuenta (guardas y aviso de escritorio siguen igual); el logo muestra bajo el arco la firma y los atajos (el slot `home_footer` no renderiza en OpenCode 1.18; se descartó); README actualizado con una fila de diagnóstico para el aviso interno `background dependency install failed` (OpenCode intenta npm en un proyecto pnpm; los plugins cargan igual). `pnpm test` → 57 tests, 53 pass, 4 skipped, 0 fail; smoke de TUI con el arte y los atajos visibles.
 
 ## Progreso
 
@@ -111,6 +113,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T8/T19: CI en GitHub (primer run verde) y separación local/público (clon de publicación con origin, local sin remoto, script con verificación de privacidad); primer push al remoto tras reescribir la autoría de los 27 commits pendientes a la identidad noreply (hashes luego reescritos por T20).
 - 2026-10-15 — T20 (pedido del usuario): historia completa sin rutas de la máquina (47 commits reescritos), force push, repositorio público y README profesional.
 - 2026-10-15 — T21 (pedido del usuario): licencia MIT y pasada profesional final del README.
+- 2026-10-15 — T22 (pedido del usuario): sonidos integrados con el sistema nativo de OpenCode (pack `venjix`) y pie de la pantalla de inicio con atajos.
 
 ## Siguiente paso
 

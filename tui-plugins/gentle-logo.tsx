@@ -87,6 +87,8 @@ const Logo = () => {
         <text fg={color}>{line}</text>
       ))}
       <text fg={ARCH_BLUE_TOP}>{LOGO_TEXT}</text>
+      <text> </text>
+      <text fg={ARCH_BLUE_BOT}>Tab: perfiles · ctrl+p: comandos · /gentle-doctor: diagnóstico</text>
     </box>
   )
 }
