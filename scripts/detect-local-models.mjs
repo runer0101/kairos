@@ -30,7 +30,8 @@ const DEFAULT_RUNTIMES = [
 ];
 
 function loadCustomRuntimes() {
-    const file = join(ROOT, "local-providers.json");
+    // OPENCODE_VENJIX_LOCAL_PROVIDERS permite usar otro archivo (pruebas o varias configuraciones).
+    const file = process.env.OPENCODE_VENJIX_LOCAL_PROVIDERS || join(ROOT, "local-providers.json");
     if (!existsSync(file)) return [];
     try {
         const list = JSON.parse(readFileSync(file, "utf8"));
