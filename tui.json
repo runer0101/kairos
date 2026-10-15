@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": [
+    "opencode-subagent-statusline",
+    "$HOME/Projects/github_proyectos/entorno/opencode-venjix/tui-plugins/gentle-logo.tsx"
+  ],
+  "theme": "gentleman"
+}
