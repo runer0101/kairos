@@ -1,75 +1,107 @@
 # opencode-venjix
 
-Configuración de [OpenCode](https://opencode.ai) con las herramientas de **gentle-shell** portadas a su base, con un aspecto visual propio (tema `gentleman` en tonos azules, logo Arch y statusline).
+OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles de agente, modos de permiso, flujo ODD con documento de feature, revisión por lentes, juicio adversarial, verificación independiente, memoria persistente y detección automática de IA local. Incluye un tema y un logo propios.
 
-El proyecto no es un programa independiente: es un conjunto de agentes, comandos, skills, un plugin, un tema y scripts que se cargan sobre OpenCode mediante variables de entorno (`OPENCODE_CONFIG`, `OPENCODE_CONFIG_DIR`, `OPENCODE_TUI_CONFIG`).
+## Qué incluye
 
-## Características
-
-- **Orchestrator** (`gentle-orchestrator`): agente primario que coordina subagentes en lugar de ejecutar trabajo pesado en línea.
-- **Subagentes especializados**: exploración, verificación, implementación, revisión (legibilidad, fiabilidad, resiliencia, riesgo) y jurado de *Judgment Day*.
-- **Guarda de comandos destructivos**: un plugin bloquea comandos bash reconocibles como destructivos (`rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE`, `DELETE` sin `WHERE`).
-- **Memoria persistente** mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
-- **Modelo gratuito por defecto** de OpenCode (`opencode/big-pickle`). No requiere instalar nada más.
-- **IA local opcional**: si tienes Ollama, LM Studio, llama.cpp o vLLM activos, opencode-venjix detecta sus modelos al abrir y los muestra como proveedores locales. Si no hay ninguno, no pasa nada.
-- **Sincronización** con la versión instalada de gentle-shell: al abrir, el launcher detecta cambios y regenera los componentes derivados sin tocar el visual ni las skills propias.
-- **Tema y logo propios**, con colores de acento azules.
+- **Perfiles de agente** (se cambian con `Tab`): `venjix` (equilibrado), `venjix-deep` (modelo profundo) y `venjix-yolo` (autónomo).
+- **Modos de permiso**: normal por defecto; autónomo con el perfil `venjix-yolo` o con `opencode-venjix --auto`. La guarda de comandos destructivos siempre está activa.
+- **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
+- **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
+- **Memoria** persistente mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
+- **IA gratuita por defecto** (`opencode/big-pickle`). Si tienes Ollama, LM Studio, llama.cpp o vLLM activos, sus modelos aparecen automáticamente.
+- **Calidad de código**: servidores LSP, formateadores y `snapshot` para deshacer cambios.
+- **Sincronización** con la versión instalada de gentle-shell.
 
 ## Requisitos
 
-| Componente | Versión probada | Para qué |
+| Componente | Versión | Cómo se obtiene |
 |---|---|---|
-| OpenCode | 1.18.35 | Base sobre la que corre todo |
-| Node.js | 26 | Script de sincronización y dependencias del plugin |
-| gentle-shell | 4.2.0 | Fuente de agentes y guardas; opcional, solo para sincronizar |
-| engram | 3.4.0 | Memoria persistente (MCP); viene con gentle-shell |
-| notify-send | — | Notificación de escritorio al terminar; opcional |
+| Linux (x86_64 o arm64, glibc) | — | Cualquier distribución con glibc |
+| `curl` o `wget`, `tar`, `gzip`, `sha256sum`, `git` | — | Gestor de paquetes de tu distribución |
+| Node.js | 22 o superior (probado con 26) | `install.sh` lo instala si falta |
+| pnpm | 11.22.0 | `install.sh` lo instala si falta |
+| OpenCode | 1.18.x | `install.sh` usa el instalador oficial si falta |
+| engram | 3.4.0 | `install.sh` descarga el binario oficial |
+| Ollama u otro runtime local | opcional | Se detecta al abrir, si está activo |
 
-## Instalación
+Alpine Linux (musl) no está soportado: Node.js y los binarios de OpenCode se distribuyen para glibc.
 
-```bash
-git clone https://github.com/runer0101/opencode-venjix.git
-cd opencode-venjix
-npm install
-
-# 1. Lanzador en el PATH
-ln -s "$PWD/bin/opencode-venjix" ~/.local/bin/opencode-venjix
-
-# 2. Tema: OpenCode busca los temas en ~/.config/opencode/themes
-mkdir -p ~/.config/opencode/themes
-ln -sf "$PWD/themes/gentleman.json" ~/.config/opencode/themes/gentleman.json
-```
-
-### Ajustes por máquina
-
-Algunos valores dependen de la máquina y deben revisarse tras clonar:
-
-- `tui.json`: ruta absoluta a `tui-plugins/gentle-logo.tsx`.
-- `opencode.json`: ruta absoluta al binario de `engram` (`mcp.engram.command`).
-- `opencode.json`: modelo por defecto (`model`, `small_model`). Los modelos locales no se configuran aquí: se detectan.
-- `local-providers.json` (opcional): endpoints propios de IA local (ver sección *IA local*).
-- `agents/` y `gentle-assets/`: contienen la ruta local del repositorio. El launcher los regenera al abrir la primera vez (no hay marcador de sincronización tras clonar), así que no hace falta editarlos.
-
-## Uso
+## Instalación rápida
 
 ```bash
-opencode-venjix                 # abre OpenCode con esta configuración
-opencode-venjix --where         # muestra la carpeta de configuración
+git clone https://github.com/runer0101/opencode-venjix.git ~/.config/opencode-venjix
+cd ~/.config/opencode-venjix
+./install.sh
 ```
 
-Comandos disponibles dentro de OpenCode:
+El instalador:
+
+1. Comprueba el sistema y las herramientas básicas.
+2. Instala Node.js 24.21.0 si falta, desde nodejs.org, verificando su SHA-256.
+3. Instala pnpm 11.22.0 si falta, desde GitHub, verificando su SHA-256. No toca el pnpm del usuario si ya tiene esa versión.
+4. Instala OpenCode si falta (instalador oficial de opencode.ai).
+5. Descarga engram 3.4.0 si falta, verificando su SHA-256.
+6. Instala las dependencias con `pnpm install --frozen-lockfile`.
+7. Enlaza el lanzador en `~/.local/bin/opencode-venjix` y el tema en `~/.config/opencode/themes/`.
+8. Ajusta las rutas locales de `tui.json` y `opencode.json`.
+9. Sincroniza con gentle-shell si está instalado.
+10. Verifica que OpenCode carga los perfiles antes de terminar.
+
+No instala Ollama ni descarga modelos. Es idempotente: puedes ejecutarlo de nuevo para reparar la instalación.
+
+Si `~/.local/bin` no está en tu `PATH`, añade `export PATH="$HOME/.local/bin:$PATH"` a tu shell.
+
+## Perfiles de agente
+
+Pulsa `Tab` para cambiar de perfil durante una sesión.
+
+| Perfil | Modelo | Permisos | Para qué |
+|---|---|---|---|
+| `venjix` (por defecto) | `opencode/big-pickle` (gratuito) | Normales | Trabajo diario |
+| `venjix-deep` | `opencode-go/deepseek-v4-pro` | Normales | Tareas difíciles; requiere suscripción OpenCode Go |
+| `venjix-yolo` | `opencode/big-pickle` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
+
+Los subagentes sin modelo propio heredan el modelo del perfil activo. Hay dos excepciones definidas en `opencode.json`:
+
+- `gentle-ai-explore` usa el modelo gratuito y tiene 15 pasos como máximo, para acotar el costo de la exploración.
+- `jd-judge-b` usa `opencode/nemotron-3-ultra-free`, distinto del modelo de `jd-judge-a`, para que el juicio tenga criterio independiente.
+
+Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar los prompts.
+
+## Modos de permiso
+
+| Modo | Cómo se activa | Qué pasa |
+|---|---|---|
+| Normal | Por defecto | Edición y comandos de bash piden confirmación. Las lecturas habituales (`ls`, `git status`, `git diff`, `grep`…) no. |
+| Autónomo | Perfil `venjix-yolo` | No pide confirmación. La guarda de comandos destructivos sigue bloqueando. |
+| Auto (OpenCode) | `opencode-venjix --auto` | Aprueba lo que pediría confirmación. Las reglas `deny` siguen aplicando. |
+
+La guarda de comandos destructivos bloquea, en todos los modos, formas reconocibles como `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE` y `DELETE` sin `WHERE`. Es un filtro heurístico, no un sandbox.
+
+## Comandos
 
 | Comando | Descripción |
 |---|---|
-| `/gentle-doctor` | Diagnóstico de la instalación: agentes, comandos, plugins, skills y estado de sincronización |
-| `/gentle-models` | Lista los modelos disponibles |
-| `/gentle-status` | Cambios del repositorio actual y siguiente paso |
+| `/gentle-doctor` | Diagnóstico: agentes, comandos, plugins, skills y sincronización |
+| `/gentle-models` | Modelos disponibles |
+| `/gentle-status` | Cambios del repositorio y siguiente paso |
+| `/gentle-usage` | Tokens y costo (`opencode stats`) |
+| `/odd-task <nombre>` | Crea `odd/tasks/<nombre>.md` en el proyecto a partir de la plantilla ODD |
+| `/review` | Revisa el cambio actual con las lentes que correspondan por tamaño y riesgo |
+| `/judge [alcance]` | Judgment Day: dos jueces ciegos con modelos distintos y corrección acotada |
+| `/verify` | Verificación independiente con evidencia observada |
 
-El agente por defecto es `gentle-orchestrator`. Con `Tab` se cambia entre agentes.
+### Flujo recomendado
+
+1. **Cambio pequeño y entendido**: pídelo directamente en `venjix`. No hace falta documento.
+2. **Tarea grande**: `/odd-task <nombre>` antes de tocar código. Implementa tarea por tarea.
+3. **Antes de entregar**: `/review`. Si el cambio toca seguridad, datos o dependencias, `/judge`.
+4. **Para dar algo por terminado**: `/verify`. Nada se considera hecho sin salida observada.
 
 ## IA local (opcional)
 
-El instalador **no instala ni descarga modelos locales**. Si quieres usar IA en tu propia máquina, instala el runtime que prefieras; opencode-venjix lo detecta al abrir (cada arranque, sin configurar nada):
+El instalador no instala ni descarga modelos locales. Si instalas un runtime, opencode-venjix lo detecta al abrir, sin configurar nada:
 
 | Runtime | Puerto por defecto | Proveedor en OpenCode |
 |---|---|---|
@@ -78,7 +110,7 @@ El instalador **no instala ni descarga modelos locales**. Si quieres usar IA en 
 | llama.cpp (`llama-server`) | 8080 | `local-llamacpp` |
 | vLLM | 8000 | `local-vllm` |
 
-Cualquier servidor compatible con OpenAI que responda en `GET /v1/models` se puede añadir con un archivo `local-providers.json` en la raíz del repo (no se versiona):
+Cualquier servidor compatible con OpenAI que responda en `GET /v1/models` puede añadirse en `local-providers.json` (no se versiona), con un id que empiece por `local-`:
 
 ```json
 [
@@ -88,85 +120,114 @@ Cualquier servidor compatible con OpenAI que responda en `GET /v1/models` se pue
 
 Reglas:
 
-- El id debe empezar por `local-` para no mezclarse con proveedores de la configuración global.
-- Los modelos aparecen en el selector de modelos de OpenCode (`/models`). El modelo por defecto no cambia: sigue siendo el gratuito de `opencode.json`.
+- Los modelos aparecen en el selector de modelos (`/models`). El modelo por defecto no cambia.
 - Los modelos de embeddings se omiten.
-- Las capacidades (herramientas, contexto) son supuestas: OpenAI-compatible no las informa. Si un modelo no usa herramientas bien, no lo selecciones para agentes.
+- Las capacidades (herramientas, contexto) son supuestas, porque OpenAI-compatible no las informa. No uses un modelo local que no maneje herramientas bien en los perfiles con agentes.
 - Si el runtime no está activo, se ignora sin error.
 
-Comprobar qué detecta el lanzador:
-
-```bash
-node scripts/detect-local-models.mjs
-```
+Para ver qué detecta el lanzador: `node scripts/detect-local-models.mjs`.
 
 ## Actualizaciones de gentle-shell
 
-Al abrir `opencode-venjix`, el launcher ejecuta `scripts/sync-gentle-shell.mjs --if-changed`:
+Al abrir `opencode-venjix`, el lanzador compara la versión instalada de gentle-shell con la última sincronizada. Si cambió, regenera los componentes derivados: subagentes, prompts del orquestador, guarda de comandos y las skills `gentle-ai` y `rdd-defect-workflow`.
 
-- Si la versión instalada de gentle-shell no cambió desde la última sincronización, no hace nada.
-- Si cambió, regenera los agentes, las referencias del orchestrator, la guarda de comandos y las skills `gentle-ai` y `rdd-defect-workflow`.
-- Todo se genera en un directorio temporal y se valida antes de escribir. Si gentle-shell cambió una API que el port usa, no se modifica nada y el launcher abre con la versión anterior.
-
-Comandos relacionados:
+Todo se genera en un directorio temporal y se valida antes de escribir. Si gentle-shell cambió algo que el port usa, no se modifica nada y el lanzador abre con la versión anterior.
 
 ```bash
 node scripts/sync-gentle-shell.mjs --force       # sincronizar ahora
 OPENCODE_VENJIX_NO_SYNC=1 opencode-venjix        # abrir sin sincronizar
 ```
 
-> **No uses `gentle-sync` sobre este directorio.** Esa herramienta reemplaza el directorio entero con la salida de gentle-ai y borraría este proyecto. Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#actualizaciones).
+La sincronización no cambia `opencode.json`, el tema, el logo ni las skills propias. Si una versión nueva de gentle-shell requiere cambios de configuración, hay que aplicarlos a mano.
 
-La sincronización no cambia `opencode.json`. Si una versión nueva de gentle-shell requiere cambios de configuración (MCPs, modelos, permisos), hay que aplicarlos a mano.
+> **No uses `gentle-sync` sobre este directorio.** Reemplaza el directorio entero con la salida de gentle-ai y borraría esta instalación. La copia local de `gentle-sync` lo bloquea; `GENTLE_SYNC_FORCE=1` lo salta.
+
+## Dependencias y cadena de suministro
+
+Las dependencias se gestionan con pnpm 11.22.0 (`packageManager` en `package.json`). La configuración está en `pnpm-workspace.yaml`:
+
+| Ajuste | Efecto |
+|---|---|
+| `minimumReleaseAge: 1440` | Una versión recién publicada no se instala hasta pasar 24 horas. Da tiempo a que se detecten paquetes comprometidos. |
+| `trustPolicy: no-downgrade` | Falla si una versión tiene menos evidencia de confianza que las anteriores. |
+| `trustPolicyIgnoreAfter: 525600` | Omite esa comprobación en paquetes publicados hace más de un año, muchos sin procedencia. Lo reciente sigue verificándose. |
+| `trustPolicyExclude: effect@4.0.0-beta.74` | Excepción estrecha y verificada: procedencia SLSA firmada, repositorio `Effect-TS/effect-smol`. Dependencia de `@opencode-ai/plugin`. |
+| `blockExoticSubdeps: true` | Las dependencias transitivas solo pueden venir del registro, no de git ni de URLs. |
+| `strictDepBuilds: true` + `allowBuilds` | Los scripts de instalación están bloqueados salvo decisión explícita. `msgpackr-extract` (addon nativo opcional) está desactivado a propósito. |
+
+El lockfile (`pnpm-lock.yaml`) se instala con `--frozen-lockfile`: si no coincide con `package.json`, la instalación falla en lugar de cambiar versiones en silencio.
+
+El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh`. El de pnpm también tiene atestación de procedencia de GitHub (`gh attestation verify <archivo> -R pnpm/pnpm`).
+
+## Pruebas
+
+```bash
+pnpm test                           # 30 pruebas: configuración, agentes, comandos, detector y guarda
+OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo gratuito
+```
+
+Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales.
 
 ## Estructura del repositorio
 
 ```
 opencode-venjix/
-├── bin/opencode-venjix            Lanzador: fija las variables de OpenCode y sincroniza
-├── opencode.json                  Modelo gratuito por defecto, MCPs, agente, permisos
-├── scripts/detect-local-models.mjs  Detecta runtimes de IA local al abrir
-├── tui.json                       Tema, logo y statusline de la TUI
-├── agents/                        Orchestrator y subagentes (generados)
-├── gentle-assets/                 Referencias perezosas del orchestrator (generadas)
-├── commands/                      Comandos /gentle-*
-├── plugins/gentle-shell.ts        Guarda de comandos destructivos y notificación
-├── lib/destructive-command-guard.ts   Lógica de la guarda (copia de gentle-pi)
-├── skills/                        Skills del entorno (33)
-├── themes/gentleman.json          Tema de colores
-├── tui-plugins/gentle-logo.tsx    Logo Arch para la TUI
-├── scripts/sync-gentle-shell.mjs  Sincronización con gentle-shell
-├── docs/ARCHITECTURE.md           Arquitectura y decisiones de diseño
-├── LICENSE-gentle-shell           Licencia MIT de los componentes derivados
-└── package.json                   Dependencias de plugins de OpenCode
+├── bin/opencode-venjix              Lanzador: fija variables, detecta IA local, sincroniza
+├── install.sh                       Instalador para Linux
+├── opencode.json                    Perfiles, modo normal, modelo gratuito, MCP, LSP y formateo
+├── tui.json                         Tema, logo y statusline
+├── prompts/orchestrator.md          Prompt común de los perfiles (generado)
+├── agents/                          Subagentes de gentle-shell (generados)
+├── gentle-assets/                   Referencias perezosas del orquestador (generadas)
+├── commands/                        Comandos /gentle-*, /odd-task, /review, /judge, /verify
+├── odd/                             Plantilla y guía del flujo ODD
+├── plugins/gentle-shell.ts          Guarda de comandos destructivos y notificación al terminar
+├── lib/destructive-command-guard.ts Lógica de la guarda (copia de gentle-pi)
+├── scripts/
+│   ├── detect-local-models.mjs      Detección de runtimes de IA local
+│   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
+├── skills/                          Skills (33)
+├── themes/gentleman.json            Tema de colores
+├── tui-plugins/gentle-logo.tsx      Logo para la TUI
+├── tests/                           Pruebas (node:test)
+├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
+├── pnpm-workspace.yaml              Ajustes de pnpm y políticas de seguridad
+├── pnpm-lock.yaml                   Versiones fijadas
+└── LICENSE-gentle-shell             Licencia MIT de los componentes derivados
 ```
 
 Detalles de cada componente, el mapeo de Pi a OpenCode y el flujo de actualización están en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Qué no incluye
 
-La TUI propia de gentle-shell (barra fullscreen, animaciones, paneles de uso, regiones de puntero, sonidos) depende de la API de Pi y no existe en OpenCode. No se portó, y tampoco los comandos `/gentle:*` que dependían de ella.
+Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi, y no se portaron:
+
+- La barra fullscreen, paneles de uso, animaciones, regiones de puntero y sonidos de la TUI de Pi.
+- La autoridad nativa de revisión (RDD), Herdr y el clasificador de la aprobación automática de Pi.
+- Los comandos `/gentle:*` que dependían de esas piezas.
 
 ## Seguridad
 
-- El repositorio no contiene claves ni credenciales. Las claves de proveedores se guardan fuera del repo (`~/.local/share/opencode/auth.json`, `~/.gentle-shell/agent/auth.json`); no las subas.
-- `.gitignore` excluye `node_modules/`, archivos de respaldo, `.env` y el marcador local de sincronización.
-- La guarda de comandos destructivos es heurística: reconoce formas ejecutables comunes, no es un sandbox. Un comando ofuscado puede pasarla.
-- La configuración usa `"permission": "allow"`, por lo que las herramientas no piden confirmación por defecto. Ajústalo en `opencode.json` si quieres más control.
+- El repositorio no contiene claves ni credenciales. Las claves de proveedores se guardan fuera del repo (`~/.local/share/opencode/auth.json`).
+- `.gitignore` excluye `node_modules/`, respaldos, `.env`, `auth.json`, claves privadas y el marcador local de sincronización.
+- La guarda de comandos destructivos es heurística: reconoce formas comunes, no es un sandbox.
+- Los perfiles con permisos amplios (`venjix-yolo`, `--auto`) deben usarse solo en repositorios de confianza.
 - Antes de compartir una sesión o un log, revisa que no incluya rutas o datos personales.
 
 ## Solución de problemas
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
-| `falta .../opencode.json` | Repositorio incompleto o symlink roto | Revisa la ruta real con `opencode-venjix --where` |
-| El tema no cambia | El tema no está enlazado en `~/.config/opencode/themes` | Repite el paso 2 de la instalación |
-| No aparece el logo | Ruta absoluta de `tui.json` incorrecta | Corrige la ruta en `tui.json` |
-| `no se pudo sincronizar con gentle-shell` | gentle-shell no está instalado o cambió una API usada por el port | Ejecuta el script a mano con `--force` para ver el detalle |
-| `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | Ejecuta `node scripts/sync-gentle-shell.mjs --force` |
+| `falta .../opencode.json` | Repositorio incompleto o enlace roto | `opencode-venjix --where` muestra la ruta real |
+| El tema no cambia | Enlace de tema ausente | Vuelve a ejecutar `./install.sh` |
+| `no se pudo sincronizar con gentle-shell` | gentle-shell no instalado o con una API distinta | `node scripts/sync-gentle-shell.mjs --force` para ver el detalle |
+| `ERR_PNPM_TRUST_DOWNGRADE` al instalar | Un paquete reciente perdió evidencia de confianza | No lo ignores: revisa el paquete con `npm audit signatures` y, si es legítimo, añade una excepción estrecha en `trustPolicyExclude` |
+| `ERR_PNPM_IGNORED_BUILDS` | Un script de instalación sin decisión | Decide en `allowBuilds` de `pnpm-workspace.yaml` |
+| El modelo gratuito no responde | Sin red o límite del proveedor | `opencode-venjix run -m opencode/big-pickle "ok"` para diagnosticar |
+| `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
 
 ## Créditos y licencia
 
-- Los agentes, la guarda de comandos y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
+- Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
 - Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai antes de este portado. Revisa su licencia de origen antes de redistribuirlas.
 - La licencia de este repositorio aún no está definida por el autor.

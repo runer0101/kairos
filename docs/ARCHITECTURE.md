@@ -28,7 +28,7 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 
 | Componente en gentle-shell | Equivalente en opencode-venjix | Notas |
 |---|---|---|
-| `assets/orchestrator.md` | `agents/gentle-orchestrator.md` (agente `primary`) | Placeholders resueltos a la ruta local de `gentle-assets/` |
+| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `venjix`, `venjix-deep`, `venjix-yolo` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
 | `assets/orchestrator-*.md`, `chains/` | `gentle-assets/` | Se leen bajo demanda, igual que en Pi |
 | `assets/agents/*.md` | `agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
@@ -81,6 +81,41 @@ Dos decisiones de diseño:
 
 - **IDs propios**: los proveedores detectados usan IDs `local-*`. Si usaran `ollama`, se fusionarían con el proveedor `ollama` de la configuración global del usuario (`~/.config/opencode/opencode.jsonc`), que puede declarar modelos que ya no existen.
 - **`disabled_providers: ["ollama"]`** en `opencode.json`: oculta ese proveedor global. El `ollama-cloud` global se conserva porque son modelos de nube, no locales.
+
+## Perfiles, modos de permiso y comandos
+
+Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan con lo que OpenCode ya ofrece:
+
+| Pieza | Dónde | Qué hace |
+|---|---|---|
+| Agentes primarios | `opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`. |
+| Prompt común | `prompts/orchestrator.md` | Lo referencia cada perfil con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell. |
+| Herencia de modelo | OpenCode | Un subagente sin `model` usa el del agente que lo invoca. Así el perfil activo decide el modelo de todo el trabajo. |
+| Excepciones de subagentes | `opencode.json` | `gentle-ai-explore` (modelo gratuito, 15 pasos) y `jd-judge-b` (modelo distinto al de `jd-judge-a`). |
+
+Permisos:
+
+- **Normal** (global): lectura, búsqueda y subagentes permitidos. Edición y bash piden confirmación. Un conjunto de lecturas habituales de bash está permitido. El comodín `*` va primero, porque la última regla que coincide gana.
+- **Autónomo** (`venjix-yolo`): `permission: "allow"` a nivel de agente. Como la última regla que coincide gana, sobrescribe las de `ask`.
+- **Auto de OpenCode**: `opencode-venjix --auto` pasa el flag al binario. Respeta los `deny`.
+- **Guarda de comandos**: `plugins/gentle-shell.ts` la aplica en `tool.execute.before`, en todos los modos.
+
+Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto real del repositorio (diff, estado, estadísticas) y delega en subagentes con la herramienta `task`. `/judge` sigue las reglas de la skill `judgment-day`: jueces ciegos en paralelo, corrección solo de hallazgos confirmados por ambos y como máximo dos rondas. `/review` elige las lentes `review-*` por tamaño y riesgo, con la tabla de gentle-shell.
+
+## Dependencias y cadena de suministro
+
+- Gestor: pnpm 11.22.0, fijado en `package.json` (`packageManager`) y en `install.sh`. `install.sh` usa el pnpm del sistema solo si es esa versión exacta; si no, instala la fijada en su propia carpeta.
+- Instalación: `pnpm install --frozen-lockfile`. Un lockfile que no coincide con `package.json` detiene la instalación.
+- Políticas en `pnpm-workspace.yaml`: `minimumReleaseAge` (24 h), `trustPolicy: no-downgrade` con `trustPolicyIgnoreAfter` (un año) y una excepción estrecha verificada. `blockExoticSubdeps`, `strictDepBuilds` y `allowBuilds` controlan los scripts de instalación.
+- Verificación de descargas: SHA-256 fijado para Node, pnpm y engram. El binario de pnpm además tiene atestación de procedencia de GitHub.
+- Decisiones documentadas: la excepción de `effect@4.0.0-beta.74` se comprobó con `npm audit signatures` (firma y SLSA válidos, repositorio `Effect-TS/effect-smol`). `msgpackr-extract` queda desactivado porque es un addon nativo opcional.
+
+## Pruebas
+
+- `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), y la guarda de comandos destructivos.
+- `OPENCODE_VENJIX_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo gratuito.
+- Las pruebas que consultan servicios usan `OPENCODE_VENJIX_LOCAL_PROVIDERS` para apuntar a servidores de prueba, y no asumen qué runtimes locales hay instalados.
+- Lección registrada: la salida de `opencode agent list` por tubería puede truncarse al cerrar el proceso. Por eso las pruebas y `install.sh` escriben la salida a un archivo.
 
 ## Ciclo de vida de los archivos
 
