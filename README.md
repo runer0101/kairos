@@ -291,7 +291,7 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 | `ERR_PNPM_IGNORED_BUILDS` | Un script de instalación sin decisión | Decide en `allowBuilds` de `pnpm-workspace.yaml` |
 | El modelo no responde | Sin red, sin suscripción OpenCode Go o límite del proveedor | `opencode-venjix run "ok"` para diagnosticar |
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
-| Aviso `background dependency install failed` al abrir | OpenCode intenta instalar dependencias de plugins con npm en un proyecto gestionado con pnpm (limitación de OpenCode; los plugins cargan igual) | Ignóralo: las dependencias ya están instaladas con `pnpm install` |
+| Aviso `background dependency install failed` o arranque lento | npm (que OpenCode ejecuta sobre el directorio de config) crashea al recorrer el layout de symlinks de pnpm | Ya prevenido: el repo usa `nodeLinker: hoisted`; si reaparece, ejecuta `pnpm install` |
 
 ## Contribuir
 

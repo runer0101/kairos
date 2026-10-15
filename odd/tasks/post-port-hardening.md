@@ -72,6 +72,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T20 — Historia limpia y repositorio público (elegida por el usuario, después del plan) · Criterio: ningún commit con rutas de la máquina ni correos; repositorio público; README profesional · Prueba: escaneo de los 47 commits de `main` + `gh repo view`
 - [x] T21 — Licencia MIT y README final (pedida por el usuario, después del plan) · Criterio: `LICENSE` MIT en la raíz, badge de licencia y sección de créditos coherente; README con pasada profesional (contribuir, estado, correcciones) · Prueba: `pnpm test` + revisión del README
 - [x] T22 — Visual nativo: pack de sonidos y pie de inicio (elegida por el usuario, después del plan) · Criterio: los tonos se integran con el sistema de atención nativo de OpenCode (pack `venjix`) y la pantalla de inicio muestra un pie con atajos · Prueba: `pnpm test` + smoke de TUI
+- [x] T23 — Arranque rápido de `ov` (reportado por el usuario) · Criterio: identificar la causa del arranque lento y corregirla · Prueba: TTFD oficial antes/después (10.005 ms → 4.889 ms)
 
 ## Evidencia de verificación
 
@@ -93,6 +94,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T20: reescritura completa de la historia (47 commits) reemplazando `/home/runer` por `$HOME` en todo el contenido; verificado: 0 ocurrencias en todo `main` y solo queda el usuario público `runer0101`; force push del clon de publicación; visibilidad del repositorio cambiada a pública; README reestructurado (badge de CI, índice, logo ASCII, agradecimientos); refs de respaldo locales purgadas y objetos antiguos recolectados con `git gc` (local y clon público).
 - T21: `LICENSE` MIT (© 2026 runer0101) en la raíz; README con badge de licencia y de Node, nota de estado activo, sección «Contribuir», corrección de «Qué no incluye» (los sonidos sí están) y créditos actualizados; la nota de licencia sin definir quedó retirada. `pnpm test` → 56 tests, 52 pass, 4 skipped, 0 fail.
 - T22: `tui-plugins/gentle-sounds.ts` registra el pack nativo `venjix` (done y subagent_done → `success`, error → `error`, permission y question → `attention`) con activación persistente vía `OPENCODE_VENJIX_SOUNDS=1`; el plugin de servidor deja de reproducir sonidos por su cuenta (guardas y aviso de escritorio siguen igual); el logo muestra bajo el arco la firma y los atajos (el slot `home_footer` no renderiza en OpenCode 1.18; se descartó); README actualizado con una fila de diagnóstico para el aviso interno `background dependency install failed` (OpenCode intenta npm en un proyecto pnpm; los plugins cargan igual). `pnpm test` → 57 tests, 53 pass, 4 skipped, 0 fail; smoke de TUI con el arte y los atajos visibles.
+- T23: causa raíz — OpenCode ejecuta npm sobre el directorio de configuración al arrancar (install de `@opencode-ai/plugin`) y npm 12 crashea al recorrer el layout de symlinks de pnpm (arborist `Link.matches` → null; reproducible con `npm install --package-lock-only` en el repo), esperando ~5 s por intento. Fix: `nodeLinker: hoisted` en `pnpm-workspace.yaml`. Verificado: npm ya no crashea, el install deja de fallar (0 avisos nuevos), TTFD oficial 10.005 ms → 4.889 ms y los plugins/atajos siguen renderizando; `pnpm install --frozen-lockfile` reproducible y `pnpm test` → 57/53/0.
 
 ## Progreso
 
@@ -114,6 +116,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T20 (pedido del usuario): historia completa sin rutas de la máquina (47 commits reescritos), force push, repositorio público y README profesional.
 - 2026-10-15 — T21 (pedido del usuario): licencia MIT y pasada profesional final del README.
 - 2026-10-15 — T22 (pedido del usuario): sonidos integrados con el sistema nativo de OpenCode (pack `venjix`) y pie de la pantalla de inicio con atajos.
+- 2026-10-15 — T23 (reportado por el usuario): arranque de `ov` acelerado ~5 s — `nodeLinker: hoisted` para que el install con npm de OpenCode no crashee sobre el layout de pnpm.
 
 ## Siguiente paso
 

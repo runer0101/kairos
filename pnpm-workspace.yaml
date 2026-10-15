@@ -2,6 +2,11 @@
 # pnpm lee estos ajustes desde este archivo (.npmrc solo admite registro y autenticación).
 # Referencia: https://pnpm.io/settings
 
+# Layout npm-compatible (sin symlinks a .pnpm): OpenCode ejecuta npm sobre el directorio
+# de configuración al arrancar y el layout de symlinks de pnpm hace crashear a npm
+# (arborist, "reading 'matches'"); con hoisted el intento no falla ni bloquea el arranque.
+nodeLinker: hoisted
+
 # Las versiones recién publicadas no se instalan hasta pasar 24 h desde su publicación.
 # Así se da tiempo a que se detecten y retiren paquetes comprometidos.
 minimumReleaseAge: 1440
