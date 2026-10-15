@@ -15,6 +15,8 @@
 //   node scripts/sync-gentle-shell.mjs              sincroniza solo si cambió la versión
 //   node scripts/sync-gentle-shell.mjs --force      sincroniza siempre
 //   node scripts/sync-gentle-shell.mjs --if-changed silencioso si ya está al día (lo usa el launcher)
+//   node scripts/sync-gentle-shell.mjs --check      informa si hay cambios pendientes sin escribir nada
+//                                                   (0 = al día, 1 = pendiente; el marcador no cambia)
 //
 // Es transaccional: todo se genera en un directorio temporal y se valida antes de tocar
 // opencode-venjix. Si algo no cuadra (p. ej. gentle-shell cambió una API que usamos), no escribe nada.
@@ -23,7 +25,7 @@ import {
   readFileSync, writeFileSync, readdirSync, mkdirSync, cpSync, existsSync, rmSync,
   mkdtempSync, realpathSync,
 } from "node:fs";
-import { join, basename, dirname } from "node:path";
+import { join, basename, dirname, relative } from "node:path";
 import { tmpdir, homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 
@@ -40,6 +42,7 @@ const BG_POLICY = "Ejecuta tareas en primer plano salvo que el usuario pida lo c
 const argv = new Set(process.argv.slice(2));
 const FORCE = argv.has("--force");
 const IF_CHANGED = argv.has("--if-changed");
+const CHECK = argv.has("--check");
 
 const fail = (msg) => {
   console.error(`sync-gentle-shell: ${msg}`);
@@ -55,7 +58,7 @@ const shellVersion = basename(realpathSync(GS_CURRENT)); // p. ej. 4.2.0-1.2.0
 const version = `${pkg.version}|${shellVersion}`;
 
 const prev = existsSync(MARKER) ? JSON.parse(readFileSync(MARKER, "utf8")) : null;
-if (!FORCE && prev && prev.version === version) {
+if (!FORCE && !CHECK && prev && prev.version === version) {
   if (!IF_CHANGED) console.log(`ya sincronizado: gentle-shell ${shellVersion} (gentle-pi ${pkg.version})`);
   process.exit(0);
 }
@@ -193,6 +196,81 @@ if (!readFileSync(join(stagePrompts, "orchestrator.md"), "utf8").includes("Runti
 if (problems.length) {
   rmSync(STAGE, { recursive: true, force: true });
   fail(`no se sincronizó, nada se modificó:\n  - ${problems.join("\n  - ")}`);
+}
+
+// ---------------------------------------------------------------- modo --check (no escribe)
+// Informa si un sync real cambiaría algo: compara el staging contra el repo y el marcador
+// contra la versión instalada. No escribe ningún archivo ni el marcador.
+if (CHECK) {
+  const differences = [];
+  if (!prev) {
+    differences.push("sin marcador de sincronización (.gentle-shell-sync.json)");
+  } else if (prev.version !== version) {
+    differences.push(
+      `versión: ${prev.gentleShell} (gentle-pi ${prev.gentlePi}) -> ${shellVersion} (gentle-pi ${pkg.version})`,
+    );
+  }
+
+  const walk = (dir) => {
+    const out = [];
+    if (!existsSync(dir)) return out;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, entry.name);
+      if (entry.isDirectory()) out.push(...walk(p));
+      else if (entry.isFile()) out.push(p);
+    }
+    return out;
+  };
+  // Compara un árbol generado contra su destino. wholesale=true: el sync reemplaza el
+  // directorio completo, así que los archivos de más también serían diferencias.
+  const compareDir = (stagedDir, targetDir, label, wholesale = false) => {
+    const seen = new Set();
+    for (const p of walk(stagedDir)) {
+      const rel = relative(stagedDir, p);
+      seen.add(rel);
+      const target = join(targetDir, rel);
+      if (!existsSync(target)) differences.push(`${label}/${rel}: falta`);
+      else if (!readFileSync(target).equals(readFileSync(p))) differences.push(`${label}/${rel}: difiere`);
+    }
+    if (wholesale) {
+      for (const p of walk(targetDir)) {
+        const rel = relative(targetDir, p);
+        if (!seen.has(rel)) differences.push(`${label}/${rel}: sobrante (un sync lo borraría)`);
+      }
+    }
+  };
+  const compareFile = (stagedFile, targetFile, label) => {
+    if (!existsSync(targetFile)) differences.push(`${label}: falta`);
+    else if (!readFileSync(targetFile).equals(readFileSync(stagedFile))) differences.push(`${label}: difiere`);
+  };
+
+  compareDir(stageAgents, join(VENJIX, "agents"), "agents");
+  compareDir(stagePrompts, join(VENJIX, "prompts"), "prompts");
+  compareDir(stageAssets, ASSETS_OUT, "gentle-assets", true);
+  for (const s of MANAGED_SKILLS) {
+    compareDir(join(stageSkills, s), join(VENJIX, "skills", s), `skills/${s}`, true);
+  }
+  compareFile(
+    join(STAGE, "destructive-command-guard.ts"),
+    join(VENJIX, "lib", "destructive-command-guard.ts"),
+    "lib/destructive-command-guard.ts",
+  );
+  compareFile(join(GS_PKG, "LICENSE"), join(VENJIX, "LICENSE-gentle-shell"), "LICENSE-gentle-shell");
+  for (const f of prev?.generatedAgents ?? []) {
+    if (!generatedAgents.includes(f)) differences.push(`agents/${f}: sobrante (un sync lo borraría)`);
+  }
+  for (const f of prev?.generatedPrompts ?? []) {
+    if (!generatedPrompts.includes(f)) differences.push(`prompts/${f}: sobrante (un sync lo borraría)`);
+  }
+
+  rmSync(STAGE, { recursive: true, force: true });
+  if (differences.length) {
+    console.log(`sync --check: hay cambios pendientes (gentle-shell ${shellVersion}, gentle-pi ${pkg.version}):`);
+    for (const d of differences) console.log(`  - ${d}`);
+    process.exit(1);
+  }
+  console.log(`sync --check: al día (gentle-shell ${shellVersion}, gentle-pi ${pkg.version})`);
+  process.exit(0);
 }
 
 // ---------------------------------------------------------------- aplicar
