@@ -3,7 +3,9 @@
   "model": "opencode-go/deepseek-v4.1-flash",
   "small_model": "opencode-go/deepseek-v4.1-flash",
   "default_agent": "kairos",
-  "instructions": ["./prompts/reply-language.md"],
+  "instructions": [
+    "./prompts/reply-language.md"
+  ],
   "share": "disabled",
   "snapshot": true,
   "lsp": true,
