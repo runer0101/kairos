@@ -21,3 +21,6 @@ auth.json
 id_rsa*
 .netrc
 .git-credentials
+
+# Endpoints de IA local propios (específicos de cada máquina)
+local-providers.json

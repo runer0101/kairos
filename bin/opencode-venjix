@@ -40,6 +40,20 @@ if [[ -f "$SYNC_SCRIPT" && "${OPENCODE_VENJIX_NO_SYNC:-}" != "1" ]] && command -
         || echo "opencode-venjix: no se pudo sincronizar con gentle-shell; se abre con la versión anterior" >&2
 fi
 
+# Modelos locales (opcional): si Ollama está activo, sus modelos instalados se añaden a OpenCode.
+# Sin Ollama no pasa nada. OPENCODE_CONFIG_CONTENT tiene prioridad sobre opencode.json.
+DETECT_SCRIPT="$GENTLE_DIR/scripts/detect-local-models.mjs"
+if [[ -f "$DETECT_SCRIPT" ]] && command -v node >/dev/null 2>&1; then
+    if command -v timeout >/dev/null 2>&1; then
+        LOCAL_CONFIG="$(timeout 5 node "$DETECT_SCRIPT" 2>/dev/null || true)"
+    else
+        LOCAL_CONFIG="$(node "$DETECT_SCRIPT" 2>/dev/null || true)"
+    fi
+    if [[ -n "$LOCAL_CONFIG" ]]; then
+        export OPENCODE_CONFIG_CONTENT="$LOCAL_CONFIG"
+    fi
+fi
+
 export OPENCODE_CONFIG="$GENTLE_DIR/opencode.json"
 export OPENCODE_CONFIG_DIR="$GENTLE_DIR"
 export OPENCODE_TUI_CONFIG="$GENTLE_DIR/tui.json"
