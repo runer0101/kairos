@@ -67,6 +67,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T15 — Sonidos y logo personal (pedida por el usuario, después del plan) · Criterio: los 3 tonos portados con atribución y apagados por defecto (`OPENCODE_VENJIX_SOUNDS=1`); texto del logo configurable (`OPENCODE_VENJIX_LOGO_TEXT`, por defecto `venjix`) · Prueba: `pnpm test` (sounds + tui-logo) + smoke de TUI
 - [x] T16 — Selector de perfiles simplificado (pedida por el usuario, después del plan) · Criterio: `build`/`plan` desactivados, `venjix-deep` retirado y `venjix-yolo` renombrado a `venjix-auto`; solo `venjix` y `venjix-auto` visibles en el selector · Prueba: `pnpm test` + `opencode agent list`
 - [x] T17 — Alias corto `ov` (pedida por el usuario, después del plan) · Criterio: `install.sh` crea `~/.local/bin/ov` → lanzador y `ov` funciona en cualquier shell · Prueba: `pnpm test` (launcher) + `ov --where`
+- [x] T18 — Seguridad: rutas sensibles + SECURITY.md (elegida por el usuario, después del plan) · Criterio: credenciales bloqueadas en todos los perfiles (incluido `venjix-auto` y vía bash); `.env`/`.pem` con confirmación en el perfil normal; modelo de seguridad documentado · Prueba: `pnpm test` (sensitive-paths) + verificación en vivo con señuelos
 
 ## Evidencia de verificación
 
@@ -82,6 +83,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T15: tema por defecto renombrado a `gentleman-venjix` (el enlace viejo se retira solo en `install.sh`); `assets/sounds/{success,error,attention}.wav` + `LICENSE.md` portados con su atribución; el plugin reproduce en `session.idle`/`session.error`/`permission.asked|question.asked` (paplay→pw-play→aplay; macOS afplay) solo con `OPENCODE_VENJIX_SOUNDS=1`; el logo pinta `LOGO_TEXT` (env `OPENCODE_VENJIX_LOGO_TEXT`, por defecto `venjix`). `pnpm test` → 50 tests, 46 pass, 4 skipped, 0 fail; smoke real: tema renombrado pinta su fondo y `OPENCODE_VENJIX_LOGO_TEXT=personalizado` aparece en la captura.
 - T16: `opencode.json` con `build`/`plan` en `disable: true`, sin `venjix-deep` y con `venjix-auto` (antes `venjix-yolo`); README, ARCHITECTURE, `install.sh` (verifica ambos perfiles) y el comando `/gentle-usage` actualizados. `pnpm test` → 51 tests, 47 pass, 4 skipped, 0 fail; `opencode agent list` → solo `venjix` y `venjix-auto` como primarios visibles; `install.sh` completo pasa su verificación.
 - T17: enlace `~/.local/bin/ov` → lanzador creado por `install.sh` (verificado: `ov --where` resuelve el repo; `command -v ov` en zsh); el lanzador y el README lo documentan; `pnpm test` → 52 tests, 48 pass, 4 skipped, 0 fail.
+- T18: capa doble — `permission.read` con `deny`/`ask` (config) + piso inviolable en el plugin (`SENSITIVE_PATH`: `.ssh`, `.gnupg`, `.aws`, `.git-credentials`, `.netrc`, claves `id_*`, `auth.json`; aplica a herramientas de archivo y a comandos bash que las referencien); `SECURITY.md` con modelo, límites y cómo ajustarlo. En vivo con señuelos: perfil normal → read SSH bloqueado por el plugin, `.env` auto-rechazado por la regla `ask`, archivo de control leído; `venjix-auto` → read y `cat` bloqueados igual; `.env` legible en auto (por diseño, documentado en límites). `pnpm test` → 56 tests, 52 pass, 4 skipped, 0 fail.
 
 ## Progreso
 
@@ -98,6 +100,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T14/T15: tema por defecto renombrado a `gentleman-venjix` (`b80b17b`); sonidos opt-in y texto del logo portados y verificados (`d5ce460`).
 - 2026-10-15 — T16: selector simplificado a `venjix` + `venjix-auto` (build/plan desactivados, venjix-deep retirado) a pedido del usuario (`6a779c9`).
 - 2026-10-15 — T17: alias corto `ov` creado por `install.sh` (`19e456a`).
+- 2026-10-15 — T18 (elegido por el usuario: seguridad primero): piso inviolable de rutas sensibles (config + plugin, también en bash y en `venjix-auto`) y `SECURITY.md` (`1a38734`).
 
 ## Siguiente paso
 
