@@ -53,7 +53,7 @@ Pedido del usuario (2026-10-15): «comencemos con lo visual, unir bien ambos mun
 Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 
 - [x] V1 — Reconocimiento en runtime de la API TUI · Criterio: nota con evidencia de qué datos expone `state` en 1.18.35 (branch, todo, diff, modelo del mensaje, mcp, lsp) y de qué slots aceptan varios plugins a la vez (captura pty con un plugin de diagnóstico temporal) · Prueba: smoke `script -qec` 120×40 + `grep` de la captura; plugin temporal retirado al terminar
-- [ ] V2 — `tui-plugins/kairos-hud.tsx`: fila de sesión (modelo · perfil · branch · contexto · ODD n/m · MCP/LSP) · Criterio: la fila se pinta junto al prompt con datos reales de la sesión y se actualiza al cambiar de sesión o de estado · Prueba: smoke pty + `tests/tui-hud.test.mjs`
+- [x] V2 — `tui-plugins/kairos-hud.tsx`: fila de sesión con lo que el host **no** pinta — ODD activa (n/m) y aviso de sync pendiente — sin duplicar modelo/contexto/MCP/LSP (ya nativos; decisión tras el baseline de sesión de V2) · Criterio: la fila se pinta junto al prompt con datos reales y se refresca cada 4 s · Prueba: smoke pty con sesión real + `tests/tui-hud.test.mjs`
 - [ ] V3 — Sección de sidebar propia (archivos cambiados +/−, todos, LSP/MCP) · Criterio: el bloque de kairos y el de subagentes conviven visibles en la sidebar · Prueba: captura pty
 - [ ] V4 — Identidad fusión: HUD y logo leen `api.theme.current`; acento rosa gentleman en texto del logo y separadores · Criterio: captura con `gentleman-kairos`, `gentle`, `gentleman-cute` y `gentleman-sexy` sin colores rotos; sin hex fijos en el HUD · Prueba: smoke pty con los 4 temas + `tests/tui-logo.test.mjs`
 - [ ] V5 — Suite verde · Criterio: `pnpm test` pasa con los tests nuevos y el de privacidad sigue verde · Prueba: `pnpm test`
@@ -71,12 +71,14 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
   - La statusline nativa ya pinta `cwd:branch`, versión y `⊙ 2 MCP`: el HUD debe **sumar** sin duplicar.
   - Método reutilizable para smokes: con `TERM` heredado la TUI queda esperando respuestas de capabilities y no pinta; `TERM=xterm` + `script -qec` pinta completo en pty.
 - Pendiente: la de cada tarea V2–V6.
+- V2 (2026-10-15): baseline de sesión real (smoke pty con prompt por stdin: `( sleep 9; printf '…\r'; sleep 10 ) | timeout -s TERM 24 script -qec "…" <captura>`) para inventariar lo que ya pinta el host. Observado: sidebar con `Context` (16,239 tokens · 2% used · $0.00 spent), `MCP` (context7/engram Connected), `LSP` y el panel `Subagentes 1.3.0`; prompt y mensaje con `Kairos · DeepSeek V4.1 Flash`. Decisión: el HUD **no duplica**; aporta ODD + sync. Implementado `tui-plugins/kairos-hud.tsx` (slot `session_prompt_right`, order 95; snapshot cada 4 s vía `createMemo`/`setInterval` + `onDispose`; caché por mtime+tamaño; solo `api.theme.current`, sin hex). Resultado observado en el smoke: fila `◆ odd visual-statusline 1/6` junto al prompt; `sync pendiente` oculto (sync al día); sin errores de plugin en el log. `pnpm test` → 66 tests, 62 pass, 4 skipped, 0 fail (8 nuevos en `tests/tui-hud.test.mjs`).
 
 ## Progreso
 
 - 2026-10-15 — Plan creado a pedido del usuario. Decisiones: primera tanda = statusline + sidebar; identidad = fusión azul Arch + rosa gentleman; banner/toasts/dashboard quedan para tandas posteriores.
 - 2026-10-15 — V1 completo: reconocimiento en runtime con plugin temporal y smoke en pty; hallazgos y decisiones de slot registrados arriba.
+- 2026-10-15 — V2 completo: HUD de sesión (ODD + sync) en `session_prompt_right`, tests estáticos y smoke real con sesión; decisión anti-duplicación registrada (el host ya pinta contexto/MCP/LSP/modelo).
 
 ## Siguiente paso
 
-V2 — implementar `tui-plugins/kairos-hud.tsx`: fila de sesión reactiva (modelo · perfil · branch · contexto · ODD n/m · MCP/LSP) conviviendo con el plugin de subagentes; verificar `session_prompt_right` en sesión real.
+V3 — sección de sidebar propia (archivos cambiados +/−, todos, LSP/MCP) conviviendo con el panel de subagentes; decidir contenido a la luz de lo que el host ya pinta.

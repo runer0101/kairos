@@ -3,7 +3,8 @@
   "plugin": [
     "opencode-subagent-statusline",
     "./tui-plugins/gentle-logo.tsx",
-    "./tui-plugins/gentle-sounds.ts"
+    "./tui-plugins/gentle-sounds.ts",
+    "./tui-plugins/kairos-hud.tsx"
   ],
   "theme": "gentleman-kairos"
 }
