@@ -26,12 +26,12 @@ test("la configuración deniega las credenciales y pregunta por archivos .env", 
 test("el plugin bloquea claves y credenciales en lectura y escritura", async () => {
     for (const tool of ["read", "edit", "write"]) {
         await assert.rejects(
-            () => before({ tool }, { args: { filePath: "/home/x/.ssh/id_rsa" } }),
+            () => before({ tool }, { args: { filePath: "/proyecto/.ssh/id_rsa" } }),
             /ruta sensible bloqueada/,
             `${tool} debería bloquear ~/.ssh`,
         );
         await assert.rejects(
-            () => before({ tool }, { args: { filePath: "/home/x/.aws/credentials" } }),
+            () => before({ tool }, { args: { filePath: "/proyecto/.aws/credentials" } }),
             /ruta sensible bloqueada/,
             `${tool} debería bloquear ~/.aws`,
         );
@@ -42,7 +42,7 @@ test("el plugin bloquea claves y credenciales en lectura y escritura", async () 
         "escribir authorized_keys debe bloquearse",
     );
     await assert.rejects(
-        () => before({ tool: "grep" }, { args: { path: "/home/x/.gnupg" } }),
+        () => before({ tool: "grep" }, { args: { path: "/proyecto/.gnupg" } }),
         /ruta sensible bloqueada/,
         "buscar dentro de .gnupg debe bloquearse",
     );
@@ -61,7 +61,7 @@ test("el plugin no bloquea archivos normales ni claves públicas", async () => {
 
 test("el plugin bloquea comandos bash que referencian rutas sensibles", async () => {
     await assert.rejects(
-        () => before({ tool: "bash" }, { args: { command: "cat /home/x/.ssh/id_rsa" } }),
+        () => before({ tool: "bash" }, { args: { command: "cat /proyecto/.ssh/id_rsa" } }),
         /ruta sensible/,
         "cat de una clave SSH debe bloquearse",
     );
