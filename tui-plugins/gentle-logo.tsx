@@ -31,6 +31,15 @@ const archArt = [
   " `++:.                           `-/+/  ",
   " .`                                 `/  "
 ]
+// Arte compacto para terminales pequeñas (por debajo de ARCH_MIN_WIDTH ×
+// ARCH_MIN_HEIGHT): un arco mínimo que cabe en lienzos reducidos.
+const compactArt = [
+  "      /\\",
+  "     /  \\",
+  "    / /\\ \\",
+  "   / /  \\ \\",
+  "  /_/    \\_\\",
+]
 // Paleta todo azul: degradado desde cian eléctrico hasta azul profundo
 const ARCH_BLUE_TOP = "#00d2ff"   // Cian brillante - pico superior
 const ARCH_BLUE_MID = "#1793d1"   // Azul oficial de Arch - cuerpo central
@@ -46,6 +55,13 @@ const archLineColor = (index: number) => {
   return ARCH_BLUE_BOT // Base y patas oscurecidas
 }
 
+// Gradiente equivalente para el arte compacto (5 filas).
+const compactLineColor = (index: number) => {
+  if (index <= 1) return ARCH_BLUE_TOP
+  if (index <= 3) return ARCH_BLUE_MID
+  return ARCH_BLUE_BOT
+}
+
 // El logo necesita un mínimo de tamaño para verse completo
 const ARCH_MIN_HEIGHT = archArt.length + 8
 const ARCH_MIN_WIDTH = 45
@@ -57,7 +73,7 @@ const Logo = () => {
     const fits = term.height >= ARCH_MIN_HEIGHT && term.width >= ARCH_MIN_WIDTH
     return fits
       ? archArt.map((line, index) => ({ line, color: archLineColor(index) }))
-      : compactArt.map((line) => ({ line, color: ARCH_BLUE_MID }))
+      : compactArt.map((line, index) => ({ line, color: compactLineColor(index) }))
   })
 
   return (
