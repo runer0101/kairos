@@ -43,7 +43,7 @@ El instalador:
 4. Instala OpenCode si falta (instalador oficial de opencode.ai).
 5. Descarga engram 3.4.0 si falta, verificando su SHA-256.
 6. Instala las dependencias con `pnpm install --frozen-lockfile`.
-7. Enlaza el lanzador en `~/.local/bin/opencode-venjix` y el tema en `~/.config/opencode/themes/`.
+7. Enlaza el lanzador en `~/.local/bin/opencode-venjix` y los temas en `~/.config/opencode/themes/`.
 8. Ajusta las rutas locales de `tui.json` y `opencode.json`.
 9. Sincroniza con gentle-shell si está instalado.
 10. Verifica que OpenCode carga los perfiles antes de terminar.
@@ -95,6 +95,19 @@ La guarda de comandos destructivos bloquea, en todos los modos, formas reconocib
 2. **Tarea grande**: `/odd-task <nombre>` antes de tocar código. Implementa tarea por tarea.
 3. **Antes de entregar**: `/review`. Si el cambio toca seguridad, datos o dependencias, `/judge`.
 4. **Para dar algo por terminado**: `/verify`. Nada se considera hecho sin salida observada.
+
+## Temas
+
+Cuatro temas en `themes/` (los tres de gentle-shell portados a OpenCode, MIT):
+
+| Tema (`tui.json`) | Estilo |
+|---|---|
+| `gentleman` (por defecto) | Rosé Pine con azules profundos |
+| `gentle` | Azul frío con acento dorado |
+| `gentleman-cute` | Rosas suaves |
+| `gentleman-sexy` | Rosas intensos con violeta |
+
+Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la tabla (sin `.json`), o usa el selector de temas de la TUI. `install.sh` enlaza todos los temas en `~/.config/opencode/themes/`.
 
 ## IA local (opcional)
 
@@ -169,7 +182,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 43 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización y privacidad
+pnpm test                           # 47 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad y temas
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
@@ -194,7 +207,7 @@ opencode-venjix/
 │   ├── detect-local-models.mjs      Detección de runtimes de IA local
 │   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
 ├── skills/                          Skills (33)
-├── themes/gentleman.json            Tema de colores
+├── themes/                          Temas (gentleman, gentle, gentleman-cute, gentleman-sexy)
 ├── tui-plugins/gentle-logo.tsx      Logo para la TUI
 ├── tests/                           Pruebas (node:test)
 ├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño

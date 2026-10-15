@@ -261,7 +261,9 @@ setup_repo() {
 
     chmod +x "$REPO/bin/opencode-venjix" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
     link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
-    link "$REPO/themes/gentleman.json" "$OC_THEMES/gentleman.json"
+    for theme_file in "$REPO"/themes/*.json; do
+        link "$theme_file" "$OC_THEMES/$(basename "$theme_file")"
+    done
 
     say "ajustando rutas locales de esta máquina (solo si hace falta)"
     OVJ_REPO="$REPO" OVJ_HOME="$HOME" OVJ_ENGRAM="$ENGRAM_PATH" node --input-type=commonjs - <<'NODE'
@@ -302,7 +304,7 @@ if (engram) {
 NODE
 
     ok "launcher: $BIN_DIR/opencode-venjix"
-    ok "tema: $OC_THEMES/gentleman.json"
+    ok "temas: $OC_THEMES"
     case ":$PATH:" in
         *":$BIN_DIR:"*) ;;
         *) warn "$BIN_DIR no está en tu PATH: añade 'export PATH=\"\$HOME/.local/bin:\$PATH\"' a tu shell" ;;
