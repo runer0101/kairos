@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# opencode-venjix — OpenCode con las herramientas de gentle-shell portadas.
+#
+# Lanza OpenCode usando la configuración de este repositorio (agentes, skills,
+# comandos, plugin y tema) en lugar de ~/.config/opencode.
+#
+# Uso:
+#   opencode-venjix                 abre la TUI
+#   opencode-venjix --where         imprime la carpeta de configuración
+#   OPENCODE_VENJIX_NO_SYNC=1 ...   no sincroniza con gentle-shell al abrir
+#
+# Ver README.md para instalación y detalles.
+
+set -euo pipefail
+
+# Raíz del repositorio: este script vive en <raíz>/bin/ y puede invocarse por symlink.
+GENTLE_DIR="$(cd -P "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+
+if [[ "${1:-}" == "--where" ]]; then
+    echo "$GENTLE_DIR"
+    exit 0
+fi
+
+if [[ ! -f "$GENTLE_DIR/opencode.json" ]]; then
+    echo "opencode-venjix: falta $GENTLE_DIR/opencode.json (repositorio incompleto)" >&2
+    exit 1
+fi
+
+OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
+if [[ ! -x "$OPENCODE_BIN" ]]; then
+    echo "opencode-venjix: no encuentro OpenCode en $OPENCODE_BIN (define OPENCODE_BIN)" >&2
+    exit 1
+fi
+
+# Mantiene el port al día con gentle-shell. No hace nada si la versión no cambió.
+# Si falla, se abre igual con la versión anterior. Para saltarlo: OPENCODE_VENJIX_NO_SYNC=1
+SYNC_SCRIPT="$GENTLE_DIR/scripts/sync-gentle-shell.mjs"
+if [[ -f "$SYNC_SCRIPT" && "${OPENCODE_VENJIX_NO_SYNC:-}" != "1" ]] && command -v node >/dev/null 2>&1; then
+    timeout 30 node "$SYNC_SCRIPT" --if-changed \
+        || echo "opencode-venjix: no se pudo sincronizar con gentle-shell; se abre con la versión anterior" >&2
+fi
+
+export OPENCODE_CONFIG="$GENTLE_DIR/opencode.json"
+export OPENCODE_CONFIG_DIR="$GENTLE_DIR"
+export OPENCODE_TUI_CONFIG="$GENTLE_DIR/tui.json"
+
+exec "$OPENCODE_BIN" "$@"
