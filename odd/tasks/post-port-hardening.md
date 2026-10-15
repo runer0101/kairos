@@ -57,7 +57,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [ ] T5 — `install.sh --uninstall` · Criterio: retira solo enlaces que apuntan al repo y conserva datos · Prueba: ejecución con HOME temporal
 - [ ] T6 — Pin de OpenCode · Criterio: instalador usa `--version` fijada (override por env) y no toca el PATH del usuario · Prueba: `bash -n` + ejecución limpia
 - [ ] T7 — SECURITY.md + verificador de políticas · Criterio: `pnpm check:policies` informa sin npm · Prueba: `node scripts/check-trust-policies.mjs`
-- [ ] T8 — CI · Criterio: workflow con tests + shellcheck en push/PR · Prueba: shellcheck local sobre `install.sh`
+- [x] T8 — CI · Criterio: workflow con tests + shellcheck en push/PR · Prueba: run `38688720308` del 2026-10-15 (tests 18 s, shellcheck 7 s, ambos verdes)
 - [ ] T9 — Docs coherentes + QUICKSTART · Criterio: números reales; QUICKSTART cubre instalación, perfiles, memoria y rollback · Prueba: revisión
 - [ ] T10 — Matriz multi-distro + smoke TUI · Criterio: scripts ejecutables y al menos una corrida registrada (local o CI manual) · Prueba: `tests/container-install-test.sh ubuntu`
 - [x] T11 — Interruptor de IA local por máquina (añadida después del plan) · Criterio: `.no-local-ai` o `OPENCODE_VENJIX_NO_LOCAL=1` evitan la detección sin tocar el repo; sin interruptor se mantiene · Prueba: `pnpm test` (tests/launcher.test.mjs)
@@ -68,6 +68,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T16 — Selector de perfiles simplificado (pedida por el usuario, después del plan) · Criterio: `build`/`plan` desactivados, `venjix-deep` retirado y `venjix-yolo` renombrado a `venjix-auto`; solo `venjix` y `venjix-auto` visibles en el selector · Prueba: `pnpm test` + `opencode agent list`
 - [x] T17 — Alias corto `ov` (pedida por el usuario, después del plan) · Criterio: `install.sh` crea `~/.local/bin/ov` → lanzador y `ov` funciona en cualquier shell · Prueba: `pnpm test` (launcher) + `ov --where`
 - [x] T18 — Seguridad: rutas sensibles + SECURITY.md (elegida por el usuario, después del plan) · Criterio: credenciales bloqueadas en todos los perfiles (incluido `venjix-auto` y vía bash); `.env`/`.pem` con confirmación en el perfil normal; modelo de seguridad documentado · Prueba: `pnpm test` (sensitive-paths) + verificación en vivo con señuelos
+- [x] T19 — Separación local/público (elegida por el usuario, después del plan) · Criterio: clon de publicación aparte con origin a GitHub, repo local sin remoto (imposible push accidental) y script de publicación que verifica privacidad antes de subir · Prueba: primer push público (`6f9cc2b..0eb822f`) con CI verde + `publicar-opencode-venjix.sh` en seco
 
 ## Evidencia de verificación
 
@@ -84,6 +85,8 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T16: `opencode.json` con `build`/`plan` en `disable: true`, sin `venjix-deep` y con `venjix-auto` (antes `venjix-yolo`); README, ARCHITECTURE, `install.sh` (verifica ambos perfiles) y el comando `/gentle-usage` actualizados. `pnpm test` → 51 tests, 47 pass, 4 skipped, 0 fail; `opencode agent list` → solo `venjix` y `venjix-auto` como primarios visibles; `install.sh` completo pasa su verificación.
 - T17: enlace `~/.local/bin/ov` → lanzador creado por `install.sh` (verificado: `ov --where` resuelve el repo; `command -v ov` en zsh); el lanzador y el README lo documentan; `pnpm test` → 52 tests, 48 pass, 4 skipped, 0 fail.
 - T18: capa doble — `permission.read` con `deny`/`ask` (config) + piso inviolable en el plugin (`SENSITIVE_PATH`: `.ssh`, `.gnupg`, `.aws`, `.git-credentials`, `.netrc`, claves `id_*`, `auth.json`; aplica a herramientas de archivo y a comandos bash que las referencien); `SECURITY.md` con modelo, límites y cómo ajustarlo. En vivo con señuelos: perfil normal → read SSH bloqueado por el plugin, `.env` auto-rechazado por la regla `ask`, archivo de control leído; `venjix-auto` → read y `cat` bloqueados igual; `.env` legible en auto (por diseño, documentado en límites). `pnpm test` → 56 tests, 52 pass, 4 skipped, 0 fail.
+- T8: `.github/workflows/ci.yml` con dos jobs en push/PR: `tests` (Node 24, pnpm 11.22.0, lockfile congelado, `pnpm test`) y `shellcheck --severity=error` sobre `install.sh` y `bin/opencode-venjix`. Primer run: `38688720308` ✓ (tests 18 s, shellcheck 7 s).
+- T19: repo local sin remoto (imposible un push accidental desde la máquina); clon de publicación aparte con `origin` a GitHub; script `publicar-opencode-venjix.sh` (fuera de ambos repos) que exige árbol limpio, corre la prueba de privacidad y exporta solo archivos versionados antes de commitear y subir. Verificado en seco ("al día") y con el primer push real (`6f9cc2b..0eb822f`, 28 commits) que dejó el CI verde.
 
 ## Progreso
 
@@ -101,6 +104,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T16: selector simplificado a `venjix` + `venjix-auto` (build/plan desactivados, venjix-deep retirado) a pedido del usuario (`7cb2478`).
 - 2026-10-15 — T17: alias corto `ov` creado por `install.sh` (`a7a7927`).
 - 2026-10-15 — T18 (elegido por el usuario: seguridad primero): piso inviolable de rutas sensibles (config + plugin, también en bash y en `venjix-auto`) y `SECURITY.md` (`54b394b`).
+- 2026-10-15 — T8/T19: CI en GitHub (primer run verde) y separación local/público (clon de publicación con origin, local sin remoto, script con verificación de privacidad); primer push público `6f9cc2b..0eb822f` tras reescribir la autoría de los 27 commits pendientes a la identidad noreply.
 
 ## Siguiente paso
 
