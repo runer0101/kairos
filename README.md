@@ -169,11 +169,11 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 42 pruebas: configuración, agentes, comandos, detector, guarda, lanzador y sincronización
+pnpm test                           # 43 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización y privacidad
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
-Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales.
+Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales. La prueba de privacidad recorre los archivos versionados y falla si aparece una ruta de tu máquina o un correo personal: el repositorio se publica tal cual.
 
 ## Estructura del repositorio
 
