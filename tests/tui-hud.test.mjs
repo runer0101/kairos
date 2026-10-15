@@ -15,6 +15,20 @@ test("el HUD se pinta junto al prompt de sesión", () => {
   assert.match(src, /session_prompt_right/, "la fila vive junto al prompt de sesión");
 });
 
+test("el HUD también pinta la sección de la sidebar de sesión", () => {
+  assert.match(src, /sidebar_content/, "la sección vive en la sidebar de sesión");
+});
+
+test("la sección lista los pendientes de la tarea ODD con tope", () => {
+  assert.match(src, /pending\.slice\(0, PENDING_ROWS\)/, "muestra los primeros pendientes");
+  assert.match(src, /pending\.length > PENDING_ROWS/, "resume el resto con +N");
+});
+
+test("los pendientes se extraen de los checkboxes sin marcar", () => {
+  assert.match(src, /box\[1\] === " "/, "detecta checkboxes vacíos");
+  assert.match(src, /\.map\(\(box\) => box\[2\]\.trim\(\)\)/, "guarda el texto del pendiente");
+});
+
 test("el HUD está cargado en tui.json", () => {
   assert.ok(
     tuiJson.plugin.includes("./tui-plugins/kairos-hud.tsx"),

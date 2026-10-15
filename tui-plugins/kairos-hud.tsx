@@ -13,9 +13,12 @@ const id = "kairos-hud"
 // Re-read cadence for the ODD/sync snapshot (files are small; keeps I/O low).
 const REFRESH_MS = 4000
 
+// Panel rows: pending steps shown before collapsing into "… +N".
+const PENDING_ROWS = 3
+
 const [tick, setTick] = createSignal(0)
 
-type OddTask = { name: string; done: number; total: number }
+type OddTask = { name: string; done: number; total: number; pending: string[] }
 
 type CacheEntry = { stamp: number; task: OddTask }
 
@@ -23,10 +26,13 @@ const cache = new Map<string, CacheEntry>()
 
 const shortName = (name: string) => (name.length > 26 ? `${name.slice(0, 25)}…` : name)
 
+const short = (text: string, max = 44) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
+
 const countCheckboxes = (text: string) => {
-  const boxes = text.match(/^[-*]\s+\[( |x|X)\]/gm) ?? []
-  const done = boxes.filter((box) => /\[[xX]\]/.test(box)).length
-  return { done, total: boxes.length }
+  const boxes = [...text.matchAll(/^[-*]\s+\[( |x|X)\]\s*(.*)$/gm)]
+  const done = boxes.filter((box) => box[1].toLowerCase() === "x").length
+  const pending = boxes.filter((box) => box[1] === " ").map((box) => box[2].trim())
+  return { done, total: boxes.length, pending }
 }
 
 // ODD tasks of the session worktree: newest first, cached by mtime+size.
@@ -49,8 +55,8 @@ const readOddTasks = (worktree: string): Array<OddTask & { mtime: number }> => {
       if (hit && hit.stamp === stamp) {
         task = hit.task
       } else {
-        const { done, total } = countCheckboxes(readFileSync(file, "utf8"))
-        task = { name: shortName(entry.replace(/\.md$/, "")), done, total }
+        const { done, total, pending } = countCheckboxes(readFileSync(file, "utf8"))
+        task = { name: shortName(entry.replace(/\.md$/, "")), done, total, pending }
         cache.set(file, { stamp, task })
       }
       if (task.total > 0) tasks.push({ ...task, mtime: stat.mtimeMs })
@@ -107,10 +113,40 @@ const tui: TuiPlugin = async (api) => {
     )
   }
 
+  // Sidebar section: the active ODD task with its next pending steps — the
+  // project plan nobody else knows about (the host paints todos/MCP/LSP).
+  const OddPanel = () => {
+    const active = createMemo(() => {
+      tick()
+      const tasks = readOddTasks(api.state.path.worktree)
+      return tasks.find((entry) => entry.done < entry.total) ?? tasks[0]
+    })
+    const stale = createMemo(() => {
+      tick()
+      return syncPending()
+    })
+
+    return (
+      <box flexDirection="column">
+        {active() ? (
+          <text fg={active().done >= active().total ? api.theme.current.success : api.theme.current.accent}>
+            {`◆ ODD ${active().name} ${active().done}/${active().total}`}
+          </text>
+        ) : null}
+        {active() ? active().pending.slice(0, PENDING_ROWS).map((item) => <text fg={api.theme.current.textMuted}>{`· ${short(item)}`}</text>) : null}
+        {active() && active().pending.length > PENDING_ROWS ? (
+          <text fg={api.theme.current.textMuted}>{`· … +${active().pending.length - PENDING_ROWS}`}</text>
+        ) : null}
+        {stale() ? <text fg={api.theme.current.warning}>{"⚠ sync gentle-shell"}</text> : null}
+      </box>
+    )
+  }
+
   api.slots.register({
     order: 95,
     slots: {
       session_prompt_right: () => <Row />,
+      sidebar_content: () => <OddPanel />,
     },
   })
 }
