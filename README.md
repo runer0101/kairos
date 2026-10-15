@@ -43,7 +43,7 @@ El instalador:
 4. Instala OpenCode si falta (instalador oficial de opencode.ai).
 5. Descarga engram 3.4.0 si falta, verificando su SHA-256.
 6. Instala las dependencias con `pnpm install --frozen-lockfile`.
-7. Enlaza el lanzador en `~/.local/bin/opencode-venjix` y los temas en `~/.config/opencode/themes/`.
+7. Enlaza el lanzador en `~/.local/bin/opencode-venjix` (con el alias corto `ov`) y los temas en `~/.config/opencode/themes/`.
 8. Ajusta las rutas locales de `tui.json` y `opencode.json`.
 9. Sincroniza con gentle-shell si está instalado.
 10. Verifica que OpenCode carga los perfiles antes de terminar.
@@ -51,6 +51,8 @@ El instalador:
 No instala Ollama ni descarga modelos. Es idempotente: puedes ejecutarlo de nuevo para reparar la instalación.
 
 Si `~/.local/bin` no está en tu `PATH`, añade `export PATH="$HOME/.local/bin:$PATH"` a tu shell.
+
+Para abrirlo usa `opencode-venjix` o su alias corto `ov` (el instalador crea ambos enlaces; funciona en cualquier shell).
 
 ## Perfiles de agente
 
@@ -199,7 +201,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 51 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas y sonidos
+pnpm test                           # 52 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas y sonidos
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 

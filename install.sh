@@ -261,6 +261,7 @@ setup_repo() {
 
     chmod +x "$REPO/bin/opencode-venjix" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
     link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
+    link "$REPO/bin/opencode-venjix" "$BIN_DIR/ov"
     # Retira enlaces rotos que apuntaban a temas de este repo y ya no existen (p. ej. tras un renombrado).
     for stale in "$OC_THEMES"/*.json; do
         [[ -L "$stale" && ! -e "$stale" ]] || continue
@@ -310,7 +311,7 @@ if (engram) {
 }
 NODE
 
-    ok "launcher: $BIN_DIR/opencode-venjix"
+    ok "launcher: $BIN_DIR/opencode-venjix (alias corto: ov)"
     ok "temas: $OC_THEMES"
     case ":$PATH:" in
         *":$BIN_DIR:"*) ;;

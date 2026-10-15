@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -42,4 +42,11 @@ test("sin interruptor, el detector se invoca salvo que exista .no-local-ai", asy
     } else {
         assert.ok(detectorInvoked(stderr), "sin marcador, el detector debería ejecutarse");
     }
+});
+
+test("install.sh crea el alias corto ov y el lanzador lo documenta", () => {
+    const install = readFileSync(join(ROOT, "install.sh"), "utf8");
+    assert.match(install, /link "\$REPO\/bin\/opencode-venjix" "\$BIN_DIR\/ov"/, "falta el enlace ov en install.sh");
+    const launcher = readFileSync(LAUNCHER, "utf8");
+    assert.match(launcher, /alias corto/, "el lanzador debe documentar el alias");
 });
