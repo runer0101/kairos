@@ -67,7 +67,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 ## Evidencia de verificación
 
 - Baseline: `pnpm test` → 34 tests, 30 pass, 4 skipped (E2E), 0 fail.
-- T1: `fe93bfa` — `pnpm test` → 39 tests, 35 pass, 4 skipped, 0 fail. Smoke real en pty 40×12 (`script -qec "stty rows 12 cols 40; ./bin/opencode-venjix"`): la TUI abre, pinta el arte compacto (`/_/    \_\`) y sale con 0; sin `ReferenceError` en la captura.
+- T1: `ea0e3d6` — `pnpm test` → 39 tests, 35 pass, 4 skipped, 0 fail. Smoke real en pty 40×12 (`script -qec "stty rows 12 cols 40; ./bin/opencode-venjix"`): la TUI abre, pinta el arte compacto (`/_/    \_\`) y sale con 0; sin `ReferenceError` en la captura.
 - T11: `tests/launcher.test.mjs` traza el lanzador con `bash -x` y comprueba que el detector no se invoca con el interruptor ni con el marcador, y sí sin ellos.
 - T2: validador único `validateAbsolutePaths` + caso negativo "una ruta absoluta no permitida se detecta" (falla con `/tmp/opencode`, pasa con la config real). `pnpm test` → 40 tests, 36 pass, 4 skipped, 0 fail.
 - T3: `@opencode-ai/plugin` 1.16.2 → 1.18.35 (coincide con el runtime). La política de confianza marcó `effect@4.0.0-beta.83` (transitiva nueva): atestación de publicación y procedencia SLSA verificadas contra el registro (digest sha512 coincide; origen `Effect-TS/effect-smol`, `.github/workflows/release.yml`); exclusión estrecha actualizada de beta.74 a beta.83 en `pnpm-workspace.yaml` y README. `pnpm install --frozen-lockfile` → "Already up to date"; `pnpm test` → 40/36/4/0.
@@ -78,13 +78,14 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 ## Progreso
 
 - 2026-10-14 — reconocimiento y plan; documento creado.
-- 2026-10-15 — T1: fix de `compactArt` (`fe93bfa`) + prueba estática y smoke real en pty 40×12.
+- 2026-10-15 — T1: fix de `compactArt` (`ea0e3d6`) + prueba estática y smoke real en pty 40×12.
 - 2026-10-15 — T11: interruptor de IA local por máquina (lanzador, `.gitignore`, README y pruebas del lanzador).
 - 2026-10-15 — T2: validador de rutas absolutas con caso negativo.
 - 2026-10-15 — T3: plugin alineado a 1.18.35; exclusión de `effect` revisada y verificada (beta.83).
-- 2026-10-15 — T4: `--check` de solo-verificación con pruebas. Commits de la sesión: `dadf730` (T11), `6e28a29` (T3), `a8ed996` (T2), `1b7d28d` (T4); sin coautor, sin push.
-- 2026-10-15 — T12 (pedido del usuario): todos los perfiles, agentes y subagentes por defecto con DeepSeek v4.1 Flash (`91d69d9`). `jd-judge-b` pierde su modelo distinto; `venjix-deep` comparte modelo con `venjix`.
-- 2026-10-15 — T13: hardening de privacidad para publicar sin datos personales (rutas portables, instalador que no ensucia, prueba de privacidad, bits de ejecución). Commits: `fd58547`, `fa04915`, `bf8d991`, `d64983d`; sin push.
+- 2026-10-15 — T4: `--check` de solo-verificación con pruebas. Commits de la sesión: `930a8ef` (T11), `722f8e7` (T3), `54b20f9` (T2), `1b9ca1c` (T4); sin coautor, sin push.
+- 2026-10-15 — T12 (pedido del usuario): todos los perfiles, agentes y subagentes por defecto con DeepSeek v4.1 Flash (`0748201`). `jd-judge-b` pierde su modelo distinto; `venjix-deep` comparte modelo con `venjix`.
+- 2026-10-15 — T13: hardening de privacidad para publicar sin datos personales (rutas portables, instalador que no ensucia, prueba de privacidad, bits de ejecución). Commits: `16b3b72`, `13372be`, `69d031f`, `3ff9abd`; sin push.
+- 2026-10-15 — Reescritura de autoría de los 13 commits sin publicar (correo personal → noreply de GitHub) con el consentimiento del autor; el árbol quedó idéntico y este documento ya apunta a los hashes nuevos. Historia pública hasta `6f9cc2b` sin tocar (decisión del autor).
 
 ## Siguiente paso
 
