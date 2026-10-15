@@ -27,6 +27,11 @@ NODE_SHA256_arm64="724282c3b43aec998aa9527380465b45d229e021b58035f5f4f63095eabfe
 ENGRAM_VERSION="3.4.0"
 ENGRAM_SHA256_x64="715fda625556e46d65ddb4526bb7f88a3fee5339ca3c44ce44cc652f17fa57f1"
 ENGRAM_SHA256_arm64="3309e9c0bbb539d183fd5aa9f9a13cd7aa0e81ec2512b5bedefb8b2bdd35b3e5"
+# pnpm: binario standalone oficial (release de GitHub). Verificado con SHA-256 y con la
+# atestación de procedencia de GitHub (gh attestation verify ... -R pnpm/pnpm).
+PNPM_VERSION="11.22.0"
+PNPM_SHA256_x64="4c592fa410eb23b69691a9efb9bf21c87c15b3e9d88c6ec8acdd354a0eb8de71"
+PNPM_SHA256_arm64="f1426231f365bdfd46c15fa3d1211c3936ee2c4e557afd304f6c66dbf1b2a8bf"
 
 # ---------------------------------------------------------------- rutas
 REPO="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -118,7 +123,7 @@ preflight() {
 
 # ---------------------------------------------------------------- 2. Node.js
 ensure_node() {
-    if have node && node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
+    if have node && node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)'; then
         ok "Node.js $(node -v) ya instalado"
         return
     fi
@@ -142,6 +147,37 @@ ensure_node() {
     link "$dir/bin/npm"  "$BIN_DIR/npm"
     link "$dir/bin/npx"  "$BIN_DIR/npx"
     ok "Node.js $NODE_VERSION instalado en $dir"
+}
+
+# ---------------------------------------------------------------- 2b. pnpm
+# Usa el pnpm del sistema solo si es exactamente la versión fijada (package.json declara
+# packageManager; otra versión intenta autoinstalarse y puede fallar). Si no, instala la
+# fijada en su propia carpeta, sin tocar el pnpm global del usuario.
+ensure_pnpm() {
+    local v=""
+    if have pnpm; then v="$(pnpm --version 2>/dev/null || true)"; fi
+    if [[ "$v" == "$PNPM_VERSION" ]]; then
+        PNPM_BIN="$(command -v pnpm)"
+        ok "pnpm $v ya instalado"
+        return
+    fi
+    [[ -n "$ARCH" ]] || die "no hay pnpm oficial para esta arquitectura ($(uname -m))"
+
+    local name="pnpm-linux-$ARCH"
+    local dir="$SHARE_DIR/pnpm-$PNPM_VERSION-$name"
+    local sha_var="PNPM_SHA256_$ARCH"
+    if [[ ! -x "$dir/pnpm" ]]; then
+        local tmp
+        tmp="$(mktemp -d)"
+        say "descargando pnpm $PNPM_VERSION ($ARCH) desde GitHub"
+        fetch "https://github.com/pnpm/pnpm/releases/download/v$PNPM_VERSION/$name.tar.gz" "$tmp/pnpm.tar.gz"
+        verify_sha256 "$tmp/pnpm.tar.gz" "${!sha_var}"
+        mkdir -p "$dir"
+        tar -xzf "$tmp/pnpm.tar.gz" -C "$dir"
+        rm -rf "$tmp"
+    fi
+    PNPM_BIN="$dir/pnpm"
+    ok "pnpm $PNPM_VERSION instalado en $dir"
 }
 
 # ---------------------------------------------------------------- 3. OpenCode
@@ -220,8 +256,8 @@ canonical_location() {
 
 # ---------------------------------------------------------------- 6. repo
 setup_repo() {
-    say "instalando dependencias de plugins (npm install)"
-    (cd "$REPO" && npm install --no-audit --no-fund --loglevel=error)
+    say "instalando dependencias con pnpm (lockfile congelado)"
+    (cd "$REPO" && "$PNPM_BIN" install --frozen-lockfile --config.confirmModulesPurge=false)
 
     chmod +x "$REPO/bin/opencode-venjix" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
     link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
@@ -274,7 +310,7 @@ if (engram) {
 }
 
 // Los prompts generados llevan la ruta de gentle-assets; la fijamos a esta máquina.
-for (const file of ["agents/gentle-orchestrator.md", "gentle-assets/orchestrator.md"]) {
+for (const file of ["prompts/orchestrator.md", "gentle-assets/orchestrator.md"]) {
     editText(file, (text) =>
         text.replace(/Package assets root: `[^`]*`/, "Package assets root: `" + path.join(canon, "gentle-assets") + "`"),
     );
@@ -302,11 +338,19 @@ sync_gentle_shell() {
 # ---------------------------------------------------------------- 8. verificación
 verify() {
     say "verificando que OpenCode carga la configuración"
-    local out
-    out="$(OPENCODE_VENJIX_NO_SYNC=1 OPENCODE_BIN="$OPENCODE_BIN" "$REPO/bin/opencode-venjix" agent list 2>&1 || true)"
-    grep -q '^gentle-orchestrator ' <<<"$out" \
-        || die "OpenCode no carga el agente gentle-orchestrator. Salida:
-$out"
+    # La salida se escribe a un archivo, no a una tubería: con una tubería, OpenCode puede
+    # cerrarse antes de vaciar stdout y la lista llega truncada (falsos negativos).
+    local listing perfil
+    listing="$(mktemp)"
+    OPENCODE_VENJIX_NO_SYNC=1 OPENCODE_BIN="$OPENCODE_BIN" "$REPO/bin/opencode-venjix" agent list >"$listing" 2>&1 || true
+    for perfil in venjix venjix-deep venjix-yolo; do
+        if ! grep -q "^$perfil (primary)" "$listing"; then
+            tail -20 "$listing" >&2
+            rm -f "$listing"
+            die "OpenCode no carga el perfil $perfil (últimas líneas arriba)"
+        fi
+    done
+    rm -f "$listing"
     ok "configuración válida: agentes, comandos, plugin y tema"
 }
 
@@ -320,6 +364,7 @@ main() {
 
     preflight
     ensure_node
+    ensure_pnpm
     ensure_opencode
     ensure_engram
     canonical_location
