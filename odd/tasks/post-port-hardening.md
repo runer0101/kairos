@@ -44,6 +44,7 @@ El port se entregó sin CI y sin pruebas de TUI; hay un crash latente en termina
 - Commits sin coautor; sin push (los publica el autor).
 - El instalador oficial de OpenCode queda fijado por versión; el riesgo residual (sin SHA-256 propio) se documenta en SECURITY.md.
 - No romper la idempotencia de `install.sh` ni la transaccionalidad de la sincronización.
+- Sin datos personales ni rutas de la máquina en archivos versionados: `tests/privacy.test.mjs` lo verifica, y el instalador y el sync no deben introducirlos.
 
 ## Checklist
 
@@ -61,6 +62,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [ ] T10 — Matriz multi-distro + smoke TUI · Criterio: scripts ejecutables y al menos una corrida registrada (local o CI manual) · Prueba: `tests/container-install-test.sh ubuntu`
 - [x] T11 — Interruptor de IA local por máquina (añadida después del plan) · Criterio: `.no-local-ai` o `OPENCODE_VENJIX_NO_LOCAL=1` evitan la detección sin tocar el repo; sin interruptor se mantiene · Prueba: `pnpm test` (tests/launcher.test.mjs)
 - [x] T12 — Modelo único DeepSeek v4.1 Flash (pedida por el usuario, después del plan) · Criterio: `model`, `small_model` y todos los agentes de `opencode.json` usan `opencode-go/deepseek-v4.1-flash`; docs y pruebas coherentes · Prueba: `pnpm test` + comprobación en vivo
+- [x] T13 — Repo publicable sin datos personales (pedida por el usuario, después del plan) · Criterio: archivos versionados sin rutas de hogar ni correos; el instalador y el sync no materializan rutas · Prueba: `pnpm test` (privacy) + `install.sh` idempotente sin cambios
 
 ## Evidencia de verificación
 
@@ -71,6 +73,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T3: `@opencode-ai/plugin` 1.16.2 → 1.18.35 (coincide con el runtime). La política de confianza marcó `effect@4.0.0-beta.83` (transitiva nueva): atestación de publicación y procedencia SLSA verificadas contra el registro (digest sha512 coincide; origen `Effect-TS/effect-smol`, `.github/workflows/release.yml`); exclusión estrecha actualizada de beta.74 a beta.83 en `pnpm-workspace.yaml` y README. `pnpm install --frozen-lockfile` → "Already up to date"; `pnpm test` → 40/36/4/0.
 - T4: `--check` compara el staging contra el repo y la versión del marcador; `tests/sync.test.mjs` verifica "al día" (exit 0) en el repo real sin cambiar marcador ni archivos, y "cambios pendientes" (exit 1) en un repo temporal vacío sin escribir nada. `pnpm test` → 42 tests, 38 pass, 4 skipped, 0 fail.
 - T12: `opencode.json` con `opencode-go/deepseek-v4.1-flash` en `model`, `small_model`, los tres perfiles, `gentle-ai-explore` y `jd-judge-b`; README y ARCHITECTURE actualizados; pruebas de configuración ajustadas (los tres perfiles usan el mismo modelo; el juez B pierde su modelo distinto). Comprobación en vivo: `opencode-venjix run "responde solo la palabra: ok"` → "ok" con cabecera `venjix · deepseek-v4.1-flash`.
+- T13: rutas portables (`tui.json` con ruta relativa, engram `{env:HOME}/...`, gentle-assets `$OPENCODE_CONFIG_DIR`); `install.sh` ya no reescribe archivos rastreados (dos corridas idempotentes sin cambios); smoke de TUI 40×12 desde otro cwd carga el logo compacto; engram conecta en vivo (`mem_list_projects` → 4). El test de rutas absolutas pasó a exigir cero rutas absolutas en `opencode.json`. Decisiones pendientes del autor: (1) autoría de los 8 commits locales previos, que usan su correo personal (los públicos usan el noreply de GitHub); (2) si se reescribe la historia pública hasta `6f9cc2b`, que contiene rutas de la máquina (sin secretos).
 
 ## Progreso
 
@@ -81,6 +84,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T3: plugin alineado a 1.18.35; exclusión de `effect` revisada y verificada (beta.83).
 - 2026-10-15 — T4: `--check` de solo-verificación con pruebas. Commits de la sesión: `dadf730` (T11), `6e28a29` (T3), `a8ed996` (T2), `1b7d28d` (T4); sin coautor, sin push.
 - 2026-10-15 — T12 (pedido del usuario): todos los perfiles, agentes y subagentes por defecto con DeepSeek v4.1 Flash (`91d69d9`). `jd-judge-b` pierde su modelo distinto; `venjix-deep` comparte modelo con `venjix`.
+- 2026-10-15 — T13: hardening de privacidad para publicar sin datos personales (rutas portables, instalador que no ensucia, prueba de privacidad, bits de ejecución). Commits: `fd58547`, `fa04915`, `bf8d991`, `d64983d`; sin push.
 
 ## Siguiente paso
 
