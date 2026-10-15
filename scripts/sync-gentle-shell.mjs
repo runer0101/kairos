@@ -65,9 +65,11 @@ const STAGE = mkdtempSync(join(tmpdir(), "ovj-sync-"));
 const stageAgents = join(STAGE, "agents");
 const stageAssets = join(STAGE, "gentle-assets");
 const stageSkills = join(STAGE, "skills");
+const stagePrompts = join(STAGE, "prompts");
 mkdirSync(stageAgents);
 mkdirSync(stageAssets);
 mkdirSync(stageSkills);
+mkdirSync(stagePrompts);
 
 const templ = (text) =>
   text
@@ -107,6 +109,7 @@ function parseFrontmatter(text) {
 
 const yamlStr = (s) => JSON.stringify(String(s));
 const generatedAgents = [];
+const generatedPrompts = [];
 
 // 1) Referencias perezosas del orchestrator
 const ASSETS_SRC = join(GS_PKG, "assets");
@@ -119,24 +122,12 @@ if (existsSync(join(ASSETS_SRC, "chains"))) {
   cpSync(join(ASSETS_SRC, "chains"), join(stageAssets, "chains"), { recursive: true });
 }
 
-// 2) Agente orchestrator (primario)
+// 2) Prompt del orchestrator. No es un agente por sí mismo: opencode.json define los perfiles
+//    (venjix, venjix-deep, venjix-yolo) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
 {
   const body = templ(readFileSync(join(ASSETS_SRC, "orchestrator.md"), "utf8"));
-  const out = [
-    "---",
-    `description: ${yamlStr("el Gentleman Orchestrator (gentle-shell portado a OpenCode): coordina subagentes, no ejecuta trabajo pesado en línea")}`,
-    "mode: primary",
-    "permission:",
-    "  edit: allow",
-    "  bash: allow",
-    "  webfetch: allow",
-    "  task: allow",
-    "---",
-    "",
-    RUNTIME_NOTE + body,
-  ].join("\n");
-  writeFileSync(join(stageAgents, "gentle-orchestrator.md"), out);
-  generatedAgents.push("gentle-orchestrator.md");
+  writeFileSync(join(stagePrompts, "orchestrator.md"), RUNTIME_NOTE + body);
+  generatedPrompts.push("orchestrator.md");
 }
 
 // 3) Subagentes: permisos derivados de la lista "tools" original de Pi
@@ -186,17 +177,17 @@ const problems = [];
 if (!/export function recognizeDestructiveCommands\(/.test(guardText)) {
   problems.push("la guarda ya no exporta recognizeDestructiveCommands (plugins/gentle-shell.ts dejaría de compilar)");
 }
-if (generatedAgents.length !== sourceAgents.length + 1) {
+if (generatedAgents.length !== sourceAgents.length) {
   problems.push(`número de agentes inesperado (${generatedAgents.length})`);
 }
-for (const dir of [stageAgents, stageAssets]) {
+for (const dir of [stageAgents, stagePrompts, stageAssets]) {
   for (const f of readdirSync(dir, { recursive: true })) {
     const p = join(dir, String(f));
     if (!p.endsWith(".md")) continue;
     if (readFileSync(p, "utf8").includes("{{")) problems.push(`placeholder sin resolver en ${p}`);
   }
 }
-if (!readFileSync(join(stageAgents, "gentle-orchestrator.md"), "utf8").includes("Runtime: OpenCode")) {
+if (!readFileSync(join(stagePrompts, "orchestrator.md"), "utf8").includes("Runtime: OpenCode")) {
   problems.push("el orchestrator no lleva la nota de runtime");
 }
 if (problems.length) {
@@ -212,6 +203,15 @@ for (const f of prev?.generatedAgents ?? []) {
 mkdirSync(join(VENJIX, "agents"), { recursive: true });
 for (const f of generatedAgents) {
   cpSync(join(stageAgents, f), join(VENJIX, "agents", f));
+}
+
+// Prompts de perfiles: se borran los generados antes y se escriben los nuevos.
+for (const f of prev?.generatedPrompts ?? []) {
+  rmSync(join(VENJIX, "prompts", f), { force: true });
+}
+mkdirSync(join(VENJIX, "prompts"), { recursive: true });
+for (const f of generatedPrompts) {
+  cpSync(join(stagePrompts, f), join(VENJIX, "prompts", f));
 }
 
 rmSync(ASSETS_OUT, { recursive: true, force: true });
@@ -235,6 +235,7 @@ writeFileSync(
       gentleShell: shellVersion,
       syncedAt: new Date().toISOString(),
       generatedAgents,
+      generatedPrompts,
     },
     null,
     2,

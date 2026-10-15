@@ -2,17 +2,86 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
   "small_model": "opencode/big-pickle",
-  "default_agent": "gentle-orchestrator",
+  "default_agent": "venjix",
   "share": "disabled",
+  "snapshot": true,
+  "lsp": true,
+  "formatter": true,
   "compaction": {
     "auto": true,
     "preserve_recent_tokens": 3000,
     "reserved": 10000
   },
-  "permission": "allow",
   "disabled_providers": [
     "ollama"
   ],
+  "permission": {
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "lsp": "allow",
+    "skill": "allow",
+    "question": "allow",
+    "task": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "pwd": "allow",
+      "ls": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "wc *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
+      "git branch*": "allow",
+      "node --version": "allow",
+      "pnpm --version": "allow",
+      "git push*": "ask",
+      "git commit*": "ask"
+    },
+    "external_directory": "ask",
+    "doom_loop": "ask"
+  },
+  "agent": {
+    "venjix": {
+      "description": "Perfil equilibrado: orquestador con IA gratuita de OpenCode y permisos normales",
+      "mode": "primary",
+      "model": "opencode/big-pickle",
+      "prompt": "{file:./prompts/orchestrator.md}",
+      "color": "accent"
+    },
+    "venjix-deep": {
+      "description": "Perfil profundo: orquestador con deepseek-v4-pro (requiere suscripción OpenCode Go)",
+      "mode": "primary",
+      "model": "opencode-go/deepseek-v4-pro",
+      "prompt": "{file:./prompts/orchestrator.md}",
+      "color": "secondary"
+    },
+    "venjix-yolo": {
+      "description": "Perfil autónomo (equivalente a YOLO): sin preguntas de permisos; la guarda de comandos destructivos sigue activa",
+      "mode": "primary",
+      "model": "opencode/big-pickle",
+      "prompt": "{file:./prompts/orchestrator.md}",
+      "permission": "allow",
+      "color": "warning"
+    },
+    "gentle-ai-explore": {
+      "model": "opencode/big-pickle",
+      "steps": 15
+    },
+    "jd-judge-b": {
+      "model": "opencode/nemotron-3-ultra-free"
+    }
+  },
   "mcp": {
     "engram": {
       "type": "local",

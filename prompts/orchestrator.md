@@ -1,13 +1,3 @@
----
-description: "el Gentleman Orchestrator (gentle-shell portado a OpenCode): coordina subagentes, no ejecuta trabajo pesado en línea"
-mode: primary
-permission:
-  edit: allow
-  bash: allow
-  webfetch: allow
-  task: allow
----
-
 > **Runtime: OpenCode (opencode-venjix).** Este prompt viene de gentle-shell (Pi). Equivalencias:
 > - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.
 > - `ask_user_choice` / preguntas al usuario -> herramienta `question`.
