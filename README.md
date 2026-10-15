@@ -125,6 +125,16 @@ Reglas:
 - Las capacidades (herramientas, contexto) son supuestas, porque OpenAI-compatible no las informa. No uses un modelo local que no maneje herramientas bien en los perfiles con agentes.
 - Si el runtime no está activo, se ignora sin error.
 
+En una máquina sin recursos puedes desactivar todo lo relacionado con IA local sin tocar el repositorio:
+
+```bash
+touch ~/.config/opencode-venjix/.no-local-ai   # desactivar en esta máquina
+rm ~/.config/opencode-venjix/.no-local-ai      # volver a activarla
+OPENCODE_VENJIX_NO_LOCAL=1 opencode-venjix     # desactivar solo esta apertura
+```
+
+El marcador `.no-local-ai` no se versiona (está en `.gitignore`): en las demás máquinas la detección sigue activa.
+
 Para ver qué detecta el lanzador: `node scripts/detect-local-models.mjs`.
 
 ## Actualizaciones de gentle-shell

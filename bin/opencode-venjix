@@ -42,8 +42,12 @@ fi
 
 # Modelos locales (opcional): si Ollama está activo, sus modelos instalados se añaden a OpenCode.
 # Sin Ollama no pasa nada. OPENCODE_CONFIG_CONTENT tiene prioridad sobre opencode.json.
+# En una máquina sin recursos se desactiva sin tocar el repo: archivo .no-local-ai (no
+# versionado) o variable OPENCODE_VENJIX_NO_LOCAL=1.
 DETECT_SCRIPT="$GENTLE_DIR/scripts/detect-local-models.mjs"
-if [[ -f "$DETECT_SCRIPT" ]] && command -v node >/dev/null 2>&1; then
+NO_LOCAL="${OPENCODE_VENJIX_NO_LOCAL:-}"
+if [[ -f "$GENTLE_DIR/.no-local-ai" ]]; then NO_LOCAL=1; fi
+if [[ "$NO_LOCAL" != "1" && -f "$DETECT_SCRIPT" ]] && command -v node >/dev/null 2>&1; then
     if command -v timeout >/dev/null 2>&1; then
         LOCAL_CONFIG="$(timeout 5 node "$DETECT_SCRIPT" 2>/dev/null || true)"
     else
