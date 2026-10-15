@@ -1,0 +1,35 @@
+# Configuración de pnpm del proyecto.
+# pnpm lee estos ajustes desde este archivo (.npmrc solo admite registro y autenticación).
+# Referencia: https://pnpm.io/settings
+
+# Las versiones recién publicadas no se instalan hasta pasar 24 h desde su publicación.
+# Así se da tiempo a que se detecten y retiren paquetes comprometidos.
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+
+# Falla si una versión tiene menos evidencia de confianza que versiones anteriores
+# (por ejemplo, si deja de publicarse con procedencia verificable).
+trustPolicy: no-downgrade
+# Paquetes publicados hace más de un año se omiten de esta comprobación (muchos paquetes
+# antiguos nunca tuvieron procedencia). Lo reciente sigue verificándose.
+trustPolicyIgnoreAfter: 525600
+
+# Excepción justificada y estrecha (solo esta versión exacta):
+# effect@4.0.0-beta.74 pasó de publicación confiable a procedencia SLSA. Verificado con
+# `npm audit signatures`: firma y atestación válidas, repositorio Effect-TS/effect-smol.
+# Dependencia transitiva de @opencode-ai/plugin. Revisar al actualizar @opencode-ai/plugin.
+trustPolicyExclude:
+  - "effect@4.0.0-beta.74"
+
+# Las dependencias transitivas solo pueden venir del registro: no git ni URLs de tarball.
+blockExoticSubdeps: true
+
+# Los scripts de instalación de dependencias están bloqueados por defecto;
+# falla si aparece uno que no se haya revisado.
+strictDepBuilds: true
+
+# Decisiones explícitas sobre scripts de instalación. msgpackr-extract es un addon nativo
+# OPCIONAL: msgpackr funciona sin él (usa su implementación en JavaScript).
+allowBuilds:
+  msgpackr-extract: false
+

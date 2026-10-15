@@ -1,4 +1,16 @@
 {
+  "name": "opencode-venjix",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenCode con las herramientas de gentle-shell portadas (agentes, perfiles, comandos, guardas, skills y tema propio)",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.7",
     "@opencode-ai/plugin": "1.16.2",

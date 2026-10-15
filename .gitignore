@@ -24,3 +24,6 @@ id_rsa*
 
 # Endpoints de IA local propios (específicos de cada máquina)
 local-providers.json
+
+# Gestor de dependencias: pnpm (no npm)
+package-lock.json
