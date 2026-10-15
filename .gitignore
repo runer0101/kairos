@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Estado local de la sincronización con gentle-shell (específico de la máquina)
+.gentle-shell-sync.json
+
+# Respaldos, temporales y logs
+*.bak
+*.bak-*
+*.backup
+*.tmp
+*.log
+.DS_Store
+
+# Secretos y credenciales: nunca versionar
+.env
+.env.*
+auth.json
+*.pem
+*.key
+id_rsa*
+.netrc
+.git-credentials
