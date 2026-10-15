@@ -4,6 +4,7 @@
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-11.22.0-orange.svg)](https://pnpm.io)
+[![Plataforma](https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1.svg)](#requisitos)
 
 **OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
 
@@ -16,6 +17,8 @@
 ```
 
 Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
+
+Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y prueba a diario — aunque funciona en cualquier distribución con glibc.
 
 > Proyecto en desarrollo activo: cada push pasa la suite completa, `shellcheck` y un escaneo de privacidad en CI.
 
@@ -47,7 +50,7 @@ Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots
 | engram | 3.4.0 | `install.sh` descarga el binario oficial |
 | Ollama u otro runtime local | opcional | Se detecta al abrir, si está activo |
 
-Alpine Linux (musl) no está soportado: Node.js y los binarios de OpenCode se distribuyen para glibc.
+El proyecto está pensado para **Arch Linux** (es el entorno de desarrollo y pruebas); cualquier otra distribución con glibc funciona igual, porque el instalador no depende de apt, dnf ni zypper. Alpine Linux (musl) no está soportado: Node.js y los binarios de OpenCode se distribuyen para glibc.
 
 ## Instalación rápida
 
