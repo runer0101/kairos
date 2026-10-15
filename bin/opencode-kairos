@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# opencode-venjix — OpenCode con las herramientas de gentle-shell portadas.
+# opencode-kairos — OpenCode con las herramientas de gentle-shell portadas.
 #
 # Lanza OpenCode usando la configuración de este repositorio (agentes, skills,
 # comandos, plugin y tema) en lugar de ~/.config/opencode.
 #
 # Uso:
-#   opencode-venjix                 abre la TUI
-#   ov                              alias corto (lo crea install.sh)
-#   opencode-venjix --where         imprime la carpeta de configuración
-#   OPENCODE_VENJIX_NO_SYNC=1 ...   no sincroniza con gentle-shell al abrir
+#   opencode-kairos                 abre la TUI
+#   kai                              alias corto (lo crea install.sh)
+#   opencode-kairos --where         imprime la carpeta de configuración
+#   OPENCODE_KAIROS_NO_SYNC=1 ...   no sincroniza con gentle-shell al abrir
 #
 # Ver README.md para instalación y detalles.
 
@@ -23,30 +23,30 @@ if [[ "${1:-}" == "--where" ]]; then
 fi
 
 if [[ ! -f "$GENTLE_DIR/opencode.json" ]]; then
-    echo "opencode-venjix: falta $GENTLE_DIR/opencode.json (repositorio incompleto)" >&2
+    echo "opencode-kairos: falta $GENTLE_DIR/opencode.json (repositorio incompleto)" >&2
     exit 1
 fi
 
 OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
 if [[ ! -x "$OPENCODE_BIN" ]]; then
-    echo "opencode-venjix: no encuentro OpenCode en $OPENCODE_BIN (define OPENCODE_BIN)" >&2
+    echo "opencode-kairos: no encuentro OpenCode en $OPENCODE_BIN (define OPENCODE_BIN)" >&2
     exit 1
 fi
 
 # Mantiene el port al día con gentle-shell. No hace nada si la versión no cambió.
-# Si falla, se abre igual con la versión anterior. Para saltarlo: OPENCODE_VENJIX_NO_SYNC=1
+# Si falla, se abre igual con la versión anterior. Para saltarlo: OPENCODE_KAIROS_NO_SYNC=1
 SYNC_SCRIPT="$GENTLE_DIR/scripts/sync-gentle-shell.mjs"
-if [[ -f "$SYNC_SCRIPT" && "${OPENCODE_VENJIX_NO_SYNC:-}" != "1" ]] && command -v node >/dev/null 2>&1; then
+if [[ -f "$SYNC_SCRIPT" && "${OPENCODE_KAIROS_NO_SYNC:-}" != "1" ]] && command -v node >/dev/null 2>&1; then
     timeout 30 node "$SYNC_SCRIPT" --if-changed \
-        || echo "opencode-venjix: no se pudo sincronizar con gentle-shell; se abre con la versión anterior" >&2
+        || echo "opencode-kairos: no se pudo sincronizar con gentle-shell; se abre con la versión anterior" >&2
 fi
 
 # Modelos locales (opcional): si Ollama está activo, sus modelos instalados se añaden a OpenCode.
 # Sin Ollama no pasa nada. OPENCODE_CONFIG_CONTENT tiene prioridad sobre opencode.json.
 # En una máquina sin recursos se desactiva sin tocar el repo: archivo .no-local-ai (no
-# versionado) o variable OPENCODE_VENJIX_NO_LOCAL=1.
+# versionado) o variable OPENCODE_KAIROS_NO_LOCAL=1.
 DETECT_SCRIPT="$GENTLE_DIR/scripts/detect-local-models.mjs"
-NO_LOCAL="${OPENCODE_VENJIX_NO_LOCAL:-}"
+NO_LOCAL="${OPENCODE_KAIROS_NO_LOCAL:-}"
 if [[ -f "$GENTLE_DIR/.no-local-ai" ]]; then NO_LOCAL=1; fi
 if [[ "$NO_LOCAL" != "1" && -f "$DETECT_SCRIPT" ]] && command -v node >/dev/null 2>&1; then
     if command -v timeout >/dev/null 2>&1; then

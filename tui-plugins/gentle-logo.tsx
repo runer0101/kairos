@@ -45,10 +45,10 @@ const ARCH_BLUE_TOP = "#00d2ff"   // Cian brillante - pico superior
 const ARCH_BLUE_MID = "#1793d1"   // Azul oficial de Arch - cuerpo central
 const ARCH_BLUE_BOT = "#0369a1"   // Azul oscuro/marino - base y patas
 
-// Texto personal bajo el arco. Cámbialo aquí o define OPENCODE_VENJIX_LOGO_TEXT
-// al lanzar: OPENCODE_VENJIX_LOGO_TEXT=otro-texto opencode-venjix
+// Texto personal bajo el arco. Cámbialo aquí o define OPENCODE_KAIROS_LOGO_TEXT
+// al lanzar: OPENCODE_KAIROS_LOGO_TEXT=otro-texto opencode-kairos
 const LOGO_TEXT =
-  (typeof process !== "undefined" && process.env?.OPENCODE_VENJIX_LOGO_TEXT) || "venjix"
+  (typeof process !== "undefined" && process.env?.OPENCODE_KAIROS_LOGO_TEXT) || "kairos"
 
 // Colorea las líneas del logo (por índice de fila, 19 líneas en total):
 // - Punta superior en ARCH_BLUE_TOP para mayor brillo y volumen

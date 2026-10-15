@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sincroniza opencode-venjix con la versión instalada de gentle-shell (gentle-pi).
+// Sincroniza opencode-kairos con la versión instalada de gentle-shell (gentle-pi).
 //
 // Regenera SOLO lo derivado de gentle-shell:
 //   agents/            orchestrator + subagentes (los generados; se borran los que ya no existan upstream)
@@ -23,7 +23,7 @@
 //                                                   (0 = al día, 1 = pendiente; el marcador no cambia)
 //
 // Es transaccional: todo se genera en un directorio temporal y se valida antes de tocar
-// opencode-venjix. Si algo no cuadra (p. ej. gentle-shell cambió una API que usamos), no escribe nada.
+// opencode-kairos. Si algo no cuadra (p. ej. gentle-shell cambió una API que usamos), no escribe nada.
 
 import {
   readFileSync, writeFileSync, readdirSync, mkdirSync, cpSync, existsSync, rmSync,
@@ -35,11 +35,11 @@ import { fileURLToPath } from "node:url";
 
 const HOME = homedir();
 // Raíz del proyecto = carpeta padre de scripts/ (funciona aunque se invoque por symlink).
-const VENJIX = dirname(dirname(fileURLToPath(import.meta.url)));
-const MARKER = join(VENJIX, ".gentle-shell-sync.json");
+const KAIROS = dirname(dirname(fileURLToPath(import.meta.url)));
+const MARKER = join(KAIROS, ".gentle-shell-sync.json");
 const GS_CURRENT = join(HOME, ".gentle-shell", "current");
 const GS_PKG = join(GS_CURRENT, "node_modules", "gentle-pi");
-const ASSETS_OUT = join(VENJIX, "gentle-assets");
+const ASSETS_OUT = join(KAIROS, "gentle-assets");
 const MANAGED_SKILLS = ["gentle-ai", "rdd-defect-workflow"];
 const BG_POLICY = "Ejecuta tareas en primer plano salvo que el usuario pida lo contrario.";
 
@@ -86,13 +86,13 @@ const templ = (text) =>
 // Este portado corre sobre OpenCode, no sobre Pi. Las instrucciones originales nombran
 // herramientas de Pi; esta nota fija las equivalencias para que el agente use las reales.
 const RUNTIME_NOTE = [
-  "> **Runtime: OpenCode (opencode-venjix).** Este prompt viene de gentle-shell (Pi). Equivalencias:",
+  "> **Runtime: OpenCode (opencode-kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:",
   "> - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.",
   "> - `ask_user_choice` / preguntas al usuario -> herramienta `question`.",
   "> - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.",
   "> - `mem_save` / memoria persistente -> herramientas `mem_*` del MCP `engram` (si están disponibles).",
   "> - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible.",
-  "> - `$OPENCODE_CONFIG_DIR` es la raíz de opencode-venjix (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
+  "> - `$OPENCODE_CONFIG_DIR` es la raíz de opencode-kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
   `> - Política de ejecución en segundo plano: ${BG_POLICY}`,
   "",
 ].join("\n");
@@ -131,7 +131,7 @@ if (existsSync(join(ASSETS_SRC, "chains"))) {
 }
 
 // 2) Prompt del orchestrator. No es un agente por sí mismo: opencode.json define los perfiles
-//    (venjix, venjix-auto) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
+//    (kairos, kairos-auto) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
 {
   const body = templ(readFileSync(join(ASSETS_SRC, "orchestrator.md"), "utf8"));
   writeFileSync(join(stagePrompts, "orchestrator.md"), RUNTIME_NOTE + body);
@@ -249,18 +249,18 @@ if (CHECK) {
     else if (!readFileSync(targetFile).equals(readFileSync(stagedFile))) differences.push(`${label}: difiere`);
   };
 
-  compareDir(stageAgents, join(VENJIX, "agents"), "agents");
-  compareDir(stagePrompts, join(VENJIX, "prompts"), "prompts");
+  compareDir(stageAgents, join(KAIROS, "agents"), "agents");
+  compareDir(stagePrompts, join(KAIROS, "prompts"), "prompts");
   compareDir(stageAssets, ASSETS_OUT, "gentle-assets", true);
   for (const s of MANAGED_SKILLS) {
-    compareDir(join(stageSkills, s), join(VENJIX, "skills", s), `skills/${s}`, true);
+    compareDir(join(stageSkills, s), join(KAIROS, "skills", s), `skills/${s}`, true);
   }
   compareFile(
     join(STAGE, "destructive-command-guard.ts"),
-    join(VENJIX, "lib", "destructive-command-guard.ts"),
+    join(KAIROS, "lib", "destructive-command-guard.ts"),
     "lib/destructive-command-guard.ts",
   );
-  compareFile(join(GS_PKG, "LICENSE"), join(VENJIX, "LICENSE-gentle-shell"), "LICENSE-gentle-shell");
+  compareFile(join(GS_PKG, "LICENSE"), join(KAIROS, "LICENSE-gentle-shell"), "LICENSE-gentle-shell");
   for (const f of prev?.generatedAgents ?? []) {
     if (!generatedAgents.includes(f)) differences.push(`agents/${f}: sobrante (un sync lo borraría)`);
   }
@@ -281,32 +281,32 @@ if (CHECK) {
 // ---------------------------------------------------------------- aplicar
 // Agentes: borrar solo los que generamos antes (no tocar agentes propios del usuario).
 for (const f of prev?.generatedAgents ?? []) {
-  rmSync(join(VENJIX, "agents", f), { force: true });
+  rmSync(join(KAIROS, "agents", f), { force: true });
 }
-mkdirSync(join(VENJIX, "agents"), { recursive: true });
+mkdirSync(join(KAIROS, "agents"), { recursive: true });
 for (const f of generatedAgents) {
-  cpSync(join(stageAgents, f), join(VENJIX, "agents", f));
+  cpSync(join(stageAgents, f), join(KAIROS, "agents", f));
 }
 
 // Prompts de perfiles: se borran los generados antes y se escriben los nuevos.
 for (const f of prev?.generatedPrompts ?? []) {
-  rmSync(join(VENJIX, "prompts", f), { force: true });
+  rmSync(join(KAIROS, "prompts", f), { force: true });
 }
-mkdirSync(join(VENJIX, "prompts"), { recursive: true });
+mkdirSync(join(KAIROS, "prompts"), { recursive: true });
 for (const f of generatedPrompts) {
-  cpSync(join(stagePrompts, f), join(VENJIX, "prompts", f));
+  cpSync(join(stagePrompts, f), join(KAIROS, "prompts", f));
 }
 
 rmSync(ASSETS_OUT, { recursive: true, force: true });
 cpSync(stageAssets, ASSETS_OUT, { recursive: true });
 
-mkdirSync(join(VENJIX, "lib"), { recursive: true });
-cpSync(join(STAGE, "destructive-command-guard.ts"), join(VENJIX, "lib", "destructive-command-guard.ts"));
-cpSync(join(GS_PKG, "LICENSE"), join(VENJIX, "LICENSE-gentle-shell"));
+mkdirSync(join(KAIROS, "lib"), { recursive: true });
+cpSync(join(STAGE, "destructive-command-guard.ts"), join(KAIROS, "lib", "destructive-command-guard.ts"));
+cpSync(join(GS_PKG, "LICENSE"), join(KAIROS, "LICENSE-gentle-shell"));
 
 for (const s of MANAGED_SKILLS) {
-  rmSync(join(VENJIX, "skills", s), { recursive: true, force: true });
-  cpSync(join(stageSkills, s), join(VENJIX, "skills", s), { recursive: true });
+  rmSync(join(KAIROS, "skills", s), { recursive: true, force: true });
+  cpSync(join(stageSkills, s), join(KAIROS, "skills", s), { recursive: true });
 }
 
 writeFileSync(

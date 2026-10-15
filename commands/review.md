@@ -1,6 +1,6 @@
 ---
 description: Revisión del cambio actual con lentes 4R según tamaño y riesgo
-agent: venjix
+agent: kairos
 ---
 Revisa el cambio actual del repositorio.
 

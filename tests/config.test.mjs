@@ -10,8 +10,8 @@ const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
 const DEEPSEEK = "opencode-go/deepseek-v4.1-flash";
 
 test("el agente por defecto es el perfil equilibrado", () => {
-  assert.equal(cfg.default_agent, "venjix");
-  assert.equal(cfg.agent.venjix.mode, "primary");
+  assert.equal(cfg.default_agent, "kairos");
+  assert.equal(cfg.agent.kairos.mode, "primary");
 });
 
 test("el modelo por defecto es DeepSeek v4.1 Flash", () => {
@@ -25,7 +25,7 @@ test("el proveedor ollama global queda deshabilitado (evita modelos fantasma)", 
 });
 
 test("existen los perfiles como agentes primarios con el mismo prompt", () => {
-  for (const name of ["venjix", "venjix-auto"]) {
+  for (const name of ["kairos", "kairos-auto"]) {
     const a = cfg.agent[name];
     assert.ok(a, `falta el perfil ${name}`);
     assert.equal(a.mode, "primary", `${name} debe ser primario`);
@@ -36,7 +36,7 @@ test("existen los perfiles como agentes primarios con el mismo prompt", () => {
 });
 
 test("todos los perfiles usan DeepSeek v4.1 Flash", () => {
-  for (const name of ["venjix", "venjix-auto"]) {
+  for (const name of ["kairos", "kairos-auto"]) {
     assert.equal(cfg.agent[name].model, DEEPSEEK, `${name} debe usar DeepSeek v4.1 Flash`);
   }
 });
@@ -56,15 +56,15 @@ test("las lecturas habituales de bash están permitidas y van después del comod
   assert.equal(cfg.permission.bash["git status*"], "allow");
 });
 
-test("modo automático (venjix-auto) permite todo; la guarda de comandos sigue en el plugin", () => {
-  assert.equal(cfg.agent["venjix-auto"].permission, "allow");
+test("modo automático (kairos-auto) permite todo; la guarda de comandos sigue en el plugin", () => {
+  assert.equal(cfg.agent["kairos-auto"].permission, "allow");
   assert.ok(existsSync(join(ROOT, "plugins", "gentle-shell.ts")));
 });
 
 test("build, plan y el perfil duplicado quedan fuera del selector", () => {
   assert.equal(cfg.agent.build?.disable, true, "build debe estar desactivado");
   assert.equal(cfg.agent.plan?.disable, true, "plan debe estar desactivado");
-  assert.equal(cfg.agent["venjix-deep"], undefined, "venjix-deep se retiró");
+  assert.equal(cfg.agent["kairos-deep"], undefined, "kairos-deep se retiró");
 });
 
 test("subagentes con modelo propio: explorador con pasos acotados y juez B con el modelo por defecto", () => {

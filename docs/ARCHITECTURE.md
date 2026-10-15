@@ -1,12 +1,12 @@
 # Arquitectura
 
-Este documento describe cómo está construido opencode-venjix, qué se portó desde gentle-shell, cómo funciona la sincronización y qué limitaciones tiene.
+Este documento describe cómo está construido opencode-kairos, qué se portó desde gentle-shell, cómo funciona la sincronización y qué limitaciones tiene.
 
 ## Visión general
 
 ```
                  ┌──────────────────────────────┐
-  opencode-venjix│ bin/opencode-venjix          │  fija OPENCODE_CONFIG,
+  opencode-kairos│ bin/opencode-kairos          │  fija OPENCODE_CONFIG,
   (launcher) ───▶│  1. sync si cambió gentle-shell│  OPENCODE_CONFIG_DIR,
                  │  2. exec opencode            │  OPENCODE_TUI_CONFIG
                  └──────────────┬───────────────┘
@@ -24,11 +24,11 @@ Este documento describe cómo está construido opencode-venjix, qué se portó d
 
 OpenCode carga la configuración desde las variables de entorno que define el launcher. El repositorio no modifica `~/.config/opencode`, salvo por el enlace del tema descrito en el README.
 
-## Mapeo: gentle-shell (Pi) → opencode-venjix (OpenCode)
+## Mapeo: gentle-shell (Pi) → opencode-kairos (OpenCode)
 
-| Componente en gentle-shell | Equivalente en opencode-venjix | Notas |
+| Componente en gentle-shell | Equivalente en opencode-kairos | Notas |
 |---|---|---|
-| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `venjix`, `venjix-auto` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
+| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `kairos`, `kairos-auto` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
 | `assets/orchestrator-*.md`, `chains/` | `gentle-assets/` | Se leen bajo demanda, igual que en Pi |
 | `assets/agents/*.md` | `agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
@@ -37,7 +37,7 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 | `gentle-notifications` (sonido y escritorio) | Evento `session.idle` → `notify-send` | Sonidos no portados |
 | Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
 | `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
-| `themes/` y TUI propia | `themes/gentleman-venjix.json`, `tui-plugins/`, `tui.json` | Logo y tema propios |
+| `themes/` y TUI propia | `themes/gentleman-kairos.json`, `tui-plugins/`, `tui.json` | Logo y tema propios |
 | Barra fullscreen, paneles, animaciones, regiones de puntero | No portado | Dependen de la API de Pi |
 
 ### Derivación de permisos de subagentes
@@ -75,7 +75,7 @@ La configuración de modelos se reparte en dos capas:
 | Modelo por defecto | `opencode.json` (`model`, `small_model`) | `opencode-go/deepseek-v4.1-flash` (requiere suscripción OpenCode Go) |
 | Proveedores locales | Detectados en cada arranque | Ollama, LM Studio, llama.cpp, vLLM y endpoints de `local-providers.json` |
 
-En cada arranque, `bin/opencode-venjix` ejecuta `scripts/detect-local-models.mjs`. El script sondea los puertos por defecto con un timeout de 800 ms y devuelve un JSON de proveedores. El lanzador lo pasa en `OPENCODE_CONFIG_CONTENT`, que OpenCode fusiona por encima de la configuración del proyecto.
+En cada arranque, `bin/opencode-kairos` ejecuta `scripts/detect-local-models.mjs`. El script sondea los puertos por defecto con un timeout de 800 ms y devuelve un JSON de proveedores. El lanzador lo pasa en `OPENCODE_CONFIG_CONTENT`, que OpenCode fusiona por encima de la configuración del proyecto.
 
 Dos decisiones de diseño:
 
@@ -96,8 +96,8 @@ Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan
 Permisos:
 
 - **Normal** (global): lectura, búsqueda y subagentes permitidos. Edición y bash piden confirmación. Un conjunto de lecturas habituales de bash está permitido. El comodín `*` va primero, porque la última regla que coincide gana.
-- **Automático** (`venjix-auto`): `permission: "allow"` a nivel de agente. Como la última regla que coincide gana, sobrescribe las de `ask`.
-- **Auto de OpenCode**: `opencode-venjix --auto` pasa el flag al binario. Respeta los `deny`.
+- **Automático** (`kairos-auto`): `permission: "allow"` a nivel de agente. Como la última regla que coincide gana, sobrescribe las de `ask`.
+- **Auto de OpenCode**: `opencode-kairos --auto` pasa el flag al binario. Respeta los `deny`.
 - **Guarda de comandos**: `plugins/gentle-shell.ts` la aplica en `tool.execute.before`, en todos los modos.
 
 Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto real del repositorio (diff, estado, estadísticas) y delega en subagentes con la herramienta `task`. `/judge` sigue las reglas de la skill `judgment-day`: jueces ciegos en paralelo, corrección solo de hallazgos confirmados por ambos y como máximo dos rondas. `/review` elige las lentes `review-*` por tamaño y riesgo, con la tabla de gentle-shell.
@@ -113,8 +113,8 @@ Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto 
 ## Pruebas
 
 - `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), y la guarda de comandos destructivos.
-- `OPENCODE_VENJIX_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo por defecto.
-- Las pruebas que consultan servicios usan `OPENCODE_VENJIX_LOCAL_PROVIDERS` para apuntar a servidores de prueba, y no asumen qué runtimes locales hay instalados.
+- `OPENCODE_KAIROS_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo por defecto.
+- Las pruebas que consultan servicios usan `OPENCODE_KAIROS_LOCAL_PROVIDERS` para apuntar a servidores de prueba, y no asumen qué runtimes locales hay instalados.
 - Lección registrada: la salida de `opencode agent list` por tubería puede truncarse al cerrar el proceso. Por eso las pruebas y `install.sh` escriben la salida a un archivo.
 
 ## Ciclo de vida de los archivos

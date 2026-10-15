@@ -1,5 +1,5 @@
 ---
-description: Lista los modelos disponibles en opencode-venjix
+description: Lista los modelos disponibles en opencode-kairos
 ---
 Modelos disponibles:
 

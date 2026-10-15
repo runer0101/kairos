@@ -1,6 +1,6 @@
 ---
 description: Crea el documento de feature ODD para una tarea grande (odd/tasks/<nombre>.md)
-agent: venjix
+agent: kairos
 ---
 Crea el documento de feature ODD para la tarea: $ARGUMENTS
 

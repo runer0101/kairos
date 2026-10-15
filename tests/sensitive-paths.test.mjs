@@ -1,5 +1,5 @@
 // Pruebas de rutas sensibles: el plugin bloquea claves y credenciales en lectura/escritura
-// para todos los agentes (también venjix-auto, que se salta las preguntas), y la
+// para todos los agentes (también kairos-auto, que se salta las preguntas), y la
 // configuración las deniega o pregunta en el perfil normal.
 import { test } from "node:test";
 import assert from "node:assert/strict";

@@ -1,6 +1,6 @@
 ---
 description: Verificación independiente del cambio con evidencia observada
-agent: venjix
+agent: kairos
 ---
 Verifica de forma independiente el cambio actual.
 

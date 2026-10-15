@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — instala opencode-venjix y sus dependencias en cualquier Linux glibc
+# install.sh — instala opencode-kairos y sus dependencias en cualquier Linux glibc
 # (x86_64 o arm64), sin depender de apt, dnf, pacman ni zypper.
 #
 # Instala solo lo que falta:
@@ -8,14 +8,14 @@
 #   - engram 3.4.0      binario oficial de GitHub, verificado con SHA-256 (memoria MCP)
 #
 # No instala Ollama ni descarga modelos. Ollama es opcional: si lo tienes activo,
-# opencode-venjix detecta sus modelos al abrir (ver scripts/detect-local-models.mjs).
+# opencode-kairos detecta sus modelos al abrir (ver scripts/detect-local-models.mjs).
 #
 # Es idempotente: puedes ejecutarlo varias veces. Nunca borra nada tuyo; si reemplaza
 # un archivo real, lo respalda con sufijo .bak-<fecha>.
 #
 # Uso:
 #   ./install.sh [--help]
-#   curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-venjix/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-kairos/main/install.sh | bash
 
 # Si lo ejecutan con sh/dash, relanzar con bash (el script usa sintaxis de bash).
 if [ -z "${BASH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
@@ -42,9 +42,9 @@ if [[ -n "$SELF" && -f "$SELF" ]]; then
 else
     REPO=""
 fi
-CANON="$HOME/.config/opencode-venjix"
+CANON="$HOME/.config/opencode-kairos"
 BIN_DIR="$HOME/.local/bin"
-SHARE_DIR="$HOME/.local/share/opencode-venjix"
+SHARE_DIR="$HOME/.local/share/opencode-kairos"
 OC_THEMES="$HOME/.config/opencode/themes"
 OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
 GS_PKG="$HOME/.gentle-shell/current/node_modules/gentle-pi"
@@ -61,13 +61,13 @@ die()  { printf '\033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
 
 usage() {
     cat <<'TXT'
-install.sh — instala opencode-venjix en Linux (x86_64 o arm64).
+install.sh — instala opencode-kairos en Linux (x86_64 o arm64).
 
 Uso:
   ./install.sh [--help]
 
 También puedes instalarlo sin clonar antes (el instalador clona el repo solo):
-  curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-venjix/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/runer0101/opencode-kairos/main/install.sh | bash
 
 Instala Node.js, OpenCode y engram si faltan, y configura el repositorio.
 No instala Ollama ni modelos: si tienes Ollama activo, se detecta al abrir.
@@ -113,8 +113,8 @@ ensure_checkout() {
         die "$CANON ya existe y no es un repositorio git; muévelo o bórralo y reintenta"
     fi
     if [[ ! -d "$CANON/.git" ]]; then
-        say "clonando https://github.com/runer0101/opencode-venjix.git"
-        git clone --depth 1 https://github.com/runer0101/opencode-venjix.git "$CANON" \
+        say "clonando https://github.com/runer0101/opencode-kairos.git"
+        git clone --depth 1 https://github.com/runer0101/opencode-kairos.git "$CANON" \
             || die "no se pudo clonar el repositorio"
     else
         ok "ya hay un checkout en $CANON"
@@ -291,9 +291,9 @@ setup_repo() {
     say "instalando dependencias con pnpm (lockfile congelado)"
     (cd "$REPO" && "$PNPM_BIN" install --frozen-lockfile --config.confirmModulesPurge=false)
 
-    chmod +x "$REPO/bin/opencode-venjix" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
-    link "$REPO/bin/opencode-venjix" "$BIN_DIR/opencode-venjix"
-    link "$REPO/bin/opencode-venjix" "$BIN_DIR/ov"
+    chmod +x "$REPO/bin/opencode-kairos" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
+    link "$REPO/bin/opencode-kairos" "$BIN_DIR/opencode-kairos"
+    link "$REPO/bin/opencode-kairos" "$BIN_DIR/kai"
     # Retira enlaces rotos que apuntaban a temas de este repo y ya no existen (p. ej. tras un renombrado).
     for stale in "$OC_THEMES"/*.json; do
         [[ -L "$stale" && ! -e "$stale" ]] || continue
@@ -343,7 +343,7 @@ if (engram) {
 }
 NODE
 
-    ok "launcher: $BIN_DIR/opencode-venjix (alias corto: ov)"
+    ok "launcher: $BIN_DIR/opencode-kairos (alias corto: kai)"
     ok "temas: $OC_THEMES"
     case ":$PATH:" in
         *":$BIN_DIR:"*) ;;
@@ -368,8 +368,8 @@ verify() {
     # cerrarse antes de vaciar stdout y la lista llega truncada (falsos negativos).
     local listing perfil
     listing="$(mktemp)"
-    OPENCODE_VENJIX_NO_SYNC=1 OPENCODE_BIN="$OPENCODE_BIN" "$REPO/bin/opencode-venjix" agent list >"$listing" 2>&1 || true
-    for perfil in venjix venjix-auto; do
+    OPENCODE_KAIROS_NO_SYNC=1 OPENCODE_BIN="$OPENCODE_BIN" "$REPO/bin/opencode-kairos" agent list >"$listing" 2>&1 || true
+    for perfil in kairos kairos-auto; do
         if ! grep -q "^$perfil (primary)" "$listing"; then
             tail -20 "$listing" >&2
             rm -f "$listing"
@@ -401,9 +401,9 @@ main() {
 
     echo
     ok "instalación completa"
-    echo "  Abre OpenCode con:    opencode-venjix"
+    echo "  Abre OpenCode con:    opencode-kairos"
     echo "  Diagnóstico dentro:   /gentle-doctor"
-    echo "  Modelos locales:      opcional; instala Ollama y descarga modelos, opencode-venjix los detecta"
+    echo "  Modelos locales:      opcional; instala Ollama y descarga modelos, opencode-kairos los detecta"
     echo
     warn "no uses gentle-sync sobre $CANON: reemplazaría esta instalación"
 }

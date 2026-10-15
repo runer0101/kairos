@@ -1,4 +1,4 @@
-# ODD (Organic Driven Development) en opencode-venjix
+# ODD (Organic Driven Development) en opencode-kairos
 
 Flujo de trabajo para tareas que no caben en un solo paso:
 

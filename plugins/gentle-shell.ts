@@ -1,11 +1,11 @@
 // gentle-shell portado a OpenCode: guarda de comandos destructivos, piso de rutas sensibles
 // y aviso de escritorio al terminar. Lógica de la guarda: copiada de gentle-pi
-// (lib/destructive-command-guard.ts), MIT. Los sonidos viven en el pack nativo "venjix"
-// (tui-plugins/gentle-sounds.ts; se activa con OPENCODE_VENJIX_SOUNDS=1).
+// (lib/destructive-command-guard.ts), MIT. Los sonidos viven en el pack nativo "kairos"
+// (tui-plugins/gentle-sounds.ts; se activa con OPENCODE_KAIROS_SOUNDS=1).
 import type { Plugin } from "@opencode-ai/plugin"
 import { recognizeDestructiveCommands } from "../lib/destructive-command-guard.ts"
 
-// Rutas sensibles: piso inviolable para todos los agentes (incluido venjix-auto, que se
+// Rutas sensibles: piso inviolable para todos los agentes (incluido kairos-auto, que se
 // salta las preguntas de permiso). Leer o escribir aquí se bloquea siempre.
 const SENSITIVE_PATH = [
   /(^|\/)\.ssh(\/|$)/,
@@ -49,7 +49,7 @@ export const GentleShellPlugin: Plugin = async ({ $ }) => {
         )
       }
       // Un comando que referencia credenciales también se bloquea: la vía bash no debe
-      // esquivar la protección de rutas sensibles (p. ej. `cat ~/.ssh/id_rsa` en venjix-auto).
+      // esquivar la protección de rutas sensibles (p. ej. `cat ~/.ssh/id_rsa` en kairos-auto).
       if (SENSITIVE_PATH.some((re) => re.test(command))) {
         throw new Error(
           "gentle-shell: el comando referencia una ruta sensible (.ssh, .gnupg, .aws o credenciales) y se bloqueó. Esa ruta la debe manejar el usuario a mano.",
@@ -59,7 +59,7 @@ export const GentleShellPlugin: Plugin = async ({ $ }) => {
     // Notificación de escritorio cuando la sesión queda inactiva (tarea terminada).
     event: async ({ event }) => {
       if (event.type !== "session.idle") return
-      await $`notify-send -a opencode-venjix "OpenCode" "Tarea terminada"`.nothrow().quiet()
+      await $`notify-send -a opencode-kairos "OpenCode" "Tarea terminada"`.nothrow().quiet()
     },
   }
 }

@@ -5,5 +5,5 @@
     "./tui-plugins/gentle-logo.tsx",
     "./tui-plugins/gentle-sounds.ts"
   ],
-  "theme": "gentleman-venjix"
+  "theme": "gentleman-kairos"
 }

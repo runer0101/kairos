@@ -18,7 +18,7 @@ const DETECT = join(ROOT, "scripts", "detect-local-models.mjs");
 // si el detector se ejecutara con execFileSync (bloquea el event loop).
 async function runDetect(file) {
     const { stdout } = await execFileAsync(process.execPath, [DETECT], {
-        env: { ...process.env, OPENCODE_VENJIX_LOCAL_PROVIDERS: file },
+        env: { ...process.env, OPENCODE_KAIROS_LOCAL_PROVIDERS: file },
         timeout: 15000,
         encoding: "utf8",
     });
