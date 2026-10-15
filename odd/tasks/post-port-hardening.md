@@ -64,6 +64,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] T12 — Modelo único DeepSeek v4.1 Flash (pedida por el usuario, después del plan) · Criterio: `model`, `small_model` y todos los agentes de `opencode.json` usan `opencode-go/deepseek-v4.1-flash`; docs y pruebas coherentes · Prueba: `pnpm test` + comprobación en vivo
 - [x] T13 — Repo publicable sin datos personales (pedida por el usuario, después del plan) · Criterio: archivos versionados sin rutas de hogar ni correos; el instalador y el sync no materializan rutas · Prueba: `pnpm test` (privacy) + `install.sh` idempotente sin cambios
 - [x] T14 — Temas de gentle-shell portados (pedida por el usuario, después del plan) · Criterio: los tres temas de `gentle-pi` (Gentle, Gentleman-Cute, Gentleman-Sexy) convertidos al formato de OpenCode, enlazados por `install.sh` y validados · Prueba: `pnpm test` (tests/themes.test.mjs) + smoke de TUI con `gentleman-sexy`
+- [x] T15 — Sonidos y logo personal (pedida por el usuario, después del plan) · Criterio: los 3 tonos portados con atribución y apagados por defecto (`OPENCODE_VENJIX_SOUNDS=1`); texto del logo configurable (`OPENCODE_VENJIX_LOGO_TEXT`, por defecto `venjix`) · Prueba: `pnpm test` (sounds + tui-logo) + smoke de TUI
 
 ## Evidencia de verificación
 
@@ -76,6 +77,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - T12: `opencode.json` con `opencode-go/deepseek-v4.1-flash` en `model`, `small_model`, los tres perfiles, `gentle-ai-explore` y `jd-judge-b`; README y ARCHITECTURE actualizados; pruebas de configuración ajustadas (los tres perfiles usan el mismo modelo; el juez B pierde su modelo distinto). Comprobación en vivo: `opencode-venjix run "responde solo la palabra: ok"` → "ok" con cabecera `venjix · deepseek-v4.1-flash`.
 - T13: rutas portables (`tui.json` con ruta relativa, engram `{env:HOME}/...`, gentle-assets `$OPENCODE_CONFIG_DIR`); `install.sh` ya no reescribe archivos rastreados (dos corridas idempotentes sin cambios); smoke de TUI 40×12 desde otro cwd carga el logo compacto; engram conecta en vivo (`mem_list_projects` → 4). El test de rutas absolutas pasó a exigir cero rutas absolutas en `opencode.json`. Decisiones pendientes del autor: (1) autoría de los 8 commits locales previos, que usan su correo personal (los públicos usan el noreply de GitHub); (2) si se reescribe la historia pública hasta `6f9cc2b`, que contiene rutas de la máquina (sin secretos).
 - T14: `themes/gentle.json`, `themes/gentleman-cute.json` y `themes/gentleman-sexy.json` (vars+colors de Pi → defs+theme de OpenCode, mismo juego de claves que `gentleman`); `install.sh` enlaza todos los temas; `pnpm test` → 47 tests, 43 pass, 4 skipped, 0 fail; smoke real: con `theme: gentleman-sexy` la TUI pinta el fondo `#060407` (ausente el de `gentleman`) y sale sin errores.
+- T15: tema por defecto renombrado a `gentleman-venjix` (el enlace viejo se retira solo en `install.sh`); `assets/sounds/{success,error,attention}.wav` + `LICENSE.md` portados con su atribución; el plugin reproduce en `session.idle`/`session.error`/`permission.asked|question.asked` (paplay→pw-play→aplay; macOS afplay) solo con `OPENCODE_VENJIX_SOUNDS=1`; el logo pinta `LOGO_TEXT` (env `OPENCODE_VENJIX_LOGO_TEXT`, por defecto `venjix`). `pnpm test` → 50 tests, 46 pass, 4 skipped, 0 fail; smoke real: tema renombrado pinta su fondo y `OPENCODE_VENJIX_LOGO_TEXT=personalizado` aparece en la captura.
 
 ## Progreso
 
@@ -89,6 +91,7 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — T13: hardening de privacidad para publicar sin datos personales (rutas portables, instalador que no ensucia, prueba de privacidad, bits de ejecución). Commits: `16b3b72`, `13372be`, `69d031f`, `3ff9abd`; sin push.
 - 2026-10-15 — Reescritura de autoría de los 13 commits sin publicar (correo personal → noreply de GitHub) con el consentimiento del autor; el árbol quedó idéntico y este documento ya apunta a los hashes nuevos. Historia pública hasta `6f9cc2b` sin tocar (decisión del autor).
 - 2026-10-15 — T14: temas de gentle-shell portados a OpenCode (Gentle, Gentleman-Cute, Gentleman-Sexy) con enlace múltiple en `install.sh`, pruebas de esquema y smoke real en la TUI (`6e2aaf2`). Pendiente decidir sonidos y logo de texto personal.
+- 2026-10-15 — T14/T15: tema por defecto renombrado a `gentleman-venjix` (`b80b17b`); sonidos opt-in y texto del logo portados y verificados (`d5ce460`).
 
 ## Siguiente paso
 
