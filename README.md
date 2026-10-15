@@ -1,6 +1,6 @@
 # opencode-venjix
 
-OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles de agente, modos de permiso, flujo ODD con documento de feature, revisión por lentes, juicio adversarial, verificación independiente, memoria persistente y detección automática de IA local. Incluye un tema y un logo propios.
+OpenCode con las herramientas de **gentle-shell** portadas a su base: perfiles de agente, modos de permiso, flujo ODD con documento de feature, revisión por lentes, juicio adversarial, verificación independiente, memoria persistente y detección automática de IA local. Incluye temas, logo y sonidos propios.
 
 ## Qué incluye
 
@@ -109,6 +109,24 @@ Cuatro temas en `themes/` (los tres de gentle-shell portados a OpenCode, MIT):
 
 Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la tabla (sin `.json`), o usa el selector de temas de la TUI. `install.sh` enlaza todos los temas en `~/.config/opencode/themes/`.
 
+### Sonidos de aviso (opcional)
+
+`assets/sounds/` trae los tres tonos originales de gentle-shell (MIT). Están apagados por defecto; actívalos al lanzar:
+
+```bash
+OPENCODE_VENJIX_SOUNDS=1 opencode-venjix
+```
+
+Suenan al terminar una tarea (`success`), ante un error de sesión (`error`) y cuando OpenCode pide permiso o hace una pregunta (`attention`). En Linux usa `paplay`, `pw-play` o `aplay` (el primero que exista); en macOS, `afplay`. Sin reproductor disponible se ignoran sin error.
+
+### Logo
+
+El arco lleva debajo un texto personal (`venjix` por defecto). Cámbialo editando `LOGO_TEXT` en `tui-plugins/gentle-logo.tsx` o al lanzar:
+
+```bash
+OPENCODE_VENJIX_LOGO_TEXT=otro-texto opencode-venjix
+```
+
 ## IA local (opcional)
 
 El instalador no instala ni descarga modelos locales. Si instalas un runtime, opencode-venjix lo detecta al abrir, sin configurar nada:
@@ -182,7 +200,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 47 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad y temas
+pnpm test                           # 50 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas y sonidos
 OPENCODE_VENJIX_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 

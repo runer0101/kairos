@@ -42,3 +42,10 @@ test("la rama compacta usa compactArt, definido antes de usarse", () => {
   assert.ok(def < use, "compactArt se usa antes de definirse");
   assert.match(src, /compactArt\.map\(\(line, index\) =>/, "la rama compacta debe colorear por índice");
 });
+
+test("el logo muestra un texto personal bajo el arco", () => {
+  assert.match(src, /const LOGO_TEXT =/, "falta LOGO_TEXT");
+  assert.match(src, /OPENCODE_VENJIX_LOGO_TEXT/, "el texto debe poder cambiarse por variable");
+  assert.match(src, /"venjix"/, "el texto por defecto es venjix");
+  assert.match(src, /\{LOGO_TEXT\}/, "LOGO_TEXT debe renderizarse en la TUI");
+});
