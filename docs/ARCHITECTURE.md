@@ -34,6 +34,7 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
 | `registerCommand("gentle:…")` | `commands/gentle-*.md` | Solo los comandos con equivalente directo en OpenCode |
 | `lib/destructive-command-guard.ts` | `lib/destructive-command-guard.ts` + `plugins/gentle-shell.ts` | El plugin llama a la guarda en `tool.execute.before` |
+| Clasificador de auto-aprobación (`lib/auto-permission-classifier.ts` + runtime) | `plugins/auto-approval.ts` + `lib/auto-approval/` | Mecanismo verificado en OpenCode 1.18.35: el ask se responde por el evento `permission.asked` y el veto va por `tool.execute.before` (ver «Clasificador de auto-aprobación») |
 | `gentle-notifications` (sonido y escritorio) | Evento `session.idle` → `notify-send` + pack de tonos nativo | Tonos opt-in con `KAIROS_SOUNDS=1` |
 | Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
 | `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
@@ -102,6 +103,54 @@ Permisos:
 
 Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto real del repositorio (diff, estado, estadísticas) y delega en subagentes con la herramienta `task`. `/judge` sigue las reglas de la skill `judgment-day`: jueces ciegos en paralelo, corrección solo de hallazgos confirmados por ambos y como máximo dos rondas. `/review` elige las lentes `review-*` por tamaño y riesgo, con la tabla de gentle-shell.
 
+### Clasificador de auto-aprobación
+
+Portado de gentle-pi (`lib/auto-permission-classifier.ts` + runtime) sobre el mecanismo que T1 verificó en OpenCode 1.18.35:
+
+- **Ask → allow**: `permission.ask` está declarado en la API del plugin pero el runtime **no lo despacha**; el camino real es el evento `permission.asked`, respondido con `client._client.post("/permission/{requestID}/reply", { reply: "once" })`. Solo se clasifican `bash` y edición (`write` entra por el permiso de edición); el resto de consentimientos sigue en manos humanas.
+- **Allow → deny (veto)**: `allow` no emite evento de permiso, así que el veto lanza un error en `tool.execute.before`, como la guarda. Solo actúa cuando el permiso efectivo del agente para esa herramienta es `allow` confirmado (lo resuelve desde `/agent` y el último mensaje de usuario); con estado desconocido o `ask` no veta.
+- **Sesión interna**: la clasificación corre en una sesión propia con herramientas deshabilitadas (`tools: {}`), modelo explícito y borrado al terminar; una sola clasificación en vuelo (las concurrentes se dejan como están) y una caché acotada por `callID` evita clasificar dos veces la misma llamada.
+- **Fail-safe**: cualquier fallo, timeout (deadline de 15 s), veredicto inválido o concurrencia deja la decisión como está; el plugin nunca debilita la guarda ni el piso de rutas sensibles.
+- **Contexto**: pedido vivo primero, acción redactada (secretos enmascarados) y presupuestos de 32 KiB de entrada y 512 tokens de salida.
+
+Evidencia del spike, criterios y presupuestos completos: `odd/tasks/auto-approval-classifier.md`.
+
+### Comandos `/gentle:*` de Pi: qué aplica
+
+gentle-pi 4.2.0 registra 29 comandos `/gentle:*` (verificado en `extensions/` y `lib/`). Kairos porta los que tienen equivalente directo y cubre el resto con lo nativo de OpenCode:
+
+| Comando de Pi | Estado en kairos | Equivalente nativo |
+|---|---|---|
+| `gentle:doctor` | portado (`commands/gentle-doctor.md`) | Diagnóstico de la instalación kairos |
+| `gentle:models` | portado (`commands/gentle-models.md`) | Lista modelos con `opencode models`; los modelos por defecto se editan en `opencode.json` |
+| `gentle:status` | portado (`commands/gentle-status.md`) | Reorientado al repositorio y la sesión (`git status`); el estado de la instalación lo cubre `/gentle-doctor` |
+| `gentle:usage` | portado (`commands/gentle-usage.md`) | Usa `opencode stats` |
+| `gentle:profiles` | no aplica | Perfiles de kairos con `Tab` (selector de agente primario) |
+| `gentle:mode` | no aplica | Perfiles con `Tab` para el modo automático y `kairos --auto` para el auto de OpenCode |
+| `gentle:yolo` | no aplica | Perfil `kairos-auto` (`Tab`) o `kairos --auto` |
+| `gentle:persona` | no aplica | Sin equivalente: kairos no tiene personas intercambiables |
+| `gentle:customize` | no aplica | `tui.json` (tema, logo, sonidos, atajos) y `opencode.json` (permisos) |
+| `gentle:animations` | no aplica | Sin ajuste equivalente en `tui.json` |
+| `gentle:vim` | no aplica | Sin equivalente; la edición del prompt usa los atajos de la TUI (`keybinds` en `tui.json`) |
+| `gentle:double-esc-cancel` | no aplica | Sin ajuste equivalente; las teclas se personalizan con `keybinds` en `tui.json` |
+| `gentle:banner` | no aplica | Logo propio (`tui-plugins/gentle-logo.tsx`, `KAIROS_LOGO_TEXT`) |
+| `gentle:banner-color` | no aplica | `theme` en `tui.json`: el logo sigue al tema activo |
+| `gentle:toggle-rose` | no aplica | `theme` en `tui.json` (temas gentleman) |
+| `gentle:toggle-text-logo` | no aplica | Editar `tui-plugins/gentle-logo.tsx` o quitarlo de `tui.json` |
+| `gentle:dev-binary` | no aplica | Kairos usa el binario de OpenCode instalado |
+| `gentle:telemetry` | no aplica | Sin equivalente: kairos no incluye telemetría |
+| `gentle:commands` | no aplica | Paleta de comandos de la TUI (`ctrl+p`) |
+| `gentle:changes` | no aplica | `/gentle-status` (resumen del árbol) y `git diff` en la terminal |
+| `gentle:agents` | no aplica | `opencode agent list` y el panel `opencode-subagent-statusline` (subagentes vía `task`) |
+| `gentle:jobs` | no aplica | Herramienta `task` en segundo plano (`background`); kairos delega en primer plano por defecto |
+| `gentle:background-subagents` | no aplica | `task` (segundo plano con `background`); primer plano por defecto |
+| `gentle:stats` | no aplica | `opencode stats` (el mismo que usa `/gentle-usage`) |
+| `gentle:status-timing` | no aplica | Sin equivalente: diagnóstico propio de Pi |
+| `gentle:review-mode` | no aplica | RDD no portado; la revisión se cubre con `/review`, `/judge` y `/verify` |
+| `gentle:review-session-permission` | no aplica | RDD no portado |
+| `gentle:install-delegation` | no aplica | `node scripts/sync-gentle-shell.mjs --force` regenera agentes y prompts; `/gentle-doctor` diagnostica |
+| `gentle:install-review` | no aplica | `node scripts/sync-gentle-shell.mjs --force` regenera los agentes de revisión y sus skills |
+
 ## Dependencias y cadena de suministro
 
 - Gestor: pnpm 11.22.0, fijado en `package.json` (`packageManager`) y en `install.sh`. `install.sh` usa el pnpm del sistema solo si es esa versión exacta; si no, instala la fijada en su propia carpeta.
@@ -112,8 +161,8 @@ Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto 
 
 ## Pruebas
 
-- `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), guarda de comandos destructivos, rutas sensibles, lanzador, hook `commit-msg`, sincronización, privacidad, temas, logo, HUD y sonidos.
-- `KAIROS_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo por defecto.
+- `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), guarda de comandos destructivos, clasificador de auto-aprobación (presupuestos, redacción, parseo, política y plugin), rutas sensibles, lanzador, hook `commit-msg`, sincronización, privacidad, temas, logo, HUD y sonidos.
+- `KAIROS_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio, una respuesta real del modelo por defecto y el e2e del clasificador en pty con `KAIROS_CLASSIFIER_STUB`.
 - Las pruebas que consultan servicios usan `KAIROS_LOCAL_PROVIDERS` para apuntar a servidores de prueba, y no asumen qué runtimes locales hay instalados.
 - Lección registrada: la salida de `opencode agent list` por tubería puede truncarse al cerrar el proceso. Por eso las pruebas y `install.sh` escriben la salida a un archivo.
 
@@ -191,7 +240,9 @@ Esa comprobación está en la copia local de `gentle-sync` (`~/.local/bin/gentle
 ## Limitaciones conocidas
 
 - La barra fullscreen, los paneles de uso y las animaciones de la TUI de Pi no se portaron; la identidad visual propia (tema, logo, sonidos y HUD ODD) sí existe (ver «La TUI (mapa)»).
-- Solo se portaron 3 comandos `/gentle:*`; los demás dependen de la API de Pi o de la TUI propia.
+- Los comandos `/gentle:*` de Pi que no aplican en kairos, con su equivalente nativo, están en la tabla «Comandos `/gentle:*` de Pi: qué aplica».
+- El clasificador de auto-aprobación usa el evento `permission.asked` y el cliente de bajo nivel (`client._client.post`). Si una actualización de OpenCode cambia esa superficie, el plugin degrada sin romper: la decisión queda como está.
+- En `opencode run` (no interactivo) el CLI auto-rechaza el ask antes de que el clasificador responda; el camino automático es práctico en la TUI.
 - Las herramientas que el orchestrator espera de Pi (`codegraph`, `gentle_review`, `web_*`) no están configuradas en OpenCode. Los agentes deben reportar esa ausencia en lugar de simularla.
 - La ruta del binario de `engram` en `opencode.json` se ajusta con `{env:HOME}` al instalar; `tui.json` usa rutas relativas al repositorio. En otra máquina basta ejecutar `install.sh`.
 - Lo visual se verifica con pruebas estáticas y capturas pty por tema; no hay captura visual automatizada en CI (evidencia en `odd/tasks/visual-statusline.md`).

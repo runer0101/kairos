@@ -30,6 +30,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 
 - **Perfiles de agente** (se cambian con `Tab`): `kairos-control` (normal) y `kairos-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
 - **Modos de permiso**: normal por defecto; automático con el perfil `kairos-auto` o con `kairos --auto`. La guarda de comandos destructivos siempre está activa.
+- **Clasificador de auto-aprobación**: aprueba lo seguro y dentro del pedido vivo en el perfil normal, y veta lo peligroso o fuera de alcance en `kairos-auto`; es consejo contextual y cualquier fallo deja la decisión como está (ver *Modos de permiso*).
 - **Rutas sensibles protegidas**: credenciales (`~/.ssh`, `~/.gnupg`, `~/.aws`, claves, `auth.json`) bloqueadas en todos los perfiles; `.env`/`.pem` piden confirmación en el perfil normal (ver `SECURITY.md`).
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
 - **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
@@ -114,6 +115,23 @@ Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar l
 La guarda de comandos destructivos bloquea, en todos los modos, formas reconocibles como `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE` y `DELETE` sin `WHERE`. Es un filtro heurístico, no un sandbox.
 
 Además hay un **piso inviolable de rutas sensibles**: leer o escribir en `~/.ssh`, `~/.gnupg`, `~/.aws`, `.git-credentials`, `.netrc`, claves `id_*` o `auth.json` se bloquea para el agente en todos los perfiles (también `kairos-auto`, y también vía bash). Los `.env`, `*.pem` y configs de kube/docker piden confirmación en el perfil normal. Detalles y límites en [SECURITY.md](SECURITY.md).
+
+### Clasificador de auto-aprobación
+
+Un clasificador por modelo decide, en ambas direcciones, si una acción de `bash` o de edición encaja con el pedido vivo:
+
+- **Perfil normal (`ask`)**: si el veredicto es seguro y está dentro del pedido, responde la confirmación con `once`. El resto sigue preguntando, igual que hoy.
+- **Perfil `kairos-auto` (`allow`)**: si el veredicto es peligroso o fuera de alcance, bloquea la acción antes de ejecutarla. Solo actúa sobre sesiones con permiso `allow` confirmado: un pedido humano (`ask`) nunca se veta.
+
+Es **consejo contextual, nunca autoridad ni respuesta a un consentimiento humano**: no debilita la guarda ni el piso de rutas sensibles, y cualquier fallo (timeout, error, veredicto inválido o clasificación concurrente) deja la decisión como está. Tarda ~1,4–5 s por decisión, así que es práctica en la TUI; en `opencode run` (no interactivo) el CLI auto-rechaza el ask antes y no llega a actuar.
+
+| Interruptor | Efecto |
+|---|---|
+| `KAIROS_NO_CLASSIFIER=1` | Apaga el clasificador: todo queda como hoy. |
+| `KAIROS_CLASSIFIER_MODEL=provider/model` | Cambia el modelo que clasifica (por defecto `opencode-go/deepseek-v4.1-flash`). |
+| `KAIROS_CLASSIFIER_STUB=allow\|deny\|timeout` | Veredicto determinista para pruebas y e2e. |
+
+Los presupuestos son: contexto ≤ 32 KiB (el pedido vivo primero, con los secretos enmascarados), salida ≤ 512 tokens y deadline de 15 s. Para apagarlo: `KAIROS_NO_CLASSIFIER=1 kairos`.
 
 ## Comandos
 
@@ -249,8 +267,8 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 75 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, sonidos y rutas sensibles
-KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
+pnpm test                           # 115 pruebas: configuración, agentes, comandos, detector, guarda, clasificador, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, sonidos y rutas sensibles
+KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto, incluido el e2e del clasificador con stub
 ```
 
 Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales. La prueba de privacidad recorre los archivos versionados y falla si aparece una ruta de tu máquina o un correo personal: el repositorio se publica tal cual.
@@ -292,8 +310,8 @@ Detalles de cada componente, el mapeo de Pi a OpenCode y el flujo de actualizaci
 Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi, y no se portaron:
 
 - La barra fullscreen, paneles de uso, animaciones y regiones de puntero de la TUI de Pi (los sonidos sí se portaron, opt-in).
-- La autoridad nativa de revisión (RDD), Herdr y el clasificador de la aprobación automática de Pi.
-- Los comandos `/gentle:*` que dependían de esas piezas.
+- La autoridad nativa de revisión (RDD) y Herdr.
+- Los comandos `/gentle:*` que dependían de esas piezas; el estado de cada comando de Pi y su equivalente nativo están en la tabla «Comandos `/gentle:*` de Pi: qué aplica» de [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Seguridad
 
