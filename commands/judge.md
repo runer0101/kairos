@@ -1,6 +1,6 @@
 ---
 description: Judgment Day del cambio: dos jueces ciegos con modelos distintos y corrección acotada
-agent: kairos
+agent: kairos-control
 ---
 Ejecuta un Judgment Day sobre: $ARGUMENTS
 Si no se indica alcance, usa el cambio actual.

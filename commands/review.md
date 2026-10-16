@@ -1,6 +1,6 @@
 ---
 description: Revisión del cambio actual con lentes 4R según tamaño y riesgo
-agent: kairos
+agent: kairos-control
 ---
 Revisa el cambio actual del repositorio.
 

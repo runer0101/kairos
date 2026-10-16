@@ -5,7 +5,7 @@
 
 ## Objetivo
 
-Portar el clasificador de auto-aprobación de gentle-shell a kairos con el hook `permission.ask` de OpenCode, en **ambas direcciones**: el perfil `kairos` aprueba automáticamente lo clasificado como seguro y dentro del pedido vivo; `kairos-auto` suma un veto inteligente sobre su `allow` actual. Nunca debilita las capas duras existentes y un fallo del clasificador deja la decisión como está hoy (fail-safe no regresivo).
+Portar el clasificador de auto-aprobación de gentle-shell a kairos con el hook `permission.ask` de OpenCode, en **ambas direcciones**: el perfil `kairos-control` aprueba automáticamente lo clasificado como seguro y dentro del pedido vivo; `kairos-auto` suma un veto inteligente sobre su `allow` actual. Nunca debilita las capas duras existentes y un fallo del clasificador deja la decisión como está hoy (fail-safe no regresivo).
 
 ## Problema
 

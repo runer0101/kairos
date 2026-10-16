@@ -9,9 +9,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
 const DEEPSEEK = "opencode-go/deepseek-v4.1-flash";
 
-test("el agente por defecto es el perfil equilibrado", () => {
-  assert.equal(cfg.default_agent, "kairos");
-  assert.equal(cfg.agent.kairos.mode, "primary");
+test("el agente por defecto es el perfil de control", () => {
+  assert.equal(cfg.default_agent, "kairos-control");
+  assert.equal(cfg.agent["kairos-control"].mode, "primary");
 });
 
 test("el modelo por defecto es DeepSeek v4.1 Flash", () => {
@@ -25,7 +25,7 @@ test("el proveedor ollama global queda deshabilitado (evita modelos fantasma)", 
 });
 
 test("existen los perfiles como agentes primarios con el mismo prompt", () => {
-  for (const name of ["kairos", "kairos-auto"]) {
+  for (const name of ["kairos-control", "kairos-auto"]) {
     const a = cfg.agent[name];
     assert.ok(a, `falta el perfil ${name}`);
     assert.equal(a.mode, "primary", `${name} debe ser primario`);
@@ -36,9 +36,14 @@ test("existen los perfiles como agentes primarios con el mismo prompt", () => {
 });
 
 test("todos los perfiles usan DeepSeek v4.1 Flash", () => {
-  for (const name of ["kairos", "kairos-auto"]) {
+  for (const name of ["kairos-control", "kairos-auto"]) {
     assert.equal(cfg.agent[name].model, DEEPSEEK, `${name} debe usar DeepSeek v4.1 Flash`);
   }
+});
+
+test("cada perfil lleva su color: control en amarillo y auto en azul", () => {
+  assert.equal(cfg.agent["kairos-control"].color, "warning");
+  assert.equal(cfg.agent["kairos-auto"].color, "accent");
 });
 
 test("modo normal: edición y bash piden confirmación, lectura libre salvo rutas sensibles", () => {

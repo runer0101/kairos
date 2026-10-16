@@ -28,7 +28,7 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 
 | Componente en gentle-shell | Equivalente en kairos | Notas |
 |---|---|---|
-| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `kairos`, `kairos-auto` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
+| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `kairos-control`, `kairos-auto` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
 | `assets/orchestrator-*.md`, `chains/` | `gentle-assets/` | Se leen bajo demanda, igual que en Pi |
 | `assets/agents/*.md` | `agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |

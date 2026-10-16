@@ -28,7 +28,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 
 ## Qué incluye
 
-- **Perfiles de agente** (se cambian con `Tab`): `kairos` (normal) y `kairos-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
+- **Perfiles de agente** (se cambian con `Tab`): `kairos-control` (normal) y `kairos-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
 - **Modos de permiso**: normal por defecto; automático con el perfil `kairos-auto` o con `kairos --auto`. La guarda de comandos destructivos siempre está activa.
 - **Rutas sensibles protegidas**: credenciales (`~/.ssh`, `~/.gnupg`, `~/.aws`, claves, `auth.json`) bloqueadas en todos los perfiles; `.env`/`.pem` piden confirmación en el perfil normal (ver `SECURITY.md`).
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
@@ -94,8 +94,10 @@ Pulsa `Tab` para cambiar de perfil durante una sesión.
 
 | Perfil | Modelo | Permisos | Para qué |
 |---|---|---|---|
-| `kairos` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario |
+| `kairos-control` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario |
 | `kairos-auto` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
+
+Cada perfil lleva su color en la interfaz: `kairos-control` en amarillo y `kairos-auto` en azul.
 
 Los dos perfiles usan el mismo modelo (DeepSeek v4.1 Flash, requiere suscripción OpenCode Go). Los subagentes sin modelo propio heredan el modelo del perfil activo. `gentle-ai-explore` limita a 15 pasos para acotar el costo de la exploración; el resto de subagentes (incluido `jd-judge-b`) usa DeepSeek v4.1 Flash.
 

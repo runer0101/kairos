@@ -1,6 +1,6 @@
 ---
 description: Verificación independiente del cambio con evidencia observada
-agent: kairos
+agent: kairos-control
 ---
 Verifica de forma independiente el cambio actual.
 

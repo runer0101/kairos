@@ -33,7 +33,7 @@ test("la lista de agentes incluye los perfiles", { skip: !enabled && "usa KAIROS
     execFileSync("/bin/sh", ["-c", `"$0" agent list > "$1" 2>&1`, OPENCODE, listing], { env, timeout: 120000 });
     const out = readFileSync(listing, "utf8");
     rmSync(listing, { force: true });
-    for (const name of ["kairos (primary)", "kairos-auto (primary)"]) {
+    for (const name of ["kairos-control (primary)", "kairos-auto (primary)"]) {
         assert.ok(out.includes(name), `falta ${name}`);
     }
 });

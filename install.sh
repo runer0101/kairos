@@ -375,7 +375,7 @@ verify() {
     local listing perfil
     listing="$(mktemp)"
     KAIROS_NO_SYNC=1 OPENCODE_BIN="$OPENCODE_BIN" "$REPO/bin/kairos" agent list >"$listing" 2>&1 || true
-    for perfil in kairos kairos-auto; do
+    for perfil in kairos-control kairos-auto; do
         if ! grep -q "^$perfil (primary)" "$listing"; then
             tail -20 "$listing" >&2
             rm -f "$listing"

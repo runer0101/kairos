@@ -1,6 +1,6 @@
 ---
 description: Crea el documento de feature ODD para una tarea grande (odd/tasks/<nombre>.md)
-agent: kairos
+agent: kairos-control
 ---
 Crea el documento de feature ODD para la tarea: $ARGUMENTS
 
