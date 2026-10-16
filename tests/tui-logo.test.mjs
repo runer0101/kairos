@@ -51,6 +51,20 @@ test("el logo muestra un texto personal bajo el arco", () => {
 });
 
 test("el logo incluye los atajos principales bajo el arco", () => {
-  assert.match(src, /Tab: perfiles/, "el logo debe recordar los atajos");
-  assert.ok(!src.includes("home_footer"), "el pie separado no se usa (no renderiza en OpenCode 1.18)");
+    assert.match(src, /Tab: perfiles/, "el logo debe recordar los atajos");
+    assert.ok(!src.includes("home_footer"), "el pie separado no se usa (no renderiza en OpenCode 1.18)");
+});
+
+test("el logo lee los colores del tema activo y no tiene hex fijos", () => {
+    assert.match(src, /api\.theme\.current/, "el logo debe leer api.theme.current");
+    assert.ok(!/#[0-9a-fA-F]{3,8}/.test(src), "sin colores hexadecimales fijos en el logo");
+    assert.match(src, /archLineColor = \(theme, index\)/, "el arco se colorea desde el tema");
+    assert.match(src, /theme\.primary/, "el arco usa primary del tema");
+    assert.match(src, /theme\.secondary/, "el arco usa secondary del tema");
+});
+
+test("el texto del logo y los separadores usan el acento del tema", () => {
+    assert.match(src, /fg=\{theme\(\)\.accent\}>\{LOGO_TEXT\}/, "LOGO_TEXT se pinta con el acento del tema");
+    assert.match(src, /const SHORTCUT_PARTS/, "los atajos se definen por partes para pintar los separadores");
+    assert.match(src, /\{ text: " · ", accent: true \}/, "los separadores llevan el acento del tema");
 });

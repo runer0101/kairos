@@ -40,45 +40,44 @@ const compactArt = [
   "   / /  \\ \\",
   "  /_/    \\_\\",
 ]
-// Paleta todo azul: degradado desde cian eléctrico hasta azul profundo
-const ARCH_BLUE_TOP = "#00d2ff"   // Cian brillante - pico superior
-const ARCH_BLUE_MID = "#1793d1"   // Azul oficial de Arch - cuerpo central
-const ARCH_BLUE_BOT = "#0369a1"   // Azul oscuro/marino - base y patas
+// Atajos bajo el arco; los separadores («·») se pintan con el acento del tema.
+const SHORTCUT_PARTS = [
+  { text: "Tab: perfiles" },
+  { text: " · ", accent: true },
+  { text: "ctrl+p: comandos" },
+  { text: " · ", accent: true },
+  { text: "/gentle-doctor: diagnóstico" },
+]
 
 // Texto personal bajo el arco. Cámbialo aquí o define KAIROS_LOGO_TEXT
 // al lanzar: KAIROS_LOGO_TEXT=otro-texto kairos
 const LOGO_TEXT =
   (typeof process !== "undefined" && process.env?.KAIROS_LOGO_TEXT) || "kairos"
 
-// Colorea las líneas del logo (por índice de fila, 19 líneas en total):
-// - Punta superior en ARCH_BLUE_TOP para mayor brillo y volumen
-// - Cuerpo principal en ARCH_BLUE_MID manteniendo el color icónico
-// - Base final en ARCH_BLUE_BOT para dar peso visual y profundidad
-const archLineColor = (index: number) => {
-  if (index <= 5) return ARCH_BLUE_TOP // Punta superior
-  if (index <= 12) return ARCH_BLUE_MID // Cuerpo principal
-  return ARCH_BLUE_BOT // Base y patas oscurecidas
+// Colorea las líneas del logo con el tema activo (por índice de fila): la
+// punta en primary y el cuerpo/base en secondary. Con el tema kairos el arco
+// queda en azul Arch; con los temas gentleman, en su paleta. Sin hex fijos.
+const archLineColor = (theme, index) => {
+  if (index <= 5) return theme.primary // Punta superior
+  return theme.secondary // Cuerpo principal y base
 }
 
 // Gradiente equivalente para el arte compacto (5 filas).
-const compactLineColor = (index: number) => {
-  if (index <= 1) return ARCH_BLUE_TOP
-  if (index <= 3) return ARCH_BLUE_MID
-  return ARCH_BLUE_BOT
-}
+const compactLineColor = (theme, index) => (index <= 1 ? theme.primary : theme.secondary)
 
 // El logo necesita un mínimo de tamaño para verse completo
 const ARCH_MIN_HEIGHT = archArt.length + 8
 const ARCH_MIN_WIDTH = 45
 
-const Logo = () => {
+const Logo = ({ theme }) => {
   const dim = useTerminalDimensions()
   const lines = createMemo(() => {
+    const t = theme()
     const term = dim()
     const fits = term.height >= ARCH_MIN_HEIGHT && term.width >= ARCH_MIN_WIDTH
     return fits
-      ? archArt.map((line, index) => ({ line, color: archLineColor(index) }))
-      : compactArt.map((line, index) => ({ line, color: compactLineColor(index) }))
+      ? archArt.map((line, index) => ({ line, color: archLineColor(t, index) }))
+      : compactArt.map((line, index) => ({ line, color: compactLineColor(t, index) }))
   })
 
   return (
@@ -86,9 +85,13 @@ const Logo = () => {
       {lines().map(({ line, color }) => (
         <text fg={color}>{line}</text>
       ))}
-      <text fg={ARCH_BLUE_TOP}>{LOGO_TEXT}</text>
+      <text fg={theme().accent}>{LOGO_TEXT}</text>
       <text> </text>
-      <text fg={ARCH_BLUE_BOT}>Tab: perfiles · ctrl+p: comandos · /gentle-doctor: diagnóstico</text>
+      <box flexDirection="row">
+        {SHORTCUT_PARTS.map((part) => (
+          <text fg={part.accent ? theme().accent : theme().textMuted}>{part.text}</text>
+        ))}
+      </box>
     </box>
   )
 }
@@ -99,7 +102,7 @@ const tui: TuiPlugin = async (api) => {
     order: 100,
     slots: {
       home_logo() {
-        return <Logo/>
+        return <Logo theme={() => api.theme.current} />
       },
     },
   })
