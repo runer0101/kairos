@@ -291,10 +291,14 @@ setup_repo() {
     say "instalando dependencias con pnpm (lockfile congelado)"
     (cd "$REPO" && "$PNPM_BIN" install --frozen-lockfile --config.confirmModulesPurge=false)
 
-    chmod +x "$REPO/bin/kairos" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
+    chmod +x "$REPO/bin/kairos" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs" "$REPO/hooks/commit-msg"
     link "$REPO/bin/kairos" "$BIN_DIR/kairos"
     link "$REPO/bin/kairos" "$BIN_DIR/kai"
     link "$REPO/bin/kairos" "$BIN_DIR/ks"
+    # El hook commit-msg rechaza los commits con co-autor: la historia publicada no los lleva.
+    if [[ -d "$REPO/.git" ]]; then
+        link "$REPO/hooks/commit-msg" "$REPO/.git/hooks/commit-msg"
+    fi
     # Retira enlaces rotos que apuntaban a temas de este repo y ya no existen (p. ej. tras un renombrado).
     for stale in "$OC_THEMES"/*.json; do
         [[ -L "$stale" && ! -e "$stale" ]] || continue
@@ -346,6 +350,7 @@ NODE
 
     ok "launcher: $BIN_DIR/kairos (alias cortos: kai, ks)"
     ok "temas: $OC_THEMES"
+    ok "hook commit-msg: rechaza co-autores"
     case ":$PATH:" in
         *":$BIN_DIR:"*) ;;
         *) warn "$BIN_DIR no está en tu PATH: añade 'export PATH=\"\$HOME/.local/bin:\$PATH\"' a tu shell" ;;

@@ -259,6 +259,7 @@ kairos/
 ├── odd/                             Plantilla y guía del flujo ODD
 ├── plugins/gentle-shell.ts          Guarda de comandos destructivos y notificación al terminar
 ├── lib/destructive-command-guard.ts Lógica de la guarda (copia de gentle-pi)
+├── hooks/commit-msg                 Hook: rechaza commits con co-autor
 ├── scripts/
 │   ├── detect-local-models.mjs      Detección de runtimes de IA local
 │   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
@@ -309,6 +310,7 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 
 - ¿Ideas o fallos? Abre un *issue* con el caso concreto: comando o ruta, resultado esperado y resultado observado.
 - ¿Código? Pasa `pnpm test` antes de enviar. El proyecto sigue su propio flujo ODD (`/odd-task`) y los commits van por unidad de trabajo.
+- Los commits no llevan co-autor: el hook `hooks/commit-msg` (que `install.sh` activa en el clon) rechaza los mensajes con `Co-authored-by`. Para un caso puntual, `git commit --no-verify` lo omite.
 - No incluyas datos personales en issues, logs ni capturas: el repositorio mantiene una prueba de privacidad que falla ante rutas o correos.
 
 ## Créditos y licencia

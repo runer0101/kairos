@@ -1,0 +1,14 @@
+#!/bin/sh
+# commit-msg hook: reject messages that credit co-authors. The published
+# history only carries commits authored and committed by the repository owner.
+# Deliberate bypass: git commit --no-verify.
+message_file="$1"
+[ -n "$message_file" ] && [ -f "$message_file" ] || exit 0
+
+if grep -qiE '^[[:space:]]*co-authored-by[[:space:]]*:' "$message_file"; then
+    echo "commit-msg: el mensaje incluye una línea Co-authored-by." >&2
+    echo "           Este repositorio publica commits sin co-autor: quítala y repite el commit." >&2
+    exit 1
+fi
+
+exit 0
