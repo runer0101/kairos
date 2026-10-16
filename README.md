@@ -76,7 +76,7 @@ El instalador:
 4. Instala OpenCode si falta (instalador oficial de opencode.ai).
 5. Descarga engram 3.4.0 si falta, verificando su SHA-256.
 6. Instala las dependencias con `pnpm install --frozen-lockfile`.
-7. Enlaza el lanzador en `~/.local/bin/kairos` (con el alias corto `kai`) y los temas en `~/.config/opencode/themes/`.
+7. Enlaza el lanzador en `~/.local/bin/kairos` (con los alias cortos `kai` y `ks`) y los temas en `~/.config/opencode/themes/`.
 8. Ajusta las rutas locales de `tui.json` y `opencode.json`.
 9. Sincroniza con gentle-shell si está instalado.
 10. Verifica que OpenCode carga los perfiles antes de terminar.
@@ -85,7 +85,7 @@ No instala Ollama ni descarga modelos. Es idempotente: puedes ejecutarlo de nuev
 
 Si `~/.local/bin` no está en tu `PATH`, añade `export PATH="$HOME/.local/bin:$PATH"` a tu shell.
 
-Para abrirlo usa `kairos` o su alias corto `kai` (el instalador crea ambos enlaces; funciona en cualquier shell).
+Para abrirlo usa `kairos` o sus alias cortos `kai` y `ks` (el instalador crea los tres enlaces; funciona en cualquier shell).
 
 ## Perfiles de agente
 

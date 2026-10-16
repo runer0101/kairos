@@ -294,6 +294,7 @@ setup_repo() {
     chmod +x "$REPO/bin/kairos" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs"
     link "$REPO/bin/kairos" "$BIN_DIR/kairos"
     link "$REPO/bin/kairos" "$BIN_DIR/kai"
+    link "$REPO/bin/kairos" "$BIN_DIR/ks"
     # Retira enlaces rotos que apuntaban a temas de este repo y ya no existen (p. ej. tras un renombrado).
     for stale in "$OC_THEMES"/*.json; do
         [[ -L "$stale" && ! -e "$stale" ]] || continue
@@ -343,7 +344,7 @@ if (engram) {
 }
 NODE
 
-    ok "launcher: $BIN_DIR/kairos (alias corto: kai)"
+    ok "launcher: $BIN_DIR/kairos (alias cortos: kai, ks)"
     ok "temas: $OC_THEMES"
     case ":$PATH:" in
         *":$BIN_DIR:"*) ;;

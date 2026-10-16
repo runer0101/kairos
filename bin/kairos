@@ -6,7 +6,7 @@
 #
 # Uso:
 #   kairos                 abre la TUI
-#   kai                              alias corto (lo crea install.sh)
+#   kai, ks                          alias cortos (los crea install.sh)
 #   kairos --where         imprime la carpeta de configuración
 #   KAIROS_NO_SYNC=1 ...   no sincroniza con gentle-shell al abrir
 #

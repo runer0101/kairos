@@ -44,11 +44,13 @@ test("sin interruptor, el detector se invoca salvo que exista .no-local-ai", asy
     }
 });
 
-test("install.sh crea el alias corto kai y el lanzador lo documenta", () => {
+test("install.sh crea los alias cortos kai y ks y el lanzador los documenta", () => {
     const install = readFileSync(join(ROOT, "install.sh"), "utf8");
     assert.match(install, /link "\$REPO\/bin\/kairos" "\$BIN_DIR\/kai"/, "falta el enlace kai en install.sh");
+    assert.match(install, /link "\$REPO\/bin\/kairos" "\$BIN_DIR\/ks"/, "falta el enlace ks en install.sh");
     const launcher = readFileSync(LAUNCHER, "utf8");
-    assert.match(launcher, /alias corto/, "el lanzador debe documentar el alias");
+    assert.match(launcher, /alias cortos/, "el lanzador debe documentar los alias");
+    assert.match(launcher, /\bkai, ks\b/, "el lanzador debe documentar el alias ks junto a kai");
 });
 
 test("install.sh soporta la instalación en un comando (curl | bash)", () => {
