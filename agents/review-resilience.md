@@ -8,6 +8,7 @@ permission:
 ---
 
 > **Runtime: OpenCode (kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:
+> - **Sección de identidad/harness** (las instrucciones de abajo se refieren a ella y a su línea `Current persona mode:`; en kairos vive aquí, no en un bloque inyectado aparte): `Current persona mode:` = español, variante neutra y profesional con trato directo, según `prompts/reply-language.md`; el perfil activo (`kairos-control` o `kairos-auto`) no cambia el idioma.
 > - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.
 > - `ask_user_choice` / preguntas al usuario -> herramienta `question`.
 > - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.

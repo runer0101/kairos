@@ -87,6 +87,7 @@ const templ = (text) =>
 // herramientas de Pi; esta nota fija las equivalencias para que el agente use las reales.
 const RUNTIME_NOTE = [
   "> **Runtime: OpenCode (kairos).** Este prompt viene de gentle-shell (Pi). Equivalencias:",
+  "> - **Sección de identidad/harness** (las instrucciones de abajo se refieren a ella y a su línea `Current persona mode:`; en kairos vive aquí, no en un bloque inyectado aparte): `Current persona mode:` = español, variante neutra y profesional con trato directo, según `prompts/reply-language.md`; el perfil activo (`kairos-control` o `kairos-auto`) no cambia el idioma.",
   "> - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.",
   "> - `ask_user_choice` / preguntas al usuario -> herramienta `question`.",
   "> - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.",
@@ -131,7 +132,7 @@ if (existsSync(join(ASSETS_SRC, "chains"))) {
 }
 
 // 2) Prompt del orchestrator. No es un agente por sí mismo: opencode.json define los perfiles
-//    (kairos, kairos-auto) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
+//    (kairos-control, kairos-auto) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
 {
   const body = templ(readFileSync(join(ASSETS_SRC, "orchestrator.md"), "utf8"));
   writeFileSync(join(stagePrompts, "orchestrator.md"), RUNTIME_NOTE + body);
