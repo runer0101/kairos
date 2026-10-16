@@ -11,7 +11,7 @@ Portar el clasificador de auto-aprobación de gentle-shell a kairos con el hook 
 
 - **Perfil normal**: cada edición o bash fuera de la lista blanca interrumpe aunque sea rutina ya autorizada por el pedido (`opencode.json:54` `edit: ask`; `opencode.json:56` `bash *: ask`).
 - **Perfil auto**: `kairos-auto` es aprobación ciega (`opencode.json:98` `permission: "allow"`); su única red es la heurística de la guarda (`plugins/gentle-shell.ts:44`) y el piso de rutas sensibles (`plugins/gentle-shell.ts:53`). gentle-shell cubría esto con un clasificador por modelo (`gentle-pi/lib/auto-permission-classifier.ts`: prompt `SYSTEM` en :99, veredicto JSON estricto en :295) que kairos no portó (`README.md`, «Qué no incluye»).
-- **Ahora es viable sin dependencias nuevas**: OpenCode 1.18.35 expone `permission.ask` (`@opencode-ai/plugin/dist/index.d.ts:225`); según la documentación de plugins, los hooks de permiso corren para `allow` y `ask` (un `deny` configurado es final) y pueden cambiar el efecto. La SDK ya presente permite la llamada de clasificación (`@opencode-ai/sdk/dist/gen/types.gen.d.ts`: `SessionMessagesData` :2209, `SessionPromptData` con `model`/`system`/`tools` :2244; `session.create`/`delete` en `sdk.gen.d.ts`).
+- **Mecanismo verificado en T1 (2026-10-16)**: `permission.ask` está declarado (`@opencode-ai/plugin/dist/index.d.ts:225`) pero el runtime 1.18.35 **no lo despacha** (0 disparadores en el binario; 11 corridas sin invocación). El camino viable es el evento `permission.asked` + respuesta con `client._client.post("/permission/{requestID}/reply")` para ask→allow, y `tool.execute.before` (como ya hace la guarda) para el veto allow→deny. La SDK ya presente permite la llamada de clasificación (`@opencode-ai/sdk/dist/gen/types.gen.d.ts`: `SessionMessagesData` :2209, `SessionPromptData` con `model`/`system`/`tools` :2244; `session.create`/`delete` en `sdk.gen.d.ts`).
 
 ## Por qué
 
@@ -22,7 +22,7 @@ Portar el clasificador de auto-aprobación de gentle-shell a kairos con el hook 
 
 ### Dentro
 
-- Plugin nuevo `plugins/auto-approval.ts` con el hook `permission.ask`.
+- Plugin nuevo `plugins/auto-approval.ts`: evento `permission.asked` + respuesta (ask→allow) y veto en `tool.execute.before` (allow→deny), según el mecanismo verificado en T1.
 - Librería del clasificador bajo `lib/auto-approval/`: contexto, prompt, parseo estricto, política pura y presupuestos.
 - Sesión interna de clasificación vía SDK: modelo explícito, herramientas deshabilitadas, timeout, borrado y guardas de re-entrada.
 - Política v1, solo tipos `bash` y `edit`:
@@ -56,7 +56,7 @@ Portar el clasificador de auto-aprobación de gentle-shell a kairos con el hook 
 
 Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 
-- [ ] T1 — Spike del hook · Criterio: acta observada — cuándo corre `permission.ask` (¿también con `allow`? ¿nunca con `deny`?), valor inicial de `status`, contenido de `title`/`pattern`/`metadata` para bash y edit, y si `session.prompt` anidado resuelve mientras el hook espera (go/no-go; contingencias: `promptAsync` o llamada directa al proveedor) · Prueba: config temporal en `/tmp` con plugin espía + `opencode run`
+- [x] T1 — Spike del hook · Criterio: acta observada — `permission.ask` existe en la API pero el runtime 1.18.35 NO lo despacha; contingencia probada de punta a punta: evento `permission.asked` + prompt anidado (sin deadlock) + respuesta por `client._client.post(/permission/{requestID}/reply)` (once/always/reject); con `allow` no hay evento de permiso y el veto va por `tool.execute.before` · Prueba: config temporal en `/tmp/opencode/classifier-spike` con plugin espía + `opencode run`/TUI
 - [ ] T2 — Librería del clasificador · Criterio: `lib/auto-approval/` prepara el contexto (pedido vivo desde `session.messages` + acción redactada), prompt adaptado del `SYSTEM` de gentle-pi, parseo estricto de `{decision, reason}` y política pura decidible por tests; RED antes de GREEN · Prueba: `pnpm test` (tests/classifier.test.mjs)
 - [ ] T3 — Plugin y hook · Criterio: hook registrado con re-entrada bloqueada, timeout, fail-safe «dejar como está» y stub `KAIROS_CLASSIFIER_STUB`; sin recursión (sesión interna sin herramientas); `KAIROS_NO_CLASSIFIER=1` lo apaga · Prueba: `pnpm test` + smoke manual
 - [ ] T4 — Ambas direcciones y presupuestos · Criterio: ask→allow y allow→deny observables de punta a punta con stub; concurrentes y timeout se quedan como están; el override de modelo funciona · Prueba: `KAIROS_E2E=1 pnpm test`
@@ -69,11 +69,19 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - Recon (2026-10-16): `permission.ask` en `@opencode-ai/plugin` 1.18.35 (`dist/index.d.ts:225`); docs de plugins: los hooks corren para `allow` y `ask`, un `deny` configurado es final y el hook puede cambiar el efecto. SDK: `SessionPromptData.model/tools/system` (`types.gen.d.ts:2244`), `SessionMessagesData` (`:2209`), `session.create/delete` (`sdk.gen.d.ts:106-190`).
 - Upstream: `gentle-pi/lib/auto-permission-classifier.ts` (459 líneas; `SYSTEM` :99–110; veredicto estricto :295–301) y `lib/auto-permission-runtime.ts` (`AUTO_DIRECTIVE` :12; límites de denegación :46).
 - Suite de partida: `pnpm test` → 58 tests, 54 pass, 4 skip (E2E), 0 fail (2026-10-16).
+- T1 (2026-10-16): spike con plugin espía en `/tmp/opencode/classifier-spike` (11 corridas `opencode run` + TUI/pty). Hallazgos observados:
+  - `permission.ask`: declarado en la API pero **nunca despachado** por 1.18.35 — 0 disparadores `trigger("permission.ask")` en el binario y 0 invocaciones en las 11 corridas (incluida una TUI con el diálogo `△ Permission required` pendiente).
+  - `allow` no emite ningún evento de permiso (solo `tool.execute.before/after`); `deny` es final y tampoco dispara nada. El veto allow→deny debe ir por `tool.execute.before`.
+  - Con `ask`, el evento `permission.asked` trae: bash → `patterns:[comando literal]` + `metadata.command`; edit → `patterns:[ruta relativa]` + `metadata.filepath`/`metadata.diff`; `always` = prefijo sugerido de "permitir siempre".
+  - Respuesta probada en TUI: `client._client.post("/permission/{requestID}/reply", { reply: "once" })` → `permission.replied once` y el comando ejecuta (marker presente); `{ reply: "reject" }` → bloqueado (marker ausente). El cliente del plugin NO expone `client.permission`; `serverUrl` es un placeholder in-process (un `fetch` directo falla).
+  - `session.prompt` anidado **resuelve mientras el permiso está pendiente, sin deadlock**: 1.395 ms y 4.994 ms con respuesta real ("OK").
+  - Límite observado: en `opencode run` (no interactivo) el CLI auto-rechaza en ~19 ms y gana la carrera; el camino `permission.asked` es práctico en TUI (el uso normal de kairos).
 
 ## Progreso
 
 - 2026-10-16 — Documento creado tras la revisión del port (oleada 2 elegida por el usuario). Decisión de producto: ambas direcciones. Recon del hook y del clasificador upstream completos. Pronóstico de tamaño: ~600 líneas autoradas (heurística; sin PR, los commits los decide el autor).
+- 2026-10-16 — T1 completo: `permission.ask` no existe en runtime; acta registrada y mecanismo sustituto verificado (evento `permission.asked` + reply + veto por `tool.execute.before`). El diseño de T3 se adapta a ese mecanismo.
 
 ## Siguiente paso
 
-- T1: spike del hook con plugin espía en config temporal — acta de comportamiento antes de escribir la librería.
+- T2: librería `lib/auto-approval/` (contexto, prompt, parseo estricto, política pura y presupuestos) con tests RED antes de GREEN; después T3 con el mecanismo verificado (evento + reply + veto).
