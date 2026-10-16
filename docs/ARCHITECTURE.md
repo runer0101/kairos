@@ -34,10 +34,10 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
 | `registerCommand("gentle:…")` | `commands/gentle-*.md` | Solo los comandos con equivalente directo en OpenCode |
 | `lib/destructive-command-guard.ts` | `lib/destructive-command-guard.ts` + `plugins/gentle-shell.ts` | El plugin llama a la guarda en `tool.execute.before` |
-| `gentle-notifications` (sonido y escritorio) | Evento `session.idle` → `notify-send` | Sonidos no portados |
+| `gentle-notifications` (sonido y escritorio) | Evento `session.idle` → `notify-send` + pack de tonos nativo | Tonos opt-in con `KAIROS_SOUNDS=1` |
 | Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
 | `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
-| `themes/` y TUI propia | `themes/gentleman-kairos.json`, `tui-plugins/`, `tui.json` | Logo y tema propios |
+| `themes/` y TUI propia | `themes/` (4 temas), `tui-plugins/`, `tui.json` | Tema, logo que sigue al tema y HUD ODD propios (ver «La TUI (mapa)») |
 | Barra fullscreen, paneles, animaciones, regiones de puntero | No portado | Dependen de la API de Pi |
 
 ### Derivación de permisos de subagentes
@@ -112,10 +112,23 @@ Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto 
 
 ## Pruebas
 
-- `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), y la guarda de comandos destructivos.
+- `pnpm test` ejecuta `tests/*.test.mjs` con el runner integrado de Node (sin dependencias extra). Cubre: configuración (perfiles, modelo por defecto, permisos, proveedor ollama deshabilitado), agentes y comandos (frontmatter, permisos, portabilidad, reglas de `/judge`), detector de IA local (endpoints propios, filtros, tolerancia a errores), guarda de comandos destructivos, rutas sensibles, lanzador, hook `commit-msg`, sincronización, privacidad, temas, logo, HUD y sonidos.
 - `KAIROS_E2E=1 pnpm test` añade pruebas con el binario real de OpenCode: lista de perfiles, resolución del repositorio y una respuesta real del modelo por defecto.
 - Las pruebas que consultan servicios usan `KAIROS_LOCAL_PROVIDERS` para apuntar a servidores de prueba, y no asumen qué runtimes locales hay instalados.
 - Lección registrada: la salida de `opencode agent list` por tubería puede truncarse al cerrar el proceso. Por eso las pruebas y `install.sh` escriben la salida a un archivo.
+
+## La TUI (mapa)
+
+`tui.json` configura la TUI de OpenCode (tema y plugins). Los plugins propios viven en `tui-plugins/` — manuales, la sincronización no los toca — y leen el tema activo con `api.theme.current`.
+
+| Pieza | Slots | Qué pinta |
+|---|---|---|
+| `gentle-logo.tsx` | `home_logo` | Arco Arch (arte compacto en terminales pequeñas), texto personal (`KAIROS_LOGO_TEXT`) y los atajos principales. Colores del tema: `primary`/`secondary` en el arco y `accent` en el texto y los separadores. |
+| `kairos-hud.tsx` | `session_prompt_right`, `sidebar_content` | Tarea ODD activa (`◆ odd <tarea> n/m`, `✓` al completar) y aviso `sync pendiente`; en la sidebar, los pendientes (tope 3, `… +N`). Refresco cada 4 s con caché por mtime+tamaño. |
+| `gentle-sounds.ts` | Pack de atención nativo | Tonos `done`, `subagent_done`, `error`, `permission` y `question`; opt-in con `KAIROS_SOUNDS=1`. |
+| `opencode-subagent-statusline` (tercero) | `session_prompt`, `sidebar_content`, `home_bottom` | Panel de subagentes del paquete npm. |
+
+Para apagar una pieza, quita su línea de `plugin` en `tui.json` y reabre kairos.
 
 ## Ciclo de vida de los archivos
 
@@ -177,8 +190,8 @@ Esa comprobación está en la copia local de `gentle-sync` (`~/.local/bin/gentle
 
 ## Limitaciones conocidas
 
-- La TUI de gentle-shell no se portó (ver README).
+- La barra fullscreen, los paneles de uso y las animaciones de la TUI de Pi no se portaron; la identidad visual propia (tema, logo, sonidos y HUD ODD) sí existe (ver «La TUI (mapa)»).
 - Solo se portaron 3 comandos `/gentle:*`; los demás dependen de la API de Pi o de la TUI propia.
 - Las herramientas que el orchestrator espera de Pi (`codegraph`, `gentle_review`, `web_*`) no están configuradas en OpenCode. Los agentes deben reportar esa ausencia en lugar de simularla.
-- `opencode.json` contiene rutas absolutas (binario de `engram`) y `tui.json` contiene la ruta de `gentle-logo.tsx`. Hay que ajustarlas al clonar en otra máquina.
-- No hay suite de pruebas automatizadas. La verificación fue manual: carga de configuración, agentes, comandos, plugin, validación de la guarda y sincronización.
+- La ruta del binario de `engram` en `opencode.json` se ajusta con `{env:HOME}` al instalar; `tui.json` usa rutas relativas al repositorio. En otra máquina basta ejecutar `install.sh`.
+- Lo visual se verifica con pruebas estáticas y capturas pty por tema; no hay captura visual automatizada en CI (evidencia en `odd/tasks/visual-statusline.md`).

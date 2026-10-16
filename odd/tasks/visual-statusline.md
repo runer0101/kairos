@@ -55,9 +55,9 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - [x] V1 — Reconocimiento en runtime de la API TUI · Criterio: nota con evidencia de qué datos expone `state` en 1.18.35 (branch, todo, diff, modelo del mensaje, mcp, lsp) y de qué slots aceptan varios plugins a la vez (captura pty con un plugin de diagnóstico temporal) · Prueba: smoke `script -qec` 120×40 + `grep` de la captura; plugin temporal retirado al terminar
 - [x] V2 — `tui-plugins/kairos-hud.tsx`: fila de sesión con lo que el host **no** pinta — ODD activa (n/m) y aviso de sync pendiente — sin duplicar modelo/contexto/MCP/LSP (ya nativos; decisión tras el baseline de sesión de V2) · Criterio: la fila se pinta junto al prompt con datos reales y se refresca cada 4 s · Prueba: smoke pty con sesión real + `tests/tui-hud.test.mjs`
 - [x] V3 — Sección de sidebar propia: tarea ODD activa con sus pendientes (sin duplicar todos/MCP/LSP del host, ni archivos: no había sección nativa de archivos en el baseline) · Criterio: el bloque de kairos y el de subagentes conviven visibles en la sidebar · Prueba: captura pty
-- [ ] V4 — Identidad fusión: HUD y logo leen `api.theme.current`; acento rosa gentleman en texto del logo y separadores · Criterio: captura con `gentleman-kairos`, `gentle`, `gentleman-cute` y `gentleman-sexy` sin colores rotos; sin hex fijos en el HUD · Prueba: smoke pty con los 4 temas + `tests/tui-logo.test.mjs`
-- [ ] V5 — Suite verde · Criterio: `pnpm test` pasa con los tests nuevos y el de privacidad sigue verde · Prueba: `pnpm test`
-- [ ] V6 — Docs al día · Criterio: README (sección de interfaz: qué se ve y cómo se apaga) y ARCHITECTURE (mapa de la TUI) describen lo implementado · Prueba: revisión + `pnpm test`
+- [x] V4 — Identidad fusión: HUD y logo leen `api.theme.current`; acento rosa gentleman en texto del logo y separadores · Criterio: captura con `gentleman-kairos`, `gentle`, `gentleman-cute` y `gentleman-sexy` sin colores rotos; sin hex fijos en el HUD · Prueba: smoke pty con los 4 temas + `tests/tui-logo.test.mjs`
+- [x] V5 — Suite verde · Criterio: `pnpm test` pasa con los tests nuevos y el de privacidad sigue verde · Prueba: `pnpm test`
+- [x] V6 — Docs al día · Criterio: README (sección de interfaz: qué se ve y cómo se apaga) y ARCHITECTURE (mapa de la TUI) describen lo implementado · Prueba: revisión + `pnpm test`
 
 ## Evidencia de verificación
 
@@ -70,9 +70,11 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
   - Slots: `home_logo` **apila** varios plugins (logo order 100 + diag order 300, ambos visibles); `home_footer` **no renderiza** (confirma el descarte de T22); `home_bottom` renderiza pero **colisiona con el tip nativo** de OpenCode (texto intercalado); **`app_bottom` renderiza limpio** y queda libre; `session_prompt_right`/`sidebar_content` (ocupados por el plugin de subagentes) quedan por verificar en sesión en V2/V3.
   - La statusline nativa ya pinta `cwd:branch`, versión y `⊙ 2 MCP`: el HUD debe **sumar** sin duplicar.
   - Método reutilizable para smokes: con `TERM` heredado la TUI queda esperando respuestas de capabilities y no pinta; `TERM=xterm` + `script -qec` pinta completo en pty.
-- Pendiente: la de cada tarea V2–V6.
 - V2 (2026-10-15): baseline de sesión real (smoke pty con prompt por stdin: `( sleep 9; printf '…\r'; sleep 10 ) | timeout -s TERM 24 script -qec "…" <captura>`) para inventariar lo que ya pinta el host. Observado: sidebar con `Context` (16,239 tokens · 2% used · $0.00 spent), `MCP` (context7/engram Connected), `LSP` y el panel `Subagentes 1.3.0`; prompt y mensaje con `Kairos · DeepSeek V4.1 Flash`. Decisión: el HUD **no duplica**; aporta ODD + sync. Implementado `tui-plugins/kairos-hud.tsx` (slot `session_prompt_right`, order 95; snapshot cada 4 s vía `createMemo`/`setInterval` + `onDispose`; caché por mtime+tamaño; solo `api.theme.current`, sin hex). Resultado observado en el smoke: fila `◆ odd visual-statusline 1/6` junto al prompt; `sync pendiente` oculto (sync al día); sin errores de plugin en el log. `pnpm test` → 66 tests, 62 pass, 4 skipped, 0 fail (8 nuevos en `tests/tui-hud.test.mjs`).
 - V3 (2026-10-15): baseline de sesión en un proyecto de prueba fuera del repo (`/tmp/opencode/scratch`, `git init`) pidiendo al agente `todowrite` (3 tareas, 1 completada) + escribir un archivo: el host ya pinta `▼ Todo` con checkboxes (en la sidebar y en el mensaje), `Context`, `MCP`, `LSP` y el panel de subagentes; no apareció sección de archivos. Decisión: la sección de kairos muestra la **tarea ODD activa con sus pendientes** (único dato que nadie pinta). Implementado en `tui-plugins/kairos-hud.tsx` (`sidebar_content`, order 95; extrae el texto de los checkboxes sin marcar, lista hasta 3 con `… +N`, aviso `⚠ sync gentle-shell`). Resultado observado en el smoke (con `odd/tasks/demo.md` 1/3): sidebar `◆ ODD demo 1/3` + `· D2 — …` + `· D3 — …` conviviendo con `▼ Subagentes 1.3.0`, y fila `◆ odd demo 1/3` junto al prompt. `pnpm test` → 69 tests, 65 pass, 4 skipped, 0 fail (3 nuevos).
+- V4 (2026-10-16): logo reescrito para leer `api.theme.current` — arco en `primary`/`secondary`, texto y separadores en `accent`, atajos en `textMuted`; sin hex fijos. Pruebas nuevas en `tests/tui-logo.test.mjs` (rojo antes, verde después). Smokes pty con los 4 temas: logo presente y 0 errores en las 4 capturas; el `accent` de cada tema aparece exactamente 3 veces (texto + 2 separadores) con su RGB exacto y su `primary` en el arco.
+- V5 (2026-10-16): `pnpm test` → 75 tests, 71 pass, 4 skip, 0 fail (privacidad verde).
+- V6 (2026-10-16): README (logo sigue al tema; sección «Statusline y sidebar (ODD)» con qué se ve y cómo se apaga; árbol y recuento de pruebas) y ARCHITECTURE (sección «La TUI (mapa)»; mapeo, pruebas y limitaciones al día).
 
 ## Progreso
 
@@ -80,7 +82,8 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 - 2026-10-15 — V1 completo: reconocimiento en runtime con plugin temporal y smoke en pty; hallazgos y decisiones de slot registrados arriba.
 - 2026-10-15 — V2 completo: HUD de sesión (ODD + sync) en `session_prompt_right`, tests estáticos y smoke real con sesión; decisión anti-duplicación registrada (el host ya pinta contexto/MCP/LSP/modelo).
 - 2026-10-15 — V3 completo: sección ODD en `sidebar_content` (tarea activa + pendientes, tope 3 + `… +N`); convivencia con el panel de subagentes verificada en smoke real.
+- 2026-10-16 — V4–V6 completos: identidad fusión del logo (colores del tema activo), docs de interfaz al día y tarea cerrada.
 
 ## Siguiente paso
 
-V4 — identidad fusión: HUD y logo leen `api.theme.current`; acento rosa gentleman en texto del logo y separadores; capturas con los 4 temas.
+Tanda visual cerrada. Quedan como tandas futuras (sin fecha): banner de arranque, toasts, dashboard de inicio y paneles de uso tipo Pi.

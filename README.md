@@ -36,6 +36,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 - **Memoria** persistente mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
 - **DeepSeek v4.1 Flash por defecto** (`opencode-go/deepseek-v4.1-flash`; requiere suscripción OpenCode Go). Si tienes Ollama, LM Studio, llama.cpp o vLLM activos, sus modelos aparecen automáticamente.
 - **Calidad de código**: servidores LSP, formateadores y `snapshot` para deshacer cambios.
+- **Identidad visual**: 4 temas, logo que sigue al tema activo, sonidos opt-in y HUD con la tarea ODD junto al prompt y en la sidebar.
 - **Sincronización** con la versión instalada de gentle-shell.
 
 ## Requisitos
@@ -165,6 +166,14 @@ KAIROS_LOGO_TEXT=otro-texto kairos
 
 Bajo el texto del logo se recuerdan los atajos principales (`Tab`, `ctrl+p`, `/gentle-doctor`).
 
+El arco y el texto siguen el tema activo: el arco usa `primary`/`secondary` del tema y el texto y los separadores, su `accent` (azul con `gentleman-kairos`, rosa con los temas gentleman).
+
+### Statusline y sidebar (ODD)
+
+El HUD de kairos suma a la TUI lo que el host no pinta: junto al prompt aparece la tarea ODD activa (`◆ odd <tarea> n/m`, con `✓` al completarla) y, si el port quedó atrás de gentle-shell, la advertencia `sync pendiente`. La sidebar muestra la misma tarea con sus siguientes pasos pendientes (hasta 3, con `… +N`). Usa los colores del tema activo y se refresca cada 4 s.
+
+Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `tui.json` y vuelve a abrir kairos.
+
 ## IA local (opcional)
 
 El instalador no instala ni descarga modelos locales. Si instalas un runtime, kairos lo detecta al abrir, sin configurar nada:
@@ -238,7 +247,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 58 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, sincronización, privacidad, temas, sonidos y rutas sensibles
+pnpm test                           # 75 pruebas: configuración, agentes, comandos, detector, guarda, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, sonidos y rutas sensibles
 KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto
 ```
 
@@ -265,7 +274,8 @@ kairos/
 │   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
 ├── skills/                          Skills (33)
 ├── themes/                          Temas (gentleman-kairos, gentle, gentleman-cute, gentleman-sexy)
-├── tui-plugins/gentle-logo.tsx      Logo para la TUI
+├── tui-plugins/gentle-logo.tsx      Logo de la TUI (sigue el tema activo)
+├── tui-plugins/kairos-hud.tsx       Tarea ODD junto al prompt y en la sidebar
 ├── tests/                           Pruebas (node:test)
 ├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
 ├── pnpm-workspace.yaml              Ajustes de pnpm y políticas de seguridad
