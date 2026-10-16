@@ -57,12 +57,12 @@ Portar el clasificador de auto-aprobación de gentle-shell a kairos con el hook 
 Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
 
 - [x] T1 — Spike del hook · Criterio: acta observada — `permission.ask` existe en la API pero el runtime 1.18.35 NO lo despacha; contingencia probada de punta a punta: evento `permission.asked` + prompt anidado (sin deadlock) + respuesta por `client._client.post(/permission/{requestID}/reply)` (once/always/reject); con `allow` no hay evento de permiso y el veto va por `tool.execute.before` · Prueba: config temporal en `/tmp/opencode/classifier-spike` con plugin espía + `opencode run`/TUI
-- [ ] T2 — Librería del clasificador · Criterio: `lib/auto-approval/` prepara el contexto (pedido vivo desde `session.messages` + acción redactada), prompt adaptado del `SYSTEM` de gentle-pi, parseo estricto de `{decision, reason}` y política pura decidible por tests; RED antes de GREEN · Prueba: `pnpm test` (tests/classifier.test.mjs)
-- [ ] T3 — Plugin y hook · Criterio: hook registrado con re-entrada bloqueada, timeout, fail-safe «dejar como está» y stub `KAIROS_CLASSIFIER_STUB`; sin recursión (sesión interna sin herramientas); `KAIROS_NO_CLASSIFIER=1` lo apaga · Prueba: `pnpm test` + smoke manual
-- [ ] T4 — Ambas direcciones y presupuestos · Criterio: ask→allow y allow→deny observables de punta a punta con stub; concurrentes y timeout se quedan como están; el override de modelo funciona · Prueba: `KAIROS_E2E=1 pnpm test`
-- [ ] T5 — Docs · Criterio: README con la sección del clasificador (qué hace, interruptores, límites, fail-safe); ARCHITECTURE con el mapeo actualizado; SECURITY con que es consejo contextual y no autoridad · Prueba: revisión
-- [ ] T6 — Saneo del prompt generado · Criterio: `prompts/orchestrator.md` sin referencias a «identity/harness section» ni «`Current persona mode:`» sin definir (se definen en el bloque Runtime del sync, no editando el generado); `sync --check` al día tras `--force`; regeneración estable · Prueba: `pnpm test` + `node scripts/sync-gentle-shell.mjs --check`
-- [ ] T7 — Decisión `/gentle:*` · Criterio: ARCHITECTURE/README dicen, por bloque, qué comandos de Pi no aplican y su equivalente nativo (stats, agents, jobs, profiles, toggles de TUI…) · Prueba: revisión
+- [x] T2 — Librería del clasificador · Criterio: `lib/auto-approval/` prepara el contexto (pedido vivo desde `session.messages` + acción redactada), prompt adaptado del `SYSTEM` de gentle-pi, parseo estricto de `{decision, reason}` y política pura decidible por tests; RED antes de GREEN · Prueba: `pnpm test` (tests/classifier.test.mjs)
+- [x] T3 — Plugin y mecanismo · Criterio: mecanismo registrado (evento + veto) con re-entrada bloqueada, timeout, fail-safe «dejar como está» y stub `KAIROS_CLASSIFIER_STUB`; sin recursión (sesión interna sin herramientas); `KAIROS_NO_CLASSIFIER=1` lo apaga · Prueba: `pnpm test` + smoke manual
+- [x] T4 — Ambas direcciones y presupuestos · Criterio: ask→allow y allow→deny observables de punta a punta con stub; concurrentes y timeout se quedan como están; el override de modelo funciona · Prueba: `KAIROS_E2E=1 pnpm test`
+- [x] T5 — Docs · Criterio: README con la sección del clasificador (qué hace, interruptores, límites, fail-safe); ARCHITECTURE con el mapeo actualizado; SECURITY con que es consejo contextual y no autoridad · Prueba: revisión
+- [x] T6 — Saneo del prompt generado · Criterio: `prompts/orchestrator.md` sin referencias a «identity/harness section» ni «`Current persona mode:`» sin definir (se definen en el bloque Runtime del sync, no editando el generado); `sync --check` al día tras `--force`; regeneración estable · Prueba: `pnpm test` + `node scripts/sync-gentle-shell.mjs --check`
+- [x] T7 — Decisión `/gentle:*` · Criterio: ARCHITECTURE/README dicen, por bloque, qué comandos de Pi no aplican y su equivalente nativo (stats, agents, jobs, profiles, toggles de TUI…) · Prueba: revisión
 
 ## Evidencia de verificación
 
@@ -76,12 +76,17 @@ Cada tarea tiene ID estable, criterio de aceptación observable y prueba.
   - Respuesta probada en TUI: `client._client.post("/permission/{requestID}/reply", { reply: "once" })` → `permission.replied once` y el comando ejecuta (marker presente); `{ reply: "reject" }` → bloqueado (marker ausente). El cliente del plugin NO expone `client.permission`; `serverUrl` es un placeholder in-process (un `fetch` directo falla).
   - `session.prompt` anidado **resuelve mientras el permiso está pendiente, sin deadlock**: 1.395 ms y 4.994 ms con respuesta real ("OK").
   - Límite observado: en `opencode run` (no interactivo) el CLI auto-rechaza en ~19 ms y gana la carrera; el camino `permission.asked` es práctico en TUI (el uso normal de kairos).
+- T2 (2026-10-16): `lib/auto-approval/` (presupuestos 32 KiB/512 tokens/15 s, redacción de secretos, contexto acotado con el pedido vivo primero, prompt adaptado del `SYSTEM` de gentle-pi, parseo estricto, política pura, guarda single-flight) + `tests/classifier.test.mjs` (20 pruebas; RED→GREEN). `pnpm test` → 95 tests, 91 pass, 4 skip, 0 fail.
+- T3+T4 (2026-10-16): `plugins/auto-approval.ts` — evento `permission.asked` → reply `once` solo con veredicto seguro; veto en `tool.execute.before` únicamente con `allow` confirmado (vía `/agent`; desconocido nunca bloquea); caché LRU por callID; guarda de sesión interna; deadline; fail-safe total. `tests/auto-approval.test.mjs` (19 pruebas + e2e pty opt-in). `pnpm test` → 115 tests, 110 pass, 5 skip, 0 fail. Evidencia observada: e2e pty con stub allow (ask auto-respondido y marcador creado; control negativo con `KAIROS_NO_CLASSIFIER=1` deja el diálogo); veto manual en `kairos-auto` + stub deny (bloqueo con `auto-approval: bloqueado por el clasificador`); corrida real sin stub (el modelo clasificó y respondió `once`).
+- T5+T7 (2026-10-16): README (subsección del clasificador con interruptores/límites/fail-safe; conteo real 115), ARCHITECTURE (fila del mapeo, subsección del mecanismo verificado en T1, tabla de 29 comandos `/gentle:*` de Pi con estado y equivalente nativo, pruebas y limitaciones al día), SECURITY (fila: consejo contextual, nunca autoridad ni respuesta a consentimientos).
+- T6 (2026-10-16): el bloque `RUNTIME_NOTE` del sync define la sección de identidad y `Current persona mode:` (resuelve las referencias colgantes del prompt generado); `--force` + `--check` al día; regeneración estable (misma huella en dos pasadas).
 
 ## Progreso
 
 - 2026-10-16 — Documento creado tras la revisión del port (oleada 2 elegida por el usuario). Decisión de producto: ambas direcciones. Recon del hook y del clasificador upstream completos. Pronóstico de tamaño: ~600 líneas autoradas (heurística; sin PR, los commits los decide el autor).
 - 2026-10-16 — T1 completo: `permission.ask` no existe en runtime; acta registrada y mecanismo sustituto verificado (evento `permission.asked` + reply + veto por `tool.execute.before`). El diseño de T3 se adapta a ese mecanismo.
+- 2026-10-16 — T2–T7 completos: librería, plugin con ambas direcciones, e2e con stub y corrida real, docs (README/ARCHITECTURE/SECURITY) y saneo del prompt generado; suite 115 tests, 0 fallos.
 
 ## Siguiente paso
 
-- T2: librería `lib/auto-approval/` (contexto, prompt, parseo estricto, política pura y presupuestos) con tests RED antes de GREEN; después T3 con el mecanismo verificado (evento + reply + veto).
+Completado. La fase 2 (evidencia acotada con inspección de archivos) y el resto del alcance «Fuera» quedan a la espera de una nueva decisión del usuario.
