@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Sincroniza kairos con la versión instalada de gentle-shell (gentle-pi).
 //
-// Regenera SOLO lo derivado de gentle-shell:
-//   agents/            orchestrator + subagentes (los generados; se borran los que ya no existan upstream)
+// Regenera SOLO lo derivado de gentle-shell, más la capa propia de kairos-auto:
+//   agents/            subagentes (los generados; se borran los que ya no existan upstream)
+//   prompts/           orchestrator.md (común + Ponytail)
 //   gentle-assets/     referencias perezosas del orchestrator (orchestrator*.md, chains/)
 //   lib/destructive-command-guard.ts
 //   LICENSE-gentle-shell
@@ -90,11 +91,46 @@ const RUNTIME_NOTE = [
   "> - **Sección de identidad/harness** (las instrucciones de abajo se refieren a ella y a su línea `Current persona mode:`; en kairos vive aquí, no en un bloque inyectado aparte): `Current persona mode:` = español, variante neutra y profesional con trato directo, según `prompts/reply-language.md`; el perfil activo (`kairos-control` o `kairos-auto`) no cambia el idioma.",
   "> - `subagent_run` / `Agent` / delegación -> herramienta `task` con el `subagent_type` del agente.",
   "> - `ask_user_choice` / preguntas al usuario -> herramienta `question`.",
-  "> - `find` -> `glob`; `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`.",
+  "> - `find` -> `glob` (en kairos sí existe); `grep` -> `grep`; `read` -> `read`; `edit` / `write` -> `edit` / `write`; `bash` -> `bash`; `bash_background` -> `bash` en primer plano.",
   "> - `mem_save` / memoria persistente -> herramientas `mem_*` del MCP `engram` (si están disponibles).",
-  "> - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible.",
+  "> - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible. No hay `gentle_review` ni assess: decide la verificación independiente por la lista de alto riesgo de Task Size.",
+  "> - `orchestrator_session_id`, `orchestrator_list`, `subagent_status` y `subagent_result` no existen en OpenCode: usa el título de la sesión, `todo` y `task`; el progreso del todo no se actualiza solo, usa `todowrite`.",
+  "> - Las reglas que Pi aplica en runtime (admisión de writers y verifier, `Allowed edit surfaces`, context backstop, señal de commit-slice) no las impone OpenCode: el prompt es la única guía, así que respétalas explícitamente. Aplica el context backstop al pasar el menor de ~150k tokens o el 15% de la ventana del modelo (indicador de contexto de OpenCode).",
   "> - `$OPENCODE_CONFIG_DIR` es la raíz de kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
   `> - Política de ejecución en segundo plano: ${BG_POLICY}`,
+  "",
+].join("\n");
+
+// Capa propia de kairos (no viene de gentle-shell): se añade al prompt común de los dos
+// perfiles. La disciplina de implementación de Ponytail (MIT) va integrada en el prompt;
+// las skills y comandos siguen on-demand para revisión y deuda. La capa no sustituye el
+// proceso de kairos: si hay conflicto, mandan ODD, riesgo, revisión y verificación.
+const PONYTAIL_LAYER = [
+  "",
+  "## Implementation Economy (Ponytail, fused)",
+  "",
+  "Default level: full. If the user explicitly asks for `lite`, `ultra`, or `off` (or says \"normal mode\"), follow that request for the rest of the conversation.",
+  "",
+  "This layer applies Ponytail's implementation discipline to every code change. It governs how much code you write; it does not replace kairos' process, scope, risk, review, or verification rules. If they conflict, kairos wins.",
+  "",
+  "Before you write, read the code the change touches and list every place it must reach: callers, tests, fixtures, config, exports. Fix bugs at the root cause in shared code, after checking every caller.",
+  "",
+  "Take the first option that fully solves the task:",
+  "",
+  "1. Does it need to exist? Skip features, options, and flexibility nobody asked for.",
+  "2. Already in this codebase? Reuse the existing helper, component, service, or pattern the way the surrounding code does.",
+  "3. Standard library or platform feature? Use it, unless the project has its own.",
+  "4. An installed dependency? Use it; never add a dependency for a few lines.",
+  "5. Can it be one line a reader understands at a glance? One line.",
+  "6. Otherwise, the minimum code that works.",
+  "",
+  "No unrequested abstraction, wrapper, option, config, boilerplate, or \"for later\" code. Deletion beats addition. Keep the repository's existing layers, interfaces, and conventions. The shortest working diff wins once you know everything it must touch; a one-liner that needs decoding is not short. Comment only the why the code cannot show, in one line.",
+  "",
+  "Lazy code without its check is unfinished: new non-trivial logic (a branch, a loop, a parser, money, security, or a whole new script or app) leaves one small test or assert-based self-check. Trivial changes need none. A deliberate shortcut with a known ceiling gets `shortcut: <the ceiling>, <when to upgrade>`; `/ponytail-debt` collects them.",
+  "",
+  "Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, the calibration real hardware needs, or anything the user asked for.",
+  "",
+  "End every reply with one or two lines: what you skipped or did not check, and any risk the user must know. This is a report, not permission to underbuild.",
   "",
 ].join("\n");
 
@@ -132,10 +168,10 @@ if (existsSync(join(ASSETS_SRC, "chains"))) {
 }
 
 // 2) Prompt del orchestrator. No es un agente por sí mismo: opencode.json define los perfiles
-//    (kairos-control, kairos-auto) y todos reutilizan este prompt con {file:./prompts/orchestrator.md}.
+//    y ambos usan el prompt común con la capa de Ponytail integrada.
 {
   const body = templ(readFileSync(join(ASSETS_SRC, "orchestrator.md"), "utf8"));
-  writeFileSync(join(stagePrompts, "orchestrator.md"), RUNTIME_NOTE + body);
+  writeFileSync(join(stagePrompts, "orchestrator.md"), RUNTIME_NOTE + body + PONYTAIL_LAYER);
   generatedPrompts.push("orchestrator.md");
 }
 
@@ -198,6 +234,9 @@ for (const dir of [stageAgents, stagePrompts, stageAssets]) {
 }
 if (!readFileSync(join(stagePrompts, "orchestrator.md"), "utf8").includes("Runtime: OpenCode")) {
   problems.push("el orchestrator no lleva la nota de runtime");
+}
+if (!readFileSync(join(stagePrompts, "orchestrator.md"), "utf8").includes("Implementation Economy (Ponytail, fused)")) {
+  problems.push("el prompt común no lleva la capa de Ponytail");
 }
 if (problems.length) {
   rmSync(STAGE, { recursive: true, force: true });
