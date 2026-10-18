@@ -18,6 +18,8 @@
 
 Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
 
+**Versiones con las que se desarrolla y prueba:** OpenCode **1.18.35** y gentle-shell **4.3.0** (gentle-pi 4.3.0 · Pi 1.2.0; fija gentle-ai 4.2.0 y Engram 3.4.0).
+
 Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y prueba a diario — aunque funciona en cualquier distribución con glibc.
 
 > Proyecto en desarrollo activo: cada push pasa la suite completa, `shellcheck` y un escaneo de privacidad en CI.
@@ -49,16 +51,10 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 | `curl` o `wget`, `tar`, `gzip`, `sha256sum`, `git` | — | Gestor de paquetes de tu distribución |
 | Node.js | 22 o superior (probado con 26) | `install.sh` lo instala si falta |
 | pnpm | 11.22.0 | `install.sh` lo instala si falta |
-| OpenCode | 1.18.x | `install.sh` usa el instalador oficial si falta |
+| OpenCode | 1.18.x (probado con 1.18.35) | `install.sh` usa el instalador oficial si falta |
+| gentle-shell (opcional) | 4.3.0 (gentle-pi 4.3.0 · Pi 1.2.0) | `gentle-shell upgrade`; el lanzador sincroniza si está instalado |
 | engram | 3.4.0 | `install.sh` descarga el binario oficial |
 | Ollama u otro runtime local | opcional | Se detecta al abrir, si está activo |
-
-### Versiones de referencia
-
-| Proyecto | Versión de desarrollo y pruebas |
-|---|---|
-| OpenCode | **1.18.35** |
-| gentle-shell | **4.3.0** (gentle-pi 4.3.0 · Pi 1.2.0; fija gentle-ai 4.2.0 y Engram 3.4.0) |
 
 El lanzador y la suite e2e se validan contra esa combinación. `gentle-shell` es opcional: si está instalado, el lanzador sincroniza agentes, prompt, guarda y skills desde esa versión; sin él, kairos abre con la última copia sincronizada.
 
