@@ -5,6 +5,21 @@
 [![Node](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-11.22.0-orange.svg)](https://pnpm.io)
 [![Plataforma](https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1.svg)](#requisitos)
+[![OpenCode](https://img.shields.io/badge/OpenCode-1.18.35-1f6feb.svg)](https://opencode.ai)
+[![gentle-shell](https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2.svg)](https://github.com/Gentleman-Programming/gentle-shell)
+
+## Stack
+
+| Proyecto | Versión | Rol |
+|---|---|---|
+| [OpenCode](https://opencode.ai) | **1.18.35** | Host: TUI, LSP, MCP, permisos y plugins |
+| [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) | **4.3.0** | Harness fuente: ODD, agentes, guardas y skills |
+| gentle-pi | 4.3.0 | Paquete de gentle-shell que kairos sincroniza |
+| Pi | 1.2.0 | Runtime que acompaña a gentle-shell |
+| gentle-ai | 4.2.0 | Runtime fijado por gentle-shell 4.3.0 |
+| Engram | 3.4.0 | Memoria persistente vía MCP |
+
+Versiones con las que se desarrolla y prueba kairos. `gentle-shell` es opcional: sin él, kairos abre con la última copia sincronizada.
 
 **OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
 
@@ -18,15 +33,13 @@
 
 Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
 
-**Versiones con las que se desarrolla y prueba:** OpenCode **1.18.35** y gentle-shell **4.3.0** (gentle-pi 4.3.0 · Pi 1.2.0; fija gentle-ai 4.2.0 y Engram 3.4.0).
-
 Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y prueba a diario — aunque funciona en cualquier distribución con glibc.
 
 > Proyecto en desarrollo activo: cada push pasa la suite completa, `shellcheck` y un escaneo de privacidad en CI.
 
 ## Índice
 
-[Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
+[Stack](#stack) · [Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
 
 ## Qué incluye
 
