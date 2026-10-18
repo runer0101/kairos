@@ -13,6 +13,7 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import {
 	buildClassifierPrompt,
+	CLASSIFIER_SESSION_TITLE,
 	createInFlightGuard,
 	DEADLINE_MS,
 	decidePolicy,
@@ -30,7 +31,6 @@ const STUB_REASON = "stub"
 const MAX_CACHE_ENTRIES = 64
 /** Tools whose calls can carry a veto in allow-status sessions. */
 const VETO_TOOLS = new Set(["bash", "edit", "write"])
-const CLASSIFIER_SESSION_TITLE = "kairos auto-approval classifier"
 const REPLY_URL = "/permission/{requestID}/reply"
 
 type StubMode = "allow" | "deny" | "timeout"

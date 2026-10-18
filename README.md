@@ -34,6 +34,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 - **Rutas sensibles protegidas**: credenciales (`~/.ssh`, `~/.gnupg`, `~/.aws`, claves, `auth.json`) bloqueadas en todos los perfiles; `.env`/`.pem` piden confirmación en el perfil normal (ver `SECURITY.md`).
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
 - **Revisión** (`/review`), **juicio adversarial** (`/judge`) y **verificación** (`/verify`), con los subagentes de gentle-shell.
+- **Ponytail**: economía de implementación (YAGNI, reutilización, `shortcut:`) integrada en el prompt común de los dos perfiles, con `/ponytail`, `/ponytail-review` y `/ponytail-debt` on-demand.
 - **Memoria** persistente mediante el servidor MCP `engram`, y documentación de librerías mediante `context7`.
 - **DeepSeek v4.1 Flash por defecto** (`opencode-go/deepseek-v4.1-flash`; requiere suscripción OpenCode Go). Si tienes Ollama, LM Studio, llama.cpp o vLLM activos, sus modelos aparecen automáticamente.
 - **Calidad de código**: servidores LSP, formateadores y `snapshot` para deshacer cambios.
@@ -51,6 +52,15 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 | OpenCode | 1.18.x | `install.sh` usa el instalador oficial si falta |
 | engram | 3.4.0 | `install.sh` descarga el binario oficial |
 | Ollama u otro runtime local | opcional | Se detecta al abrir, si está activo |
+
+### Versiones de referencia
+
+| Proyecto | Versión de desarrollo y pruebas |
+|---|---|
+| OpenCode | **1.18.35** |
+| gentle-shell | **4.3.0** (gentle-pi 4.3.0 · Pi 1.2.0; fija gentle-ai 4.2.0 y Engram 3.4.0) |
+
+El lanzador y la suite e2e se validan contra esa combinación. `gentle-shell` es opcional: si está instalado, el lanzador sincroniza agentes, prompt, guarda y skills desde esa versión; sin él, kairos abre con la última copia sincronizada.
 
 El proyecto está pensado para **Arch Linux** (es el entorno de desarrollo y pruebas); cualquier otra distribución con glibc funciona igual, porque el instalador no depende de apt, dnf ni zypper. Alpine Linux (musl) no está soportado: Node.js y los binarios de OpenCode se distribuyen para glibc.
 
@@ -95,12 +105,14 @@ Pulsa `Tab` para cambiar de perfil durante una sesión.
 
 | Perfil | Modelo | Permisos | Para qué |
 |---|---|---|---|
-| `kairos-control` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario |
-| `kairos-auto` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza |
+| `kairos-control` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario, con la economía de implementación integrada |
+| `kairos-auto` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza, con la misma disciplina |
 
 Cada perfil lleva su color en la interfaz: `kairos-control` en amarillo y `kairos-auto` en azul.
 
 Los dos perfiles usan el mismo modelo (DeepSeek v4.1 Flash, requiere suscripción OpenCode Go). Los subagentes sin modelo propio heredan el modelo del perfil activo. `gentle-ai-explore` limita a 15 pasos para acotar el costo de la exploración; el resto de subagentes (incluido `jd-judge-b`) usa DeepSeek v4.1 Flash.
+
+Los dos perfiles comparten el prompt común (`prompts/orchestrator.md`), que incluye la capa de economía de implementación de Ponytail: se aplica en cada turno, sin comando. Los comandos `/ponytail*` quedan para ajustes explícitos de nivel, revisión y deuda.
 
 Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar los prompts.
 
@@ -142,9 +154,22 @@ Los presupuestos son: contexto ≤ 32 KiB (el pedido vivo primero, con los secre
 | `/gentle-status` | Cambios del repositorio y siguiente paso |
 | `/gentle-usage` | Tokens y costo (`opencode stats`) |
 | `/odd-task <nombre>` | Crea `odd/tasks/<nombre>.md` en el proyecto a partir de la plantilla ODD |
-| `/review` | Revisa el cambio actual con las lentes que correspondan por tamaño y riesgo |
+| `/review` | Revisa el cambio actual con las lentes que correspondan por tamaño y riesgo (incluye la lente lean de Ponytail en `review-readability`) |
 | `/judge [alcance]` | Judgment Day: dos jueces ciegos con modelos distintos y corrección acotada |
 | `/verify` | Verificación independiente con evidencia observada |
+| `/ponytail [nivel]` | Ajusta el nivel de implementación mínima en la conversación (`lite`, `full`, `ultra` u `off`); la disciplina ya está integrada en el prompt común |
+| `/ponytail-review [alcance]` | Revisión con la lente lean de Ponytail: bugs, seguridad, carga, tests, velocidad y código que sobra |
+| `/ponytail-debt` | Recoge los comentarios `shortcut:` del repositorio en un ledger de deuda |
+
+### Ponytail
+
+Ponytail (v5.3.2, MIT) aporta una lente de implementación mínima integrada en el prompt común de los dos perfiles (`prompts/orchestrator.md`, generado): se aplica en cada turno, sin comando. Los comandos quedan para uso explícito:
+
+- `/ponytail [nivel]`: ajusta el nivel en la conversación actual (`lite`, `full`, `ultra` u `off`). No se persiste entre sesiones.
+- `/ponytail-review [alcance]`: informe de revisión con la lente lean. `/review` ya aplica esta lente en `review-readability`; este comando es la pasada completa.
+- `/ponytail-debt`: recoge los comentarios `shortcut:` en un ledger para que una simplificación deliberada no se vuelva permanente.
+
+La precedencia es explícita: kairos manda en proceso, riesgo y verificación; Ponytail manda en economía de implementación. La sincronización con gentle-shell regenera el prompt común con la capa incluida y no gestiona las skills ni los comandos. Licencia y atribución: `LICENSE-ponytail`.
 
 ### Flujo recomendado
 
@@ -175,6 +200,14 @@ KAIROS_SOUNDS=1 kairos
 ```
 
 Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo a mano en la configuración de atención de OpenCode (`tui.json`), donde se controlan el volumen y si suenan solo cuando la ventana no tiene foco.
+
+### Avisos de escritorio
+
+Cuando una sesión **principal** termina un turno (pasa de `busy` a `idle`), kairos lanza un aviso de escritorio con `notify-send` — resumen `Kairos` y cuerpo «Listo para tu siguiente mensaje», porque un turno terminado no es una tarea terminada. Los subagentes y las sesiones internas del clasificador no avisan; un error avisa como error (`Error en la sesión` o `El modelo dejó de responder`) y el «listo» posterior a un error no se muestra. Se apaga con:
+
+```bash
+KAIROS_NO_NOTIFY=1 kairos
+```
 
 ### Logo
 
@@ -267,7 +300,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 115 pruebas: configuración, agentes, comandos, detector, guarda, clasificador, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, sonidos y rutas sensibles
+pnpm test                           # 134 pruebas: configuración, agentes, comandos, detector, guarda, clasificador, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, sonidos, rutas sensibles y Ponytail
 KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto, incluido el e2e del clasificador con stub
 ```
 
@@ -281,18 +314,18 @@ kairos/
 ├── install.sh                       Instalador para Linux
 ├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
-├── prompts/orchestrator.md          Prompt común de los perfiles (generado)
+├── prompts/orchestrator.md          Prompt común + Ponytail (generado)
 ├── agents/                          Subagentes de gentle-shell (generados)
 ├── gentle-assets/                   Referencias perezosas del orquestador (generadas)
-├── commands/                        Comandos /gentle-*, /odd-task, /review, /judge, /verify
+├── commands/                        Comandos /gentle-*, /odd-task, /review, /judge, /verify, /ponytail*
 ├── odd/                             Plantilla y guía del flujo ODD
-├── plugins/gentle-shell.ts          Guarda de comandos destructivos y notificación al terminar
+├── plugins/gentle-shell.ts          Guarda de comandos destructivos y avisos de escritorio
 ├── lib/destructive-command-guard.ts Lógica de la guarda (copia de gentle-pi)
 ├── hooks/commit-msg                 Hook: rechaza commits con co-autor
 ├── scripts/
 │   ├── detect-local-models.mjs      Detección de runtimes de IA local
 │   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
-├── skills/                          Skills (33)
+├── skills/                          Skills (36)
 ├── themes/                          Temas (gentleman-kairos, gentle, gentleman-cute, gentleman-sexy)
 ├── tui-plugins/gentle-logo.tsx      Logo de la TUI (sigue el tema activo)
 ├── tui-plugins/kairos-hud.tsx       Tarea ODD junto al prompt y en la sidebar
@@ -300,7 +333,8 @@ kairos/
 ├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
 ├── pnpm-workspace.yaml              Ajustes de pnpm y políticas de seguridad
 ├── pnpm-lock.yaml                   Versiones fijadas
-└── LICENSE-gentle-shell             Licencia MIT de los componentes derivados
+├── LICENSE-gentle-shell             Licencia MIT de los componentes derivados
+└── LICENSE-ponytail                 Licencia MIT de Ponytail
 ```
 
 Detalles de cada componente, el mapeo de Pi a OpenCode y el flujo de actualización están en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -312,6 +346,8 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 - La barra fullscreen, paneles de uso, animaciones y regiones de puntero de la TUI de Pi (los sonidos sí se portaron, opt-in).
 - La autoridad nativa de revisión (RDD) y Herdr.
 - Los comandos `/gentle:*` que dependían de esas piezas; el estado de cada comando de Pi y su equivalente nativo están en la tabla «Comandos `/gentle:*` de Pi: qué aplica» de [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+De Ponytail no se portó el plugin de inyección, la band/board (específicas de Claude Code) ni los hooks de lifecycle para otros hosts: la integración always-on se hace en el prompt generado de los perfiles, sin plugin.
 
 ## Seguridad
 
@@ -350,6 +386,7 @@ Mantenido por [@runer0101](https://github.com/runer0101).
 Este repositorio se distribuye bajo **licencia MIT** (ver [LICENSE](LICENSE)).
 
 - Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), de [Gentleman Programming](https://github.com/Gentleman-Programming), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
+- Las skills `ponytail`, `ponytail-review` y `ponytail-debt`, y sus comandos, se derivan de **Ponytail**, de [Dietrich Gebert](https://github.com/DietrichGebert), bajo licencia MIT. Ver `LICENSE-ponytail`.
 - Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai. Revisa su licencia de origen antes de redistribuirlas.
 - Los tonos de `assets/sounds/` son originales de gentle-pi (MIT); su nota de licencia está junto a los archivos.
 - Los servidores MCP (`engram`, `context7`) son proyectos externos, cada uno con su propia licencia.

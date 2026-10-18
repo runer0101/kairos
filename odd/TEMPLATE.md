@@ -27,6 +27,10 @@
 
 - <Compatibilidad, rendimiento, dependencias que no se pueden tocar, etc.>
 
+## Deuda deliberada
+
+<Simplificaciones conscientes con `shortcut: <límite>, <cuándo revisar>` y por qué no se resolvieron ahora. `/ponytail-debt` las recoge.>
+
 ## Checklist
 
 Cada tarea tiene ID estable, criterio de aceptación observable y prueba.

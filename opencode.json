@@ -84,14 +84,14 @@
       "disable": true
     },
     "kairos-control": {
-      "description": "Perfil de control (por defecto): orquestador con DeepSeek v4.1 Flash y permisos normales",
+      "description": "Perfil de control (por defecto): orquestador con DeepSeek v4.1 Flash, permisos normales y la economía de implementación de Ponytail integrada",
       "mode": "primary",
       "model": "opencode-go/deepseek-v4.1-flash",
       "prompt": "{file:./prompts/orchestrator.md}",
       "color": "warning"
     },
     "kairos-auto": {
-      "description": "Perfil automático: sin preguntas de permisos; la guarda de comandos destructivos sigue activa",
+      "description": "Perfil automático: sin preguntas de permisos, con la economía de implementación de Ponytail integrada; la guarda de comandos destructivos sigue activa",
       "mode": "primary",
       "model": "opencode-go/deepseek-v4.1-flash",
       "prompt": "{file:./prompts/orchestrator.md}",

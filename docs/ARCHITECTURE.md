@@ -16,7 +16,7 @@ Este documento describe cómo está construido kairos, qué se portó desde gent
         │  opencode.json  → modelos, MCPs, permisos, agente  │
         │  agents/        → orchestrator + subagentes        │
         │  commands/      → /gentle-*                        │
-        │  plugins/       → guarda bash + notificación       │
+        │  plugins/       → guarda bash + avisos al terminar │
         │  skills/        → instrucciones bajo demanda       │
         │  tui.json       → tema + logo + statusline         │
         └───────────────────────────────────────────────────┘
@@ -28,14 +28,14 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 
 | Componente en gentle-shell | Equivalente en kairos | Notas |
 |---|---|---|
-| `assets/orchestrator.md` | `prompts/orchestrator.md` (prompt común) + perfiles `kairos-control`, `kairos-auto` en `opencode.json` | Placeholders resueltos; cada perfil define modelo y permisos sin duplicar el prompt |
+| `assets/orchestrator.md` | `prompts/orchestrator.md` (común + Ponytail) + perfiles `kairos-control`, `kairos-auto` en `opencode.json` | Placeholders resueltos; la capa de economía de implementación va integrada en el prompt común de los dos perfiles |
 | `assets/orchestrator-*.md`, `chains/` | `gentle-assets/` | Se leen bajo demanda, igual que en Pi |
 | `assets/agents/*.md` | `agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
 | `registerCommand("gentle:…")` | `commands/gentle-*.md` | Solo los comandos con equivalente directo en OpenCode |
 | `lib/destructive-command-guard.ts` | `lib/destructive-command-guard.ts` + `plugins/gentle-shell.ts` | El plugin llama a la guarda en `tool.execute.before` |
 | Clasificador de auto-aprobación (`lib/auto-permission-classifier.ts` + runtime) | `plugins/auto-approval.ts` + `lib/auto-approval/` | Mecanismo verificado en OpenCode 1.18.35: el ask se responde por el evento `permission.asked` y el veto va por `tool.execute.before` (ver «Clasificador de auto-aprobación») |
-| `gentle-notifications` (sonido y escritorio) | Evento `session.idle` → `notify-send` + pack de tonos nativo | Tonos opt-in con `KAIROS_SOUNDS=1` |
+| `gentle-notifications` (sonido y escritorio) | Eventos `session.status`/`session.error` → `notify-send` filtrado + pack de tonos nativo | Avisa solo a la sesión principal al pasar de `busy` a `idle`, calla el «listo» tras un error (avisando el error) y silencia a subagentes y sesiones internas del clasificador. Tonos opt-in con `KAIROS_SOUNDS=1`; avisos apagables con `KAIROS_NO_NOTIFY=1` |
 | Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
 | `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
 | `themes/` y TUI propia | `themes/` (4 temas), `tui-plugins/`, `tui.json` | Tema, logo que sigue al tema y HUD ODD propios (ver «La TUI (mapa)») |
@@ -90,7 +90,7 @@ Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan
 | Pieza | Dónde | Qué hace |
 |---|---|---|
 | Agentes primarios | `opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`. |
-| Prompt común | `prompts/orchestrator.md` | Lo referencia cada perfil con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell. |
+| Prompt común | `prompts/orchestrator.md` | Lo usan los dos perfiles con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell e incluye la capa de Ponytail. |
 | Herencia de modelo | OpenCode | Un subagente sin `model` usa el del agente que lo invoca. Así el perfil activo decide el modelo de todo el trabajo. |
 | Excepciones de subagentes | `opencode.json` | `gentle-ai-explore` (15 pasos) y `jd-judge-b` usan el modelo por defecto (DeepSeek v4.1 Flash). |
 
@@ -102,6 +102,10 @@ Permisos:
 - **Guarda de comandos**: `plugins/gentle-shell.ts` la aplica en `tool.execute.before`, en todos los modos.
 
 Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto real del repositorio (diff, estado, estadísticas) y delega en subagentes con la herramienta `task`. `/judge` sigue las reglas de la skill `judgment-day`: jueces ciegos en paralelo, corrección solo de hallazgos confirmados por ambos y como máximo dos rondas. `/review` elige las lentes `review-*` por tamaño y riesgo, con la tabla de gentle-shell.
+
+### Ponytail integrado en los perfiles
+
+La capa de economía de implementación (Ponytail v5.3.2, MIT) se genera dentro de `prompts/orchestrator.md`, el prompt común de `kairos-control` y `kairos-auto`. No sustituye ODD, delegación, riesgo, revisión ni verificación: si hay conflicto, manda el proceso de kairos. `/review` incorpora además la lente lean en `review-readability`, y la plantilla ODD tiene una sección «Deuda deliberada» para los comentarios `shortcut:`.
 
 ### Clasificador de auto-aprobación
 
@@ -117,7 +121,7 @@ Evidencia del spike, criterios y presupuestos completos: `odd/tasks/auto-approva
 
 ### Comandos `/gentle:*` de Pi: qué aplica
 
-gentle-pi 4.2.0 registra 29 comandos `/gentle:*` (verificado en `extensions/` y `lib/`). Kairos porta los que tienen equivalente directo y cubre el resto con lo nativo de OpenCode:
+gentle-pi 4.3.0 registra 30 comandos `/gentle:*` (verificado en `extensions/` y `lib/`). Kairos porta los que tienen equivalente directo y cubre el resto con lo nativo de OpenCode:
 
 | Comando de Pi | Estado en kairos | Equivalente nativo |
 |---|---|---|
@@ -184,6 +188,7 @@ Para apagar una pieza, quita su línea de `plugin` en `tui.json` y reabre kairos
 | Archivo o carpeta | Origen | ¿Lo modifica la sincronización? |
 |---|---|---|
 | `agents/` (orchestrator y subagentes de gentle-shell) | Generado | Sí, reemplaza los suyos y borra los que ya no existan upstream |
+| `prompts/orchestrator.md` | Generado | Sí, se regenera con la capa de Ponytail incluida |
 | `gentle-assets/` | Generado | Sí, se regenera completo |
 | `lib/destructive-command-guard.ts`, `LICENSE-gentle-shell` | Copiado | Sí |
 | `skills/gentle-ai`, `skills/rdd-defect-workflow` | Copiado | Sí, se refrescan |
