@@ -43,8 +43,8 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 
 ## Qué incluye
 
-- **Perfiles de agente** (se cambian con `Tab`): `kairos-control` (normal) y `kairos-auto` (sin preguntas). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
-- **Modos de permiso**: normal por defecto; automático con el perfil `kairos-auto` o con `kairos --auto`. La guarda de comandos destructivos siempre está activa.
+- **Perfiles de agente** (se cambian con `Tab`): `kairos-auto` (sin preguntas, el de arranque) y `kairos-control` (normal). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
+- **Modos de permiso**: automático por defecto con el perfil `kairos-auto`; normal con `kairos-control`. La guarda de comandos destructivos siempre está activa.
 - **Clasificador de auto-aprobación**: aprueba lo seguro y dentro del pedido vivo en el perfil normal, y veta lo peligroso o fuera de alcance en `kairos-auto`; es consejo contextual y cualquier fallo deja la decisión como está (ver *Modos de permiso*).
 - **Rutas sensibles protegidas**: credenciales (`~/.ssh`, `~/.gnupg`, `~/.aws`, claves, `auth.json`) bloqueadas en todos los perfiles; `.env`/`.pem` piden confirmación en el perfil normal (ver `SECURITY.md`).
 - **Flujo ODD**: `/odd-task <nombre>` crea un documento de feature en el proyecto, con checklist y criterios observables.
@@ -113,12 +113,12 @@ Para abrirlo usa `kairos` o sus alias cortos `kai` y `ks` (el instalador crea lo
 
 ## Perfiles de agente
 
-Pulsa `Tab` para cambiar de perfil durante una sesión.
+Pulsa `Tab` para cambiar de perfil durante una sesión. Arranca en `kairos-auto` (`default_agent` en `opencode.json`).
 
 | Perfil | Modelo | Permisos | Para qué |
 |---|---|---|---|
-| `kairos-control` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario, con la economía de implementación integrada |
-| `kairos-auto` | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza, con la misma disciplina |
+| `kairos-auto` (por defecto) | `opencode-go/deepseek-v4.1-flash` | Sin preguntas | Trabajo autónomo sobre un repositorio de confianza, con la misma disciplina |
+| `kairos-control` | `opencode-go/deepseek-v4.1-flash` | Normales | Trabajo diario, con la economía de implementación integrada |
 
 Cada perfil lleva su color en la interfaz: `kairos-control` en amarillo y `kairos-auto` en azul.
 
@@ -132,8 +132,8 @@ Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar l
 
 | Modo | Cómo se activa | Qué pasa |
 |---|---|---|
-| Normal | Por defecto | Edición y comandos de bash piden confirmación. Las lecturas habituales (`ls`, `git status`, `git diff`, `grep`…) no. |
-| Automático | Perfil `kairos-auto` | No pide confirmación. La guarda de comandos destructivos sigue bloqueando. |
+| Automático | Perfil `kairos-auto` (por defecto) | No pide confirmación. La guarda de comandos destructivos sigue bloqueando. |
+| Normal | Perfil `kairos-control` | Edición y comandos de bash piden confirmación. Las lecturas habituales (`ls`, `git status`, `git diff`, `grep`…) no. |
 | Auto (OpenCode) | `kairos --auto` | Aprueba lo que pediría confirmación. Las reglas `deny` siguen aplicando. |
 
 La guarda de comandos destructivos bloquea, en todos los modos, formas reconocibles como `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE` y `DELETE` sin `WHERE`. Es un filtro heurístico, no un sandbox.

@@ -90,7 +90,7 @@ Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan
 
 | Pieza | Dónde | Qué hace |
 |---|---|---|
-| Agentes primarios | `opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`. |
+| Agentes primarios | `opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`; el de arranque es `kairos-auto` (`default_agent`). |
 | Prompt común | `prompts/orchestrator.md` | Lo usan los dos perfiles con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell e incluye la capa de Ponytail. |
 | Herencia de modelo | OpenCode | Un subagente sin `model` usa el del agente que lo invoca. Así el perfil activo decide el modelo de todo el trabajo. |
 | Excepciones de subagentes | `opencode.json` | `gentle-ai-explore` (15 pasos) y `jd-judge-b` usan el modelo por defecto (DeepSeek v4.1 Flash). |

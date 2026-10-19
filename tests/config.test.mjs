@@ -9,8 +9,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
 const DEEPSEEK = "opencode-go/deepseek-v4.1-flash";
 
-test("el agente por defecto es el perfil de control", () => {
-  assert.equal(cfg.default_agent, "kairos-control");
+test("el agente por defecto es el perfil automático", () => {
+  assert.equal(cfg.default_agent, "kairos-auto");
+  assert.equal(cfg.agent["kairos-auto"].mode, "primary");
   assert.equal(cfg.agent["kairos-control"].mode, "primary");
 });
 
