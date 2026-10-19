@@ -13,12 +13,11 @@
 <p align="center">
   <a href="https://github.com/runer0101/kairos/actions/workflows/ci.yml"><img src="https://github.com/runer0101/kairos/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-3b82f6?style=for-the-badge&labelColor=191724" alt="Licencia MIT"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A522.13-1d4ed8?style=for-the-badge&labelColor=191724" alt="Node"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-22.13-1d4ed8?style=for-the-badge&labelColor=191724" alt="Node"></a>
   <a href="https://pnpm.io"><img src="https://img.shields.io/badge/pnpm-11.22.0-1e3a8a?style=for-the-badge&labelColor=191724" alt="pnpm"></a>
   <a href="#requisitos"><img src="https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1?style=for-the-badge&labelColor=191724" alt="Plataforma"></a>
   <a href="https://github.com/anomalyco/opencode"><img src="https://img.shields.io/badge/OpenCode-1.18.35-1f6feb?style=for-the-badge&labelColor=191724" alt="OpenCode"></a>
   <a href="https://github.com/Gentleman-Programming/gentle-shell"><img src="https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2?style=for-the-badge&labelColor=191724" alt="gentle-shell"></a>
-  <a href="https://github.com/runer0101/kairos/stargazers"><img src="https://img.shields.io/github/stars/runer0101/kairos?style=for-the-badge&labelColor=191724&color=3b82f6" alt="Estrellas"></a>
 </p>
 
 <p align="center">
@@ -568,7 +567,6 @@ Issues concretos y `pnpm test` antes de enviar.
 
 <p align="center">
   <a href="https://github.com/runer0101/kairos/issues"><img src="https://img.shields.io/badge/issues-abre%20uno-3b82f6?style=for-the-badge&labelColor=191724" alt="Issues"></a>
-  <a href="https://github.com/runer0101/kairos/stargazers"><img src="https://img.shields.io/github/stars/runer0101/kairos?style=for-the-badge&labelColor=191724&color=3b82f6" alt="Estrellas"></a>
   <a href="https://github.com/runer0101/kairos/graphs/contributors"><img src="https://img.shields.io/badge/contribuidores-gracias-1d4ed8?style=for-the-badge&labelColor=191724" alt="Contribuidores"></a>
 </p>
 
