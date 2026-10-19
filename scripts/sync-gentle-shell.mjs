@@ -6,7 +6,7 @@
 //   prompts/           orchestrator.md (común + Ponytail)
 //   gentle-assets/     referencias perezosas del orchestrator (orchestrator*.md, chains/)
 //   lib/destructive-command-guard.ts
-//   LICENSE-gentle-shell
+//   licenses/LICENSE-gentle-shell
 //   skills/gentle-ai, skills/rdd-defect-workflow (skills que vienen de gentle-shell)
 //
 // NO toca: themes/, tui-plugins/, tui.json, opencode.json, resto de skills/, plugins/,
@@ -207,7 +207,7 @@ const guardSrc = join(GS_PKG, "lib", "destructive-command-guard.ts");
 const guardText = readFileSync(guardSrc, "utf8");
 writeFileSync(
   join(STAGE, "destructive-command-guard.ts"),
-  "// Copiado de gentle-pi (gentle-shell), licencia MIT. Ver ../LICENSE-gentle-shell.\n" + guardText,
+  "// Copiado de gentle-pi (gentle-shell), licencia MIT. Ver ../licenses/LICENSE-gentle-shell.\n" + guardText,
 );
 
 // 5) Skills de gentle-shell que se refrescan
@@ -300,7 +300,7 @@ if (CHECK) {
     join(KAIROS, "lib", "destructive-command-guard.ts"),
     "lib/destructive-command-guard.ts",
   );
-  compareFile(join(GS_PKG, "LICENSE"), join(KAIROS, "LICENSE-gentle-shell"), "LICENSE-gentle-shell");
+  compareFile(join(GS_PKG, "LICENSE"), join(KAIROS, "licenses", "LICENSE-gentle-shell"), "licenses/LICENSE-gentle-shell");
   for (const f of prev?.generatedAgents ?? []) {
     if (!generatedAgents.includes(f)) differences.push(`agents/${f}: sobrante (un sync lo borraría)`);
   }
@@ -341,8 +341,9 @@ rmSync(ASSETS_OUT, { recursive: true, force: true });
 cpSync(stageAssets, ASSETS_OUT, { recursive: true });
 
 mkdirSync(join(KAIROS, "lib"), { recursive: true });
+mkdirSync(join(KAIROS, "licenses"), { recursive: true });
 cpSync(join(STAGE, "destructive-command-guard.ts"), join(KAIROS, "lib", "destructive-command-guard.ts"));
-cpSync(join(GS_PKG, "LICENSE"), join(KAIROS, "LICENSE-gentle-shell"));
+cpSync(join(GS_PKG, "LICENSE"), join(KAIROS, "licenses", "LICENSE-gentle-shell"));
 
 for (const s of MANAGED_SKILLS) {
   rmSync(join(KAIROS, "skills", s), { recursive: true, force: true });

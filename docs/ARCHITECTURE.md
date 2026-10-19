@@ -217,7 +217,7 @@ El panel lo pinta `tui-plugins/kairos-shell.tsx` (sección «Agents» con subage
 | `agents/` (orchestrator y subagentes de gentle-shell) | Generado | Sí, reemplaza los suyos y borra los que ya no existan upstream |
 | `prompts/orchestrator.md` | Generado | Sí, se regenera con la capa de Ponytail incluida |
 | `gentle-assets/` | Generado | Sí, se regenera completo |
-| `lib/destructive-command-guard.ts`, `LICENSE-gentle-shell` | Copiado | Sí |
+| `lib/destructive-command-guard.ts`, `licenses/LICENSE-gentle-shell` | Copiado | Sí |
 | `skills/gentle-ai`, `skills/rdd-defect-workflow` | Copiado | Sí, se refrescan |
 | Resto de `skills/` | Propio / incorporado | No |
 | `opencode.json` | Manual | No |

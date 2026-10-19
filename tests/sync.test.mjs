@@ -48,7 +48,7 @@ function snapshot() {
         "prompts",
         "gentle-assets",
         "lib/destructive-command-guard.ts",
-        "LICENSE-gentle-shell",
+        "licenses/LICENSE-gentle-shell",
         "skills/gentle-ai",
         "skills/rdd-defect-workflow",
         ".gentle-shell-sync.json",

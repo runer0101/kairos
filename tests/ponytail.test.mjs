@@ -1,5 +1,5 @@
 // Pruebas de la integración de Ponytail: skills y comandos vendorizados, sin plugin.
-// La fuente es DietrichGebert/ponytail 5.3.2 (MIT); ver LICENSE-ponytail.
+// La fuente es DietrichGebert/ponytail 5.3.2 (MIT); ver licenses/LICENSE-ponytail.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -59,7 +59,7 @@ test("/ponytail cubre los niveles y /ponytail-review exige veredicto", () => {
 });
 
 test("la licencia MIT de Ponytail se conserva y se atribuye", () => {
-    const license = readFileSync(join(ROOT, "LICENSE-ponytail"), "utf8");
+    const license = readFileSync(join(ROOT, "licenses", "LICENSE-ponytail"), "utf8");
     assert.match(license, /MIT License/);
     assert.match(license, /DietrichGebert/);
     const readme = readFileSync(join(ROOT, "README.md"), "utf8");
