@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 <div align="center">
   <img src="assets/banner.svg" width="100%" alt="kairos — el harness de gentle-shell sobre OpenCode">
 </div>
@@ -8,12 +10,12 @@
 
 <p align="center">
   <a href="https://github.com/runer0101/kairos/actions/workflows/ci.yml"><img src="https://github.com/runer0101/kairos/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-yellow.svg" alt="Licencia MIT"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg" alt="Node"></a>
-  <a href="https://pnpm.io"><img src="https://img.shields.io/badge/pnpm-11.22.0-orange.svg" alt="pnpm"></a>
-  <a href="#requisitos"><img src="https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1.svg" alt="Plataforma"></a>
-  <a href="https://github.com/anomalyco/opencode"><img src="https://img.shields.io/badge/OpenCode-1.18.35-1f6feb.svg" alt="OpenCode"></a>
-  <a href="https://github.com/Gentleman-Programming/gentle-shell"><img src="https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2.svg" alt="gentle-shell"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-3b82f6?style=for-the-badge&labelColor=191724" alt="Licencia MIT"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A522.13-1d4ed8?style=for-the-badge&labelColor=191724" alt="Node"></a>
+  <a href="https://pnpm.io"><img src="https://img.shields.io/badge/pnpm-11.22.0-1e3a8a?style=for-the-badge&labelColor=191724" alt="pnpm"></a>
+  <a href="#requisitos"><img src="https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1?style=for-the-badge&labelColor=191724" alt="Plataforma"></a>
+  <a href="https://github.com/anomalyco/opencode"><img src="https://img.shields.io/badge/OpenCode-1.18.35-1f6feb?style=for-the-badge&labelColor=191724" alt="OpenCode"></a>
+  <a href="https://github.com/Gentleman-Programming/gentle-shell"><img src="https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2?style=for-the-badge&labelColor=191724" alt="gentle-shell"></a>
 </p>
 
 ## Stack
@@ -52,7 +54,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 
 ## Índice
 
-[Stack](#stack) · [Qué incluye](#qué-incluye) · [Construido sobre](#construido-sobre) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
+[Stack](#stack) · [Qué incluye](#qué-incluye) · [Construido sobre](#construido-sobre) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Documentación](#documentación) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
 
 ## Qué incluye
 
@@ -91,6 +93,15 @@ El proyecto está pensado para **Arch Linux** (es el entorno de desarrollo y pru
 
 ## Instalación rápida
 
+¿Por dónde empiezas?
+
+| Si quieres… | Empieza por… |
+|---|---|
+| Instalarlo con un comando y usar OpenCode tal cual | El comando de abajo |
+| Ver el panel de gentle-shell junto a la conversación | [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) |
+| Contribuir o revisar el código | [Contribuir](#contribuir) |
+| Entender cómo está construido | [Documentación](#documentación) |
+
 Un comando (el instalador clona el repo en `~/.config/kairos` y configura todo):
 
 ```bash
@@ -123,6 +134,10 @@ No instala Ollama ni descarga modelos. Es idempotente: puedes ejecutarlo de nuev
 Si `~/.local/bin` no está en tu `PATH`, añade `export PATH="$HOME/.local/bin:$PATH"` a tu shell.
 
 Para abrirlo usa `kairos` o sus alias cortos `kai` y `ks` (el instalador crea los tres enlaces; funciona en cualquier shell).
+
+<p align="center">
+  <img src="assets/divider.svg" width="480" alt="">
+</p>
 
 ## Perfiles de agente
 
@@ -266,6 +281,10 @@ Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `tui.json` y vuelve a a
 
 La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes de terceros y el HUD siguen ahí, y esta vista es la unión a pantalla completa. Para tener el panel de gentle-shell junto a la conversación, kairos trae un binario propio (siguiente sección).
 
+<p align="center">
+  <img src="assets/divider.svg" width="480" alt="">
+</p>
+
 ## Panel de gentle-shell a la izquierda (binario propio, opcional)
 
 Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
@@ -405,6 +424,19 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 - Los comandos `/gentle:*` que dependían de esas piezas; el estado de cada comando de Pi y su equivalente nativo están en la tabla «Comandos `/gentle:*` de Pi: qué aplica» de [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 De Ponytail no se portó el plugin de inyección, la band/board (específicas de Claude Code) ni los hooks de lifecycle para otros hosts: la integración always-on se hace en el prompt generado de los perfiles, sin plugin.
+
+<p align="center">
+  <img src="assets/divider.svg" width="480" alt="">
+</p>
+
+## Documentación
+
+| Destino | Para qué |
+|---|---|
+| [Arquitectura](docs/ARCHITECTURE.md) | Mapeo de gentle-shell a OpenCode, la TUI, el binario propio y las decisiones de diseño |
+| [Seguridad](SECURITY.md) | Guardas, rutas sensibles, límites y cómo ajustarlos |
+| [Plantilla y flujo ODD](odd/) | Documentos de feature, tareas y criterios observables del proyecto |
+| [Licencias](LICENSE) | MIT, con las atribuciones de gentle-shell y Ponytail |
 
 ## Seguridad
 
