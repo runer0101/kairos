@@ -6,7 +6,9 @@
 
 <h1 align="center">kairos</h1>
 
-<p align="center">OpenCode con el harness de <a href="https://github.com/Gentleman-Programming/gentle-shell">gentle-shell</a> portado a su base — el flujo «el Gentleman» sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.</p>
+<p align="center"><strong>OpenCode con el harness de <a href="https://github.com/Gentleman-Programming/gentle-shell">gentle-shell</a> portado a su base.</strong></p>
+
+<p align="center">El flujo «el Gentleman» sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente — con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.</p>
 
 <p align="center">
   <a href="https://github.com/runer0101/kairos/actions/workflows/ci.yml"><img src="https://github.com/runer0101/kairos/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -16,9 +18,36 @@
   <a href="#requisitos"><img src="https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1?style=for-the-badge&labelColor=191724" alt="Plataforma"></a>
   <a href="https://github.com/anomalyco/opencode"><img src="https://img.shields.io/badge/OpenCode-1.18.35-1f6feb?style=for-the-badge&labelColor=191724" alt="OpenCode"></a>
   <a href="https://github.com/Gentleman-Programming/gentle-shell"><img src="https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2?style=for-the-badge&labelColor=191724" alt="gentle-shell"></a>
+  <a href="https://github.com/runer0101/kairos/stargazers"><img src="https://img.shields.io/github/stars/runer0101/kairos?style=for-the-badge&labelColor=191724&color=3b82f6" alt="Estrellas"></a>
 </p>
 
-## Stack
+<p align="center">
+  <strong>
+    <a href="#instalación-rápida">Instalación</a>
+    &nbsp;·&nbsp;
+    <a href="#comandos">Comandos</a>
+    &nbsp;·&nbsp;
+    <a href="#temas">Temas</a>
+    &nbsp;·&nbsp;
+    <a href="#documentación">Documentación</a>
+    &nbsp;·&nbsp;
+    <a href="SECURITY.md">Seguridad</a>
+  </strong>
+</p>
+
+<br>
+
+<p align="center">Dos mundos en uno: la potencia nativa de OpenCode — LSP, formateadores, snapshots, MCP y plugins — y las herramientas de gentle-shell — agentes, skills, comandos, ODD y guardas — sin renunciar a ninguna.</p>
+
+<p align="center">Pensado para <strong>Linux</strong>, en especial <strong>Arch Linux</strong>, donde se desarrolla y prueba a diario; funciona en cualquier distribución con glibc.</p>
+
+> Proyecto en desarrollo activo: cada push pasa la suite completa, `shellcheck` y un escaneo de privacidad en CI.
+
+<a id="stack"></a>
+
+## 🧱 Stack
+
+Versiones con las que se desarrolla y prueba kairos. `gentle-shell` es opcional: sin él, kairos abre con la última copia sincronizada.
 
 | Proyecto | Versión | Rol |
 |---|---|---|
@@ -29,11 +58,9 @@
 | [gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) | 4.2.0 | Runtime fijado por gentle-shell 4.3.0 |
 | [Engram](https://github.com/Gentleman-Programming/engram) | 3.4.0 | Memoria persistente vía MCP |
 
-Versiones con las que se desarrolla y prueba kairos. `gentle-shell` es opcional: sin él, kairos abre con la última copia sincronizada.
+<a id="construido-sobre"></a>
 
-Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
-
-## Construido sobre
+## 🙌 Construido sobre
 
 Kairos no existiría sin los dos proyectos en los que se inspira, y el crédito va por delante:
 
@@ -44,19 +71,11 @@ Kairos no existiría sin los dos proyectos en los que se inspira, y el crédito 
 
 Gracias también a [Ponytail](https://github.com/DietrichGebert) por la capa de economía de implementación, y a los servidores MCP de memoria y documentación por el contexto persistente.
 
-<p align="center">
-  <img src="assets/divider.svg" width="480" alt="">
-</p>
+<a id="qué-incluye"></a>
 
-Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y prueba a diario — aunque funciona en cualquier distribución con glibc.
+## 🧩 Qué incluye
 
-> Proyecto en desarrollo activo: cada push pasa la suite completa, `shellcheck` y un escaneo de privacidad en CI.
-
-## Índice
-
-[Stack](#stack) · [Qué incluye](#qué-incluye) · [Construido sobre](#construido-sobre) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Documentación](#documentación) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
-
-## Qué incluye
+Todo lo que trae el port, en una lista:
 
 - **Perfiles de agente** (se cambian con `Tab`): `kairos-auto` (sin preguntas, el de arranque) y `kairos-control` (normal). Los agentes `build` y `plan` de OpenCode quedan desactivados para no confundir el selector.
 - **Modos de permiso**: automático por defecto con el perfil `kairos-auto`; normal con `kairos-control`. La guarda de comandos destructivos siempre está activa.
@@ -73,7 +92,13 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 - **Panel de gentle-shell a la izquierda** (opcional): binario propio de OpenCode 1.18.35 con un parche mínimo que abre un panel izquierdo — agentes, todos y estado, lo que muestra gentle-shell — junto a la conversación de OpenCode; la sidebar de OpenCode queda a la derecha como siempre. Sin el binario propio, todo funciona igual.
 - **Sincronización** con la versión instalada de gentle-shell.
 
-## Requisitos
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
+
+<a id="requisitos"></a>
+
+## 📋 Requisitos
+
+Linux con glibc; el instalador resuelve el resto.
 
 | Componente | Versión | Cómo se obtiene |
 |---|---|---|
@@ -91,7 +116,11 @@ El lanzador y la suite e2e se validan contra esa combinación. `gentle-shell` es
 
 El proyecto está pensado para **Arch Linux** (es el entorno de desarrollo y pruebas); cualquier otra distribución con glibc funciona igual, porque el instalador no depende de apt, dnf ni zypper. Alpine Linux (musl) no está soportado: Node.js y los binarios de OpenCode se distribuyen para glibc.
 
-## Instalación rápida
+<a id="instalación-rápida"></a>
+
+## ⚡ Instalación rápida
+
+Un comando y OpenCode queda listo.
 
 ¿Por dónde empiezas?
 
@@ -102,13 +131,16 @@ El proyecto está pensado para **Arch Linux** (es el entorno de desarrollo y pru
 | Contribuir o revisar el código | [Contribuir](#contribuir) |
 | Entender cómo está construido | [Documentación](#documentación) |
 
-Un comando (el instalador clona el repo en `~/.config/kairos` y configura todo):
+El instalador clona el repo en `~/.config/kairos` y configura todo:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash
 ```
 
-¿Prefieres revisarlo antes de ejecutarlo? Es el mismo script, desde el repo:
+<details>
+<summary><kbd>Alternativa</kbd> <strong>¿Prefieres revisarlo antes de ejecutarlo?</strong> — es el mismo script, desde el repo</summary>
+
+<br>
 
 ```bash
 git clone https://github.com/runer0101/kairos.git ~/.config/kairos
@@ -116,7 +148,9 @@ cd ~/.config/kairos
 ./install.sh
 ```
 
-El instalador:
+</details>
+
+Los diez pasos del instalador:
 
 1. Comprueba el sistema y las herramientas básicas.
 2. Instala Node.js 24.21.0 si falta, desde nodejs.org, verificando su SHA-256.
@@ -135,11 +169,11 @@ Si `~/.local/bin` no está en tu `PATH`, añade `export PATH="$HOME/.local/bin:$
 
 Para abrirlo usa `kairos` o sus alias cortos `kai` y `ks` (el instalador crea los tres enlaces; funciona en cualquier shell).
 
-<p align="center">
-  <img src="assets/divider.svg" width="480" alt="">
-</p>
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
 
-## Perfiles de agente
+<a id="perfiles-de-agente"></a>
+
+## 🎛️ Perfiles de agente
 
 Pulsa `Tab` para cambiar de perfil durante una sesión. Arranca en `kairos-auto` (`default_agent` en `opencode.json`).
 
@@ -156,7 +190,11 @@ Los dos perfiles comparten el prompt común (`prompts/orchestrator.md`), que inc
 
 Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar los prompts.
 
-## Modos de permiso
+<a id="modos-de-permiso"></a>
+
+## 🛡️ Modos de permiso
+
+Automático con `kairos-auto`, normal con `kairos-control`.
 
 | Modo | Cómo se activa | Qué pasa |
 |---|---|---|
@@ -177,6 +215,11 @@ Un clasificador por modelo decide, en ambas direcciones, si una acción de `bash
 
 Es **consejo contextual, nunca autoridad ni respuesta a un consentimiento humano**: no debilita la guarda ni el piso de rutas sensibles, y cualquier fallo (timeout, error, veredicto inválido o clasificación concurrente) deja la decisión como está. Tarda ~1,4–5 s por decisión, así que es práctica en la TUI; en `opencode run` (no interactivo) el CLI auto-rechaza el ask antes y no llega a actuar.
 
+<details>
+<summary><kbd>Más</kbd> <strong>Interruptores y presupuestos</strong> — cómo apagarlo, cambiarle el modelo o stubbearlo</summary>
+
+<br>
+
 | Interruptor | Efecto |
 |---|---|
 | `KAIROS_NO_CLASSIFIER=1` | Apaga el clasificador: todo queda como hoy. |
@@ -185,7 +228,15 @@ Es **consejo contextual, nunca autoridad ni respuesta a un consentimiento humano
 
 Los presupuestos son: contexto ≤ 32 KiB (el pedido vivo primero, con los secretos enmascarados), salida ≤ 512 tokens y deadline de 15 s. Para apagarlo: `KAIROS_NO_CLASSIFIER=1 kairos`.
 
-## Comandos
+</details>
+
+<br>
+
+<a id="comandos"></a>
+
+## ⌨️ Comandos
+
+Todo lo que puedes invocar desde la TUI:
 
 | Comando | Descripción |
 |---|---|
@@ -209,7 +260,7 @@ Ponytail (v5.3.2, MIT) aporta una lente de implementación mínima integrada en 
 - `/ponytail-review [alcance]`: informe de revisión con la lente lean. `/review` ya aplica esta lente en `review-readability`; este comando es la pasada completa.
 - `/ponytail-debt`: recoge los comentarios `shortcut:` en un ledger para que una simplificación deliberada no se vuelva permanente.
 
-La precedencia es explícita: kairos manda en proceso, riesgo y verificación; Ponytail manda en economía de implementación. La sincronización con gentle-shell regenera el prompt común con la capa incluida y no gestiona las skills ni los comandos. Licencia y atribución: `LICENSE-ponytail`.
+La precedencia es explícita: kairos manda en proceso, riesgo y verificación; Ponytail manda en economía de implementación. La sincronización con gentle-shell regenera el prompt común con la capa incluida y no gestiona las skills ni los comandos. Licencia y atribución: `licenses/LICENSE-ponytail`.
 
 ### Flujo recomendado
 
@@ -218,9 +269,13 @@ La precedencia es explícita: kairos manda en proceso, riesgo y verificación; P
 3. **Antes de entregar**: `/review`. Si el cambio toca seguridad, datos o dependencias, `/judge`.
 4. **Para dar algo por terminado**: `/verify`. Nada se considera hecho sin salida observada.
 
-## Temas
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
 
-Cuatro temas en `themes/` (los tres de gentle-shell portados a OpenCode, MIT):
+<a id="temas"></a>
+
+## 🎨 Temas
+
+Cuatro temas, sonidos opt-in y una TUI con identidad propia.
 
 | Tema (`tui.json`) | Estilo |
 |---|---|
@@ -229,7 +284,7 @@ Cuatro temas en `themes/` (los tres de gentle-shell portados a OpenCode, MIT):
 | `gentleman-cute` | Rosas suaves |
 | `gentleman-sexy` | Rosas intensos con violeta |
 
-Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la tabla (sin `.json`), o usa el selector de temas de la TUI. `install.sh` enlaza todos los temas en `~/.config/opencode/themes/`.
+Los cuatro temas viven en `themes/` (los tres de gentle-shell portados a OpenCode, MIT). Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la tabla (sin `.json`), o usa el selector de temas de la TUI. `install.sh` enlaza todos los temas en `~/.config/opencode/themes/`.
 
 ### Sonidos de aviso (opcional)
 
@@ -281,11 +336,11 @@ Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `tui.json` y vuelve a a
 
 La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes de terceros y el HUD siguen ahí, y esta vista es la unión a pantalla completa. Para tener el panel de gentle-shell junto a la conversación, kairos trae un binario propio (siguiente sección).
 
-<p align="center">
-  <img src="assets/divider.svg" width="480" alt="">
-</p>
+<a id="panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional"></a>
 
-## Panel de gentle-shell a la izquierda (binario propio, opcional)
+## 🖥️ Panel de gentle-shell a la izquierda (binario propio, opcional)
+
+Opcional: el panel de gentle-shell junto a la conversación.
 
 Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
 
@@ -295,7 +350,11 @@ Kairos es la combinación de los dos proyectos, también visualmente: con el bin
 - Tu binario oficial (`~/.opencode/bin/opencode`) no se toca; con él, el slot izquierdo simplemente no se pinta y todo queda como antes (verificado).
 - Mantenimiento: al subir de versión de OpenCode, vuelve a ejecutar el script; el parche vive en el repositorio.
 
-## IA local (opcional)
+<a id="ia-local-opcional"></a>
+
+## 🤖 IA local (opcional)
+
+Si hay un runtime local activo, sus modelos aparecen solos.
 
 El instalador no instala ni descarga modelos locales. Si instalas un runtime, kairos lo detecta al abrir, sin configurar nada:
 
@@ -333,7 +392,11 @@ El marcador `.no-local-ai` no se versiona (está en `.gitignore`): en las demás
 
 Para ver qué detecta el lanzador: `node scripts/detect-local-models.mjs`.
 
-## Actualizaciones de gentle-shell
+<a id="actualizaciones-de-gentle-shell"></a>
+
+## 🔄 Actualizaciones de gentle-shell
+
+El lanzador sincroniza con gentle-shell al abrir.
 
 Al abrir `kairos`, el lanzador compara la versión instalada de gentle-shell con la última sincronizada. Si cambió, regenera los componentes derivados: subagentes, prompts del orquestador, guarda de comandos y las skills `gentle-ai` y `rdd-defect-workflow`.
 
@@ -348,7 +411,11 @@ La sincronización no cambia `opencode.json`, el tema, el logo ni las skills pro
 
 > **No uses `gentle-sync` sobre este directorio.** Reemplaza el directorio entero con la salida de gentle-ai y borraría esta instalación. La copia local de `gentle-sync` lo bloquea; `GENTLE_SYNC_FORCE=1` lo salta.
 
-## Dependencias y cadena de suministro
+<a id="dependencias-y-cadena-de-suministro"></a>
+
+## 📦 Dependencias y cadena de suministro
+
+`pnpm` 11.22.0 con políticas de cadena de suministro.
 
 Las dependencias se gestionan con pnpm 11.22.0 (`packageManager` en `package.json`). La configuración está en `pnpm-workspace.yaml`:
 
@@ -365,7 +432,11 @@ El lockfile (`pnpm-lock.yaml`) se instala con `--frozen-lockfile`: si no coincid
 
 El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh`. El de pnpm también tiene atestación de procedencia de GitHub (`gh attestation verify <archivo> -R pnpm/pnpm`).
 
-## Pruebas
+<a id="pruebas"></a>
+
+## 🧪 Pruebas
+
+186 pruebas; las de extremo a extremo son opt-in.
 
 ```bash
 pnpm test                           # 186 pruebas: configuración, agentes, comandos, detector, guarda, clasificador, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, vista unificada, panel de gentle-shell, lectores compartidos (ODD y subagentes), sonidos, rutas sensibles, notificaciones y Ponytail
@@ -374,13 +445,22 @@ KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por de
 
 Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por eso son opcionales. La prueba de privacidad recorre los archivos versionados y falla si aparece una ruta de tu máquina o un correo personal: el repositorio se publica tal cual.
 
-## Estructura del repositorio
+<a id="estructura-del-repositorio"></a>
+
+## 🗂️ Estructura del repositorio
+
+El mapa del repositorio, de un vistazo.
+
+<details>
+<summary><kbd>Ver</kbd> <strong>árbol del repositorio</strong></summary>
+
+<br>
 
 ```
 kairos/
 ├── bin/kairos              Lanzador: fija variables, detecta IA local, sincroniza
 ├── install.sh                       Instalador para Linux
-├── assets/                          Banner animado, divisor y sonidos del pack kairos
+├── assets/                          Banner animado y sonidos del pack kairos
 ├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
 ├── prompts/orchestrator.md          Prompt común + Ponytail (generado)
@@ -409,13 +489,21 @@ kairos/
 ├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
 ├── pnpm-workspace.yaml              Ajustes de pnpm y políticas de seguridad
 ├── pnpm-lock.yaml                   Versiones fijadas
-├── LICENSE-gentle-shell             Licencia MIT de los componentes derivados
-└── LICENSE-ponytail                 Licencia MIT de Ponytail
+├── licenses/                        Licencias de terceros (gentle-shell y Ponytail)
+└── LICENSE                          Licencia MIT de kairos
 ```
+
+</details>
+
+<br>
 
 Detalles de cada componente, el mapeo de Pi a OpenCode y el flujo de actualización están en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Qué no incluye
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
+
+<a id="qué-no-incluye"></a>
+
+## 🚫 Qué no incluye
 
 Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi, y no se portaron:
 
@@ -425,22 +513,26 @@ Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi,
 
 De Ponytail no se portó el plugin de inyección, la band/board (específicas de Claude Code) ni los hooks de lifecycle para otros hosts: la integración always-on se hace en el prompt generado de los perfiles, sin plugin.
 
-<p align="center">
-  <img src="assets/divider.svg" width="480" alt="">
-</p>
+<a id="documentación"></a>
 
-## Documentación
+## 📚 Documentación
+
+Empieza por el destino que necesites.
 
 | Destino | Para qué |
 |---|---|
 | [Arquitectura](docs/ARCHITECTURE.md) | Mapeo de gentle-shell a OpenCode, la TUI, el binario propio y las decisiones de diseño |
 | [Seguridad](SECURITY.md) | Guardas, rutas sensibles, límites y cómo ajustarlos |
 | [Plantilla y flujo ODD](odd/) | Documentos de feature, tareas y criterios observables del proyecto |
-| [Licencias](LICENSE) | MIT, con las atribuciones de gentle-shell y Ponytail |
+| [Licencias](licenses/) | MIT de kairos y las atribuciones de gentle-shell y Ponytail |
 
-## Seguridad
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
 
-Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.md).
+<a id="seguridad"></a>
+
+## 🔒 Seguridad
+
+Guardas heurísticas, rutas sensibles y límites claros: el detalle completo está en [SECURITY.md](SECURITY.md).
 
 - El repositorio no contiene claves ni credenciales. Las claves de proveedores se guardan fuera del repo (`~/.local/share/opencode/auth.json`).
 - `.gitignore` excluye `node_modules/`, respaldos, `.env`, `auth.json`, claves privadas y el marcador local de sincronización.
@@ -448,7 +540,11 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 - Los perfiles con permisos amplios (`kairos-auto`, `--auto`) deben usarse solo en repositorios de confianza.
 - Antes de compartir una sesión o un log, revisa que no incluya rutas o datos personales.
 
-## Solución de problemas
+<a id="solución-de-problemas"></a>
+
+## 🩺 Solución de problemas
+
+Los fallos conocidos y su arreglo:
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
@@ -461,7 +557,13 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 | `/gentle-doctor` muestra `sin marcador` | Nunca se sincronizó | `node scripts/sync-gentle-shell.mjs --force` |
 | Aviso `background dependency install failed` o arranque lento | npm (que OpenCode ejecuta sobre el directorio de config) crashea al recorrer el layout de symlinks de pnpm | Ya prevenido: el repo usa `nodeLinker: hoisted`; si reaparece, ejecuta `pnpm install` |
 
-## Contribuir
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
+
+<a id="contribuir"></a>
+
+## 🤝 Contribuir
+
+Issues concretos y `pnpm test` antes de enviar.
 
 - ¿Ideas o fallos? Abre un *issue* con el caso concreto: comando o ruta, resultado esperado y resultado observado.
 - ¿Código? Pasa `pnpm test` antes de enviar. El proyecto sigue su propio flujo ODD (`/odd-task`) y los commits van por unidad de trabajo.
@@ -469,17 +571,39 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 - No incluyas datos personales en issues, logs ni capturas: el repositorio mantiene una prueba de privacidad que falla ante rutas o correos.
 
 <p align="center">
-  <img src="assets/divider.svg" width="480" alt="">
+  <a href="https://github.com/runer0101/kairos/issues"><img src="https://img.shields.io/badge/issues-abre%20uno-3b82f6?style=for-the-badge&labelColor=191724" alt="Issues"></a>
+  <a href="https://github.com/runer0101/kairos/stargazers"><img src="https://img.shields.io/github/stars/runer0101/kairos?style=for-the-badge&labelColor=191724&color=3b82f6" alt="Estrellas"></a>
+  <a href="https://github.com/runer0101/kairos/graphs/contributors"><img src="https://img.shields.io/badge/contribuidores-gracias-1d4ed8?style=for-the-badge&labelColor=191724" alt="Contribuidores"></a>
 </p>
 
-## Créditos y licencia
+<p align="center">
+  <a href="https://github.com/runer0101/kairos/stargazers"><strong>★ Danos una estrella en GitHub</strong></a>
+</p>
 
-Mantenido por [@runer0101](https://github.com/runer0101).
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
 
-Este repositorio se distribuye bajo **licencia MIT** (ver [LICENSE](LICENSE)).
+<a id="créditos-y-licencia"></a>
 
-- Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), de [Gentleman Programming](https://github.com/Gentleman-Programming), bajo licencia MIT. Ver `LICENSE-gentle-shell`.
-- Las skills `ponytail`, `ponytail-review` y `ponytail-debt`, y sus comandos, se derivan de **Ponytail**, de [Dietrich Gebert](https://github.com/DietrichGebert), bajo licencia MIT. Ver `LICENSE-ponytail`.
+## ⭐ Créditos y licencia
+
+Mantenido por [@runer0101](https://github.com/runer0101). Todo el proyecto —el código propio y lo derivado— se distribuye bajo **licencia MIT**, con las tres licencias en un solo lugar:
+
+| Archivo | Qué cubre |
+|---|---|
+| [`LICENSE`](LICENSE) | El código propio de kairos |
+| [`licenses/LICENSE-gentle-shell`](licenses/LICENSE-gentle-shell) | Los componentes derivados de **gentle-pi** (gentle-shell) |
+| [`licenses/LICENSE-ponytail`](licenses/LICENSE-ponytail) | Las skills y comandos derivados de **Ponytail** |
+
+- Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), de [Gentleman Programming](https://github.com/Gentleman-Programming), bajo licencia MIT.
+- Las skills `ponytail`, `ponytail-review` y `ponytail-debt`, y sus comandos, se derivan de **Ponytail**, de [Dietrich Gebert](https://github.com/DietrichGebert), bajo licencia MIT.
 - Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai. Revisa su licencia de origen antes de redistribuirlas.
 - Los tonos de `assets/sounds/` son originales de gentle-pi (MIT); su nota de licencia está junto a los archivos.
 - Los servidores MCP (`engram`, `context7`) son proyectos externos, cada uno con su propia licencia.
+
+<p align="center"><strong>Hecho con el flujo que trae a OpenCode.</strong></p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-3b82f6?style=for-the-badge&labelColor=191724" alt="Licencia MIT"></a>
+</p>
+
+<p align="right"><a href="#top">Volver arriba ↑</a></p>
