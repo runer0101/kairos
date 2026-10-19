@@ -126,6 +126,7 @@ Un comando y OpenCode queda listo.
 | Si quieres… | Empieza por… |
 |---|---|
 | Instalarlo con un comando y usar OpenCode tal cual | El comando de abajo |
+| Instalarlo con un asistente en el navegador | [Instalador web](#instalador-web-opcional) |
 | Ver el panel de gentle-shell junto a la conversación | [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) |
 | Contribuir o revisar el código | [Contribuir](#contribuir) |
 | Entender cómo está construido | [Documentación](#documentación) |
@@ -148,6 +149,22 @@ cd ~/.config/kairos
 ```
 
 </details>
+
+### Instalador web (opcional)
+
+Si prefieres ver el plan antes de instalar, abre el asistente local:
+
+```bash
+./install.sh --web
+```
+
+O sin clonar antes:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash -s -- --web
+```
+
+El wizard escucha solo en `127.0.0.1`, usa un enlace con token que caduca en 30 minutos y muestra el log en vivo. Su única acción es ejecutar este mismo `install.sh`; no acepta comandos del navegador. Si falta Node.js, lo instala antes de abrir el asistente.
 
 Los diez pasos del instalador:
 
@@ -478,6 +495,8 @@ kairos/
 │   ├── sync-gentle-shell.mjs        Sincronización con gentle-shell
 │   ├── detect-local-models.mjs      Detección de runtimes de IA local
 │   ├── build-opencode-patched.sh    Binario propio con el panel izquierdo
+│   ├── install-web.mjs              Wizard local (127.0.0.1) sobre este instalador
+│   ├── install-web/                 UI del wizard (HTML, CSS y JS)
 │   ├── hooks/commit-msg             Hook: rechaza commits con co-autor
 │   └── patches/                     Parche mínimo sobre OpenCode 1.18.35
 ├── tests/                  Pruebas (node:test)

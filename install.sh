@@ -15,7 +15,9 @@
 #
 # Uso:
 #   ./install.sh [--help]
+#   ./install.sh --web          abre el instalador en el navegador (127.0.0.1)
 #   curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash -s -- --web
 
 # Si lo ejecutan con sh/dash, relanzar con bash (el script usa sintaxis de bash).
 if [ -z "${BASH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
@@ -65,9 +67,14 @@ install.sh — instala kairos en Linux (x86_64 o arm64).
 
 Uso:
   ./install.sh [--help]
+  ./install.sh --web
+
+--web abre un wizard local en el navegador (solo 127.0.0.1) que muestra el
+plan detectado y ejecuta este mismo instalador con el log en vivo.
 
 También puedes instalarlo sin clonar antes (el instalador clona el repo solo):
   curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/runer0101/kairos/main/install.sh | bash -s -- --web
 
 Instala Node.js, OpenCode y engram si faltan, y configura el repositorio.
 No instala Ollama ni modelos: si tienes Ollama activo, se detecta al abrir.
@@ -387,10 +394,19 @@ verify() {
 }
 
 # ---------------------------------------------------------------- main
+web_install() {
+    ensure_checkout --web
+    preflight
+    ensure_node
+    say "iniciando el instalador web (solo accesible desde esta máquina)"
+    exec node "$REPO/scripts/install-web.mjs" --repo "$REPO"
+}
+
 main() {
     case "${1:-}" in
         "") ;;
         --help|-h) usage; exit 0 ;;
+        --web) web_install; exit 0 ;;
         *) die "opción desconocida: $1 (usa --help)" ;;
     esac
 

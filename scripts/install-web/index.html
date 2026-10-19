@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instalar kairos</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Instalador local</p>
+      <h1>kairos</h1>
+      <p class="lead">OpenCode con el harness de gentle-shell portado a su base.</p>
+      <p class="note">Este wizard solo escucha en 127.0.0.1. El enlace es de un solo uso y caduca en 30 minutos.</p>
+    </header>
+
+    <section class="card" aria-labelledby="plan-title">
+      <h2 id="plan-title">Tu sistema</h2>
+      <dl id="system" class="system">
+        <div><dt>Estado</dt><dd id="system-state">Detectando…</dd></div>
+      </dl>
+      <table class="tools">
+        <thead>
+          <tr><th>Herramienta</th><th>Detectada</th><th>Necesaria</th></tr>
+        </thead>
+        <tbody id="tools"></tbody>
+      </table>
+    </section>
+
+    <section class="card" aria-labelledby="plan-title-2">
+      <h2 id="plan-title-2">Qué hará el instalador</h2>
+      <ul class="steps">
+        <li>Clona o actualiza el repositorio en <code id="canonical">~/.config/kairos</code>.</li>
+        <li>Instala lo que falte: Node.js, pnpm, OpenCode y engram.</li>
+        <li>Instala las dependencias con el lockfile congelado.</li>
+        <li>Enlaza el lanzador <code>kairos</code> (y <code>kai</code>, <code>ks</code>) y los temas.</li>
+        <li>Sincroniza con gentle-shell si está instalado.</li>
+        <li>Verifica que OpenCode carga los perfiles antes de terminar.</li>
+      </ul>
+      <p class="note">Es idempotente: puedes ejecutarlo de nuevo para reparar la instalación. No instala Ollama ni descarga modelos.</p>
+    </section>
+
+    <section class="card actions" aria-labelledby="actions-title">
+      <h2 id="actions-title">Instalación</h2>
+      <div class="row">
+        <button id="install" type="button" disabled>Instalar kairos</button>
+        <button id="close" type="button" class="secondary">Cerrar</button>
+      </div>
+      <p id="status" class="status" role="status">Leyendo el plan…</p>
+      <pre id="log" class="log" aria-live="polite"></pre>
+      <div id="next" class="next" hidden>
+        <h3>Listo</h3>
+        <p>Abre kairos desde tu terminal:</p>
+        <pre class="command">kairos</pre>
+        <p>Diagnóstico dentro de la TUI: <code>/gentle-doctor</code>.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>El servidor se apaga al cerrar esta página o al pulsar <strong>Cerrar</strong>.</p>
+    </footer>
+  </main>
+</body>
+</html>
