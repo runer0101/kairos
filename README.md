@@ -355,7 +355,7 @@ Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por 
 kairos/
 ├── bin/kairos              Lanzador: fija variables, detecta IA local, sincroniza
 ├── install.sh                       Instalador para Linux
-├── assets/preview.svg               Imagen del README (captura real de la TUI)
+├── assets/                          Imágenes del README (home y sesión) y sonidos del pack kairos
 ├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
 ├── prompts/orchestrator.md          Prompt común + Ponytail (generado)
