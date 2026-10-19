@@ -8,18 +8,18 @@
 [![OpenCode](https://img.shields.io/badge/OpenCode-1.18.35-1f6feb.svg)](https://opencode.ai)
 [![gentle-shell](https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2.svg)](https://github.com/Gentleman-Programming/gentle-shell)
 
-<img src="assets/preview.svg" alt="kairos: panel de gentle-shell a la izquierda (agentes, todos y estado), conversación de OpenCode en el centro y su sidebar a la derecha" width="100%">
+<img src="assets/home.svg" alt="Pantalla de inicio de kairos: logo Arch en azul, atajos principales y el prompt con Kairos-Auto" width="100%">
 
 ## Stack
 
 | Proyecto | Versión | Rol |
 |---|---|---|
-| [OpenCode](https://opencode.ai) | **1.18.35** | Host: TUI, LSP, MCP, permisos y plugins |
+| [OpenCode](https://github.com/anomalyco/opencode) | **1.18.35** | Host: TUI, LSP, MCP, permisos y plugins |
 | [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) | **4.3.0** | Harness fuente: ODD, agentes, guardas y skills |
-| gentle-pi | 4.3.0 | Paquete de gentle-shell que kairos sincroniza |
-| Pi | 1.2.0 | Runtime que acompaña a gentle-shell |
-| gentle-ai | 4.2.0 | Runtime fijado por gentle-shell 4.3.0 |
-| Engram | 3.4.0 | Memoria persistente vía MCP |
+| [gentle-pi](https://github.com/Gentleman-Programming/gentle-shell) | 4.3.0 | Paquete de gentle-shell que kairos sincroniza |
+| [Pi](https://github.com/earendil-works/pi) | 1.2.0 | Runtime que acompaña a gentle-shell |
+| [gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) | 4.2.0 | Runtime fijado por gentle-shell 4.3.0 |
+| [Engram](https://github.com/Gentleman-Programming/engram) | 3.4.0 | Memoria persistente vía MCP |
 
 Versiones con las que se desarrolla y prueba kairos. `gentle-shell` es opcional: sin él, kairos abre con la última copia sincronizada.
 
@@ -69,12 +69,12 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 |---|---|---|
 | Linux (x86_64 o arm64, glibc) | — | Cualquier distribución con glibc |
 | `curl` o `wget`, `tar`, `gzip`, `sha256sum`, `git` | — | Gestor de paquetes de tu distribución |
-| Node.js | 22 o superior (probado con 26) | `install.sh` lo instala si falta |
-| pnpm | 11.22.0 | `install.sh` lo instala si falta |
-| OpenCode | 1.18.x (probado con 1.18.35) | `install.sh` usa el instalador oficial si falta |
-| gentle-shell (opcional) | 4.3.0 (gentle-pi 4.3.0 · Pi 1.2.0) | `gentle-shell upgrade`; el lanzador sincroniza si está instalado |
-| engram | 3.4.0 | `install.sh` descarga el binario oficial |
-| `bun` (solo para el binario propio) | — | https://bun.sh; lo usa `scripts/build-opencode-patched.sh` |
+| [Node.js](https://nodejs.org) | 22 o superior (probado con 26) | `install.sh` lo instala si falta |
+| [pnpm](https://pnpm.io) | 11.22.0 | `install.sh` lo instala si falta |
+| [OpenCode](https://github.com/anomalyco/opencode) | 1.18.x (probado con 1.18.35) | `install.sh` usa el instalador oficial si falta |
+| [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) (opcional) | 4.3.0 (gentle-pi 4.3.0 · Pi 1.2.0) | `gentle-shell upgrade`; el lanzador sincroniza si está instalado |
+| [engram](https://github.com/Gentleman-Programming/engram) | 3.4.0 | `install.sh` descarga el binario oficial |
+| [bun](https://bun.sh) (solo para el binario propio) | — | https://bun.sh; lo usa `scripts/build-opencode-patched.sh` |
 | Ollama u otro runtime local | opcional | Se detecta al abrir, si está activo |
 
 El lanzador y la suite e2e se validan contra esa combinación. `gentle-shell` es opcional: si está instalado, el lanzador sincroniza agentes, prompt, guarda y skills desde esa versión; sin él, kairos abre con la última copia sincronizada.
@@ -262,6 +262,8 @@ La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes 
 
 Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
 
+<img src="assets/preview.svg" alt="Sesión de kairos: panel de gentle-shell a la izquierda con subagentes y la tarea ODD, conversación de OpenCode en el centro y su sidebar a la derecha" width="100%">
+
 - **Construir e instalar**: `scripts/build-opencode-patched.sh` (requiere `bun`; descarga OpenCode 1.18.35, aplica el parche, compila e instala en `~/.local/share/kairos/opencode-patched/`; tarda unos minutos).
 - El panel lo pinta `tui-plugins/kairos-shell.tsx` (subagentes, tarea ODD y coste; mismo lector que el HUD y la vista `alt+g`); su ancho se ajusta en `tui.json` (`session_left_width`, por defecto 40). En terminales de menos de ~140 columnas el panel se oculta solo.
 - El lanzador usa el binario propio **solo si existe**; `OPENCODE_BIN` explícito siempre gana y `KAIROS_OPENCODE_BIN` cambia la ruta. Comparte la base de sesiones normal (`OPENCODE_DISABLE_CHANNEL_DB=1`).
@@ -274,10 +276,10 @@ El instalador no instala ni descarga modelos locales. Si instalas un runtime, ka
 
 | Runtime | Puerto por defecto | Proveedor en OpenCode |
 |---|---|---|
-| Ollama | 11434 | `local-ollama` |
-| LM Studio | 1234 | `local-lmstudio` |
-| llama.cpp (`llama-server`) | 8080 | `local-llamacpp` |
-| vLLM | 8000 | `local-vllm` |
+| [Ollama](https://github.com/ollama/ollama) | 11434 | `local-ollama` |
+| [LM Studio](https://lmstudio.ai) | 1234 | `local-lmstudio` |
+| [llama.cpp](https://github.com/ggml-org/llama.cpp) (`llama-server`) | 8080 | `local-llamacpp` |
+| [vLLM](https://github.com/vllm-project/vllm) | 8000 | `local-vllm` |
 
 Cualquier servidor compatible con OpenAI que responda en `GET /v1/models` puede añadirse en `local-providers.json` (no se versiona), con un id que empiece por `local-`:
 
