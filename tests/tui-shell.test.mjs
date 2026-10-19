@@ -1,6 +1,7 @@
 // Pruebas del panel izquierdo de kairos (tui-plugins/kairos-shell.tsx): la
-// superficie de gentle-shell (agentes, todos y estado) junto a la conversación
-// de OpenCode, a través del slot `session_left` del binario parcheado.
+// rail de gentle-shell (Status, Changes y TODO) más la tarea ODD y los
+// subagentes vivos, junto a la conversación de OpenCode, a través del slot
+// `session_left` del binario parcheado.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -35,16 +36,30 @@ test("el panel comparte los lectores de subagentes y ODD", () => {
   assert.match(src, /api\.client\.session\.children\(\{ sessionID: sid \}\)/, "hijos reales para estado y coste");
 });
 
-test("el panel muestra lo de gentle-shell: Agents, Todos y estado", () => {
+test("el panel muestra la rail de gentle-shell: Status, Changes, TODO y Agents", () => {
+  assert.match(src, /<b>Status<\/b>/, "sección Status");
+  assert.match(src, /<b>Changes<\/b>/, "sección Changes");
+  assert.match(src, /<b>TODO<\/b>/, "sección TODO");
+  assert.match(src, /<b>ODD<\/b>/, "sección ODD propia de kairos");
   assert.match(src, /<b>Agents<\/b>/, "sección Agents");
-  assert.match(src, /<b>Todos<\/b>/, "sección Todos");
-  assert.match(src, /` · \$\{odd\(\)\.done\} of \$\{odd\(\)\.total\}`/, "contador todos");
-  assert.match(src, /stateLine/, "línea de estado al pie");
+  assert.match(src, /` · \$\{odd\(\)\.done\} of \$\{odd\(\)\.total\}`/, "contador ODD");
+});
+
+test("Status y Changes se alimentan del host, sin llamadas propias", () => {
+  assert.match(src, /api\.state\.session\.get\(sid\)/, "modelo, tokens y coste de la sesión");
+  assert.match(src, /api\.state\.vcs\?\.branch/, "rama del worktree");
+  assert.match(src, /api\.state\.session\.diff\(sid\)/, "estado Git que el host ya rastrea");
+  assert.match(src, /api\.state\.session\.todo\(sid\)/, "plan nativo del modelo");
+  assert.match(src, /api\.state\.mcp\(\)/, "estado de los servidores MCP");
+  assert.match(src, /api\.state\.lsp\(\)/, "estado de los servidores LSP");
+  assert.match(src, /●\$\{changes\(\)\.files\.length\}/, "marca de worktree sucio");
 });
 
 test("respeta presupuestos de ancho y no usa hex fijos", () => {
-  assert.match(src, /AGENT_ROWS = 6/, "tope de filas de subagentes");
-  assert.match(src, /ODD_ROWS = 4/, "tope de pendientes");
+  assert.match(src, /AGENT_ROWS = 5/, "tope de filas de subagentes");
+  assert.match(src, /CHANGE_ROWS = 3/, "tope de archivos cambiados");
+  assert.match(src, /TODO_ROWS = 4/, "tope de pasos del plan");
+  assert.match(src, /ODD_ROWS = 3/, "tope de pendientes");
   assert.match(src, /clip\(/, "recorte por ancho");
   assert.match(src, /api\.theme\.current/, "colores desde el tema");
   assert.ok(!/#[0-9a-fA-F]{6}/.test(src), "sin colores hex fijos");

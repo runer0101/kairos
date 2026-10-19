@@ -13,6 +13,9 @@ export const SESSION_EVENTS = [
   "session.error",
   "message.updated",
   "message.part.updated",
+  "todo.updated",
+  "session.diff",
+  "vcs.branch.updated",
 ]
 
 export const formatElapsed = (ms) => {
