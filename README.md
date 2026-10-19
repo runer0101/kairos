@@ -8,6 +8,8 @@
 [![OpenCode](https://img.shields.io/badge/OpenCode-1.18.35-1f6feb.svg)](https://opencode.ai)
 [![gentle-shell](https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2.svg)](https://github.com/Gentleman-Programming/gentle-shell)
 
+<img src="assets/preview.svg" alt="kairos: panel de gentle-shell a la izquierda (agentes, todos y estado), conversación de OpenCode en el centro y su sidebar a la derecha" width="100%">
+
 ## Stack
 
 | Proyecto | Versión | Rol |
@@ -23,15 +25,18 @@ Versiones con las que se desarrolla y prueba kairos. `gentle-shell` es opcional:
 
 **OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
 
-```
-      /\
-     /  \
-    / /\ \
-   / /  \ \
-  /_/    \_\   kairos
-```
-
 Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
+
+## Construido sobre
+
+Kairos no existiría sin los dos proyectos en los que se inspira, y el crédito va por delante:
+
+| Proyecto | Qué aporta a kairos |
+|---|---|
+| [**OpenCode**](https://github.com/anomalyco/opencode) | El host: TUI, LSP, MCP, permisos, plugins y el binario que kairos parchea para el panel izquierdo |
+| [**gentle-shell**](https://github.com/Gentleman-Programming/gentle-shell) | La inspiración y el harness que kairos porta: ODD, agentes, guardas, skills e identidad visual |
+
+Gracias también a [Ponytail](https://github.com/DietrichGebert) por la capa de economía de implementación, y a los servidores MCP de memoria y documentación por el contexto persistente.
 
 Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y prueba a diario — aunque funciona en cualquier distribución con glibc.
 
@@ -39,7 +44,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 
 ## Índice
 
-[Stack](#stack) · [Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
+[Stack](#stack) · [Qué incluye](#qué-incluye) · [Construido sobre](#construido-sobre) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
 
 ## Qué incluye
 
@@ -348,6 +353,7 @@ Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por 
 kairos/
 ├── bin/kairos              Lanzador: fija variables, detecta IA local, sincroniza
 ├── install.sh                       Instalador para Linux
+├── assets/preview.svg               Imagen del README (captura real de la TUI)
 ├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
 ├── prompts/orchestrator.md          Prompt común + Ponytail (generado)
