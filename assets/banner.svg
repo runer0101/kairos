@@ -11,7 +11,9 @@
   </filter>
   <linearGradient id="scan" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0%" stop-color="#3b82f6" stop-opacity="0"/>
-    <stop offset="50%" stop-color="#93c5fd" stop-opacity="0.9"/>
+    <stop offset="7%" stop-color="#3b82f6" stop-opacity="0.75"/>
+    <stop offset="50%" stop-color="#93c5fd" stop-opacity="1"/>
+    <stop offset="93%" stop-color="#3b82f6" stop-opacity="0.75"/>
     <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
   </linearGradient>
 </defs>
@@ -620,8 +622,8 @@
 <text x="770" y="364.4" font-size="16" fill="#93c5fd" opacity="0">#<animate attributeName="opacity" values="0;0;0.95;0;0" keyTimes="0;0.455;0.464;0.53;1" dur="3.2s" begin="0s" fill="freeze"/></text>
 <text x="770" y="364.4" font-size="16" fill="#1e3a8a">/<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.455;0.48;1" dur="3.2s" begin="0s" fill="freeze"/></text>
 </g>
-<rect x="360" y="-10" width="480" height="3" fill="url(#scan)" opacity="0.8">
-  <animate attributeName="y" values="26;368" dur="3.6s" begin="3.2s" repeatCount="indefinite"/>
+<rect x="0" y="-8" width="1200" height="2" fill="url(#scan)" opacity="0.9">
+  <animate attributeName="y" values="-8;380" dur="8s" begin="3.2s" repeatCount="indefinite"/>
 </rect>
 <text x="600" y="420" text-anchor="middle" font-size="46" font-weight="700" letter-spacing="12" fill="#e0def4">kairos<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.625;0.781;1" dur="3.2s" begin="0s" fill="freeze"/></text>
 <text x="600" y="455" text-anchor="middle" font-size="18" fill="#908caa">el harness de <tspan fill="#f5c2e7" font-weight="700">gentle-shell</tspan> sobre <tspan fill="#60a5fa" font-weight="700">OpenCode</tspan><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.750;0.906;1" dur="3.2s" begin="0s" fill="freeze"/></text>
