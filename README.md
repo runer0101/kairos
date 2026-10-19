@@ -39,7 +39,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 
 ## Índice
 
-[Stack](#stack) · [Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
+[Stack](#stack) · [Qué incluye](#qué-incluye) · [Requisitos](#requisitos) · [Instalación rápida](#instalación-rápida) · [Perfiles de agente](#perfiles-de-agente) · [Modos de permiso](#modos-de-permiso) · [Comandos](#comandos) · [Temas](#temas) · [Panel de gentle-shell](#panel-de-gentle-shell-a-la-izquierda-binario-propio-opcional) · [IA local](#ia-local-opcional) · [Dependencias](#dependencias-y-cadena-de-suministro) · [Pruebas](#pruebas) · [Estructura](#estructura-del-repositorio) · [Seguridad](#seguridad) · [Solución de problemas](#solución-de-problemas) · [Contribuir](#contribuir) · [Créditos y licencia](#créditos-y-licencia)
 
 ## Qué incluye
 
@@ -54,6 +54,8 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 - **DeepSeek v4.1 Flash por defecto** (`opencode-go/deepseek-v4.1-flash`; requiere suscripción OpenCode Go). Si tienes Ollama, LM Studio, llama.cpp o vLLM activos, sus modelos aparecen automáticamente.
 - **Calidad de código**: servidores LSP, formateadores y `snapshot` para deshacer cambios.
 - **Identidad visual**: 4 temas, logo que sigue al tema activo, sonidos opt-in y HUD con la tarea ODD junto al prompt y en la sidebar.
+- **Vista unificada** (`alt+g` o `/agentes`): sesión, subagentes vivos, catálogo de agentes y la tarea ODD a la izquierda; el hilo de la sesión o del subagente (o la ficha del agente) a la derecha, como el overlay de gentle-shell.
+- **Panel de gentle-shell a la izquierda** (opcional): binario propio de OpenCode 1.18.35 con un parche mínimo que abre un panel izquierdo — agentes, todos y estado, lo que muestra gentle-shell — junto a la conversación de OpenCode; la sidebar de OpenCode queda a la derecha como siempre. Sin el binario propio, todo funciona igual.
 - **Sincronización** con la versión instalada de gentle-shell.
 
 ## Requisitos
@@ -67,6 +69,7 @@ Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y pru
 | OpenCode | 1.18.x (probado con 1.18.35) | `install.sh` usa el instalador oficial si falta |
 | gentle-shell (opcional) | 4.3.0 (gentle-pi 4.3.0 · Pi 1.2.0) | `gentle-shell upgrade`; el lanzador sincroniza si está instalado |
 | engram | 3.4.0 | `install.sh` descarga el binario oficial |
+| `bun` (solo para el binario propio) | — | https://bun.sh; lo usa `scripts/build-opencode-patched.sh` |
 | Ollama u otro runtime local | opcional | Se detecta al abrir, si está activo |
 
 El lanzador y la suite e2e se validan contra esa combinación. `gentle-shell` es opcional: si está instalado, el lanzador sincroniza agentes, prompt, guarda y skills desde esa versión; sin él, kairos abre con la última copia sincronizada.
@@ -212,7 +215,7 @@ Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo 
 
 ### Avisos de escritorio
 
-Cuando una sesión **principal** termina un turno (pasa de `busy` a `idle`), kairos lanza un aviso de escritorio con `notify-send` — resumen `Kairos` y cuerpo «Listo para tu siguiente mensaje», porque un turno terminado no es una tarea terminada. Los subagentes y las sesiones internas del clasificador no avisan; un error avisa como error (`Error en la sesión` o `El modelo dejó de responder`) y el «listo» posterior a un error no se muestra. Se apaga con:
+Cuando una sesión **principal** termina un turno (pasa de `busy` a `idle`), kairos lanza un aviso de escritorio con `notify-send` — resumen `Kairos` y cuerpo «Listo para tu siguiente mensaje», porque un turno terminado no es una tarea terminada. Los subagentes y las sesiones internas del clasificador no avisan, y el «listo» tampoco sale si **queda algún subagente corriendo** (el aviso llega al terminar el último), si la sesión **espera un permiso o una pregunta** tuya, o si la sesión nunca se vio antes (`created`/`updated`); como última barrera se contrasta con el servidor que la sesión no sea hija. Nada de avisos falsos con trabajo pendiente. Un error avisa como error (`Error en la sesión` o `El modelo dejó de responder`) y el «listo» posterior a un error no se muestra. Se apaga con:
 
 ```bash
 KAIROS_NO_NOTIFY=1 kairos
@@ -232,9 +235,33 @@ El arco y el texto siguen el tema activo: el arco usa `primary`/`secondary` del 
 
 ### Statusline y sidebar (ODD)
 
-El HUD de kairos suma a la TUI lo que el host no pinta: junto al prompt aparece la tarea ODD activa (`◆ odd <tarea> n/m`, con `✓` al completarla) y, si el port quedó atrás de gentle-shell, la advertencia `sync pendiente`. La sidebar muestra la misma tarea con sus siguientes pasos pendientes (hasta 3, con `… +N`). Usa los colores del tema activo y se refresca cada 4 s.
+El HUD de kairos suma a la TUI lo que el host no pinta: junto al prompt aparece la tarea ODD activa (`◆ odd <tarea> n/m`, con `✓` al completarla) y, si el port quedó atrás de gentle-shell, la advertencia `sync pendiente`. La sidebar muestra la misma tarea con sus siguientes pasos pendientes (hasta 3, con `… +N`). Usa los colores del tema activo y se refresca cada 4 s. El nombre se recorta al presupuesto real de cada zona (26 columnas junto al prompt, 33 en la sidebar) para que el contador `n/m` y los pendientes nunca se partan en dos líneas.
 
 Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `tui.json` y vuelve a abrir kairos.
+
+### Vista unificada (`alt+g`)
+
+`alt+g` —también `/agentes`, o la paleta con `ctrl+p`— abre una vista a pantalla completa que une lo que la sidebar no cabe: a la izquierda, la **sesión** (estado, modelo, tokens y coste), los subagentes de la sesión (estado, agente, tarea y tiempo), el catálogo de agentes configurados y la **tarea ODD** activa con sus pendientes; a la derecha, el hilo de la conversación de la sesión, el del subagente seleccionado o la ficha del agente.
+
+- La fila **Sesión** encabeza la lista y sale seleccionada: la derecha muestra su conversación en vivo (prompt, texto y llamadas a herramientas) y se refresca sola mientras hay trabajo.
+- `j`/`k` mueven la selección; `enter` (u `o`) abre la sesión del subagente; `esc`/`q` vuelven a la sesión.
+- `f` sigue el hilo en vivo; `pgup`/`pgdn` lo recorren; `s` detiene un subagente en marcha con confirmación.
+- En terminales de menos de 100 columnas se muestra una sola columna: `enter` abre el detalle y `esc` vuelve a la lista.
+- `alt+a` no se usa porque OpenCode ya lo ocupa en el editor del prompt. El atajo se cambia con `KAIROS_AGENTS_KEY` (o se apaga con `off`); el slash `/agents` tampoco, porque OpenCode lo usa para cambiar de agente.
+- Los subagentes se leen de las llamadas `task` de la sesión y de sus sesiones hijas; la tarea ODD, del worktree, con el mismo lector que el HUD (`tui-plugins/odd-tasks.ts`). Si el servidor falla, la vista conserva lo cacheado y lo avisa, nunca rompe la TUI. Cada agente del catálogo se pinta con su color configurado, el mismo que el host usa junto al prompt (por ejemplo `kairos-control` en ámbar y `kairos-auto` en el acento del tema).
+- Para apagarla, quita `"./tui-plugins/kairos-agents.tsx"` de `tui.json` y vuelve a abrir kairos.
+
+La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes de terceros y el HUD siguen ahí, y esta vista es la unión a pantalla completa. Para tener el panel de gentle-shell junto a la conversación, kairos trae un binario propio (siguiente sección).
+
+## Panel de gentle-shell a la izquierda (binario propio, opcional)
+
+Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
+
+- **Construir e instalar**: `scripts/build-opencode-patched.sh` (requiere `bun`; descarga OpenCode 1.18.35, aplica el parche, compila e instala en `~/.local/share/kairos/opencode-patched/`; tarda unos minutos).
+- El panel lo pinta `tui-plugins/kairos-shell.tsx` (subagentes, tarea ODD y coste; mismo lector que el HUD y la vista `alt+g`); su ancho se ajusta en `tui.json` (`session_left_width`, por defecto 40). En terminales de menos de ~140 columnas el panel se oculta solo.
+- El lanzador usa el binario propio **solo si existe**; `OPENCODE_BIN` explícito siempre gana y `KAIROS_OPENCODE_BIN` cambia la ruta. Comparte la base de sesiones normal (`OPENCODE_DISABLE_CHANNEL_DB=1`).
+- Tu binario oficial (`~/.opencode/bin/opencode`) no se toca; con él, el slot izquierdo simplemente no se pinta y todo queda como antes (verificado).
+- Mantenimiento: al subir de versión de OpenCode, vuelve a ejecutar el script; el parche vive en el repositorio.
 
 ## IA local (opcional)
 
@@ -309,7 +336,7 @@ El binario de pnpm y el de engram se verifican con SHA-256 fijado en `install.sh
 ## Pruebas
 
 ```bash
-pnpm test                           # 134 pruebas: configuración, agentes, comandos, detector, guarda, clasificador, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, sonidos, rutas sensibles y Ponytail
+pnpm test                           # 186 pruebas: configuración, agentes, comandos, detector, guarda, clasificador, lanzador, hook de commits, sincronización, privacidad, temas, logo, HUD, vista unificada, panel de gentle-shell, lectores compartidos (ODD y subagentes), sonidos, rutas sensibles, notificaciones y Ponytail
 KAIROS_E2E=1 pnpm test     # añade pruebas con OpenCode real y el modelo por defecto, incluido el e2e del clasificador con stub
 ```
 
@@ -333,11 +360,18 @@ kairos/
 ├── hooks/commit-msg                 Hook: rechaza commits con co-autor
 ├── scripts/
 │   ├── detect-local-models.mjs      Detección de runtimes de IA local
-│   └── sync-gentle-shell.mjs        Sincronización con gentle-shell
+│   ├── sync-gentle-shell.mjs        Sincronización con gentle-shell
+│   └── build-opencode-patched.sh    Binario propio con el panel izquierdo
+├── patches/opencode-left-panel.patch    Parche mínimo sobre OpenCode 1.18.35
 ├── skills/                          Skills (36)
 ├── themes/                          Temas (gentleman-kairos, gentle, gentleman-cute, gentleman-sexy)
 ├── tui-plugins/gentle-logo.tsx      Logo de la TUI (sigue el tema activo)
+├── tui-plugins/gentle-sounds.ts     Pack de sonidos kairos (opt-in con KAIROS_SOUNDS=1)
 ├── tui-plugins/kairos-hud.tsx       Tarea ODD junto al prompt y en la sidebar
+├── tui-plugins/kairos-agents.tsx    Vista unificada: lista a la izquierda, hilo/ficha a la derecha
+├── tui-plugins/kairos-shell.tsx     Panel izquierdo: agentes, todos y estado (slot session_left)
+├── tui-plugins/subagents.ts         Datos de subagentes compartidos (vista y panel)
+├── tui-plugins/odd-tasks.ts         Lector compartido de la tarea ODD (HUD, vista y panel)
 ├── tests/                           Pruebas (node:test)
 ├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
 ├── pnpm-workspace.yaml              Ajustes de pnpm y políticas de seguridad
@@ -352,7 +386,7 @@ Detalles de cada componente, el mapeo de Pi a OpenCode y el flujo de actualizaci
 
 Algunas piezas de gentle-shell dependen de la API o de la interfaz propia de Pi, y no se portaron:
 
-- La barra fullscreen, paneles de uso, animaciones y regiones de puntero de la TUI de Pi (los sonidos sí se portaron, opt-in).
+- La barra fullscreen, paneles de uso, animaciones y regiones de puntero de la TUI de Pi (los sonidos sí se portaron, opt-in). El overlay de Agentes se reconstruyó como vista propia (`alt+g`), y el panel fijo a la izquierda requiere el binario propio (ver *Panel de gentle-shell*).
 - La autoridad nativa de revisión (RDD) y Herdr.
 - Los comandos `/gentle:*` que dependían de esas piezas; el estado de cada comando de Pi y su equivalente nativo están en la tabla «Comandos `/gentle:*` de Pi: qué aplica» de [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

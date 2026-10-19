@@ -35,11 +35,12 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 | `registerCommand("gentle:…")` | `commands/gentle-*.md` | Solo los comandos con equivalente directo en OpenCode |
 | `lib/destructive-command-guard.ts` | `lib/destructive-command-guard.ts` + `plugins/gentle-shell.ts` | El plugin llama a la guarda en `tool.execute.before` |
 | Clasificador de auto-aprobación (`lib/auto-permission-classifier.ts` + runtime) | `plugins/auto-approval.ts` + `lib/auto-approval/` | Mecanismo verificado en OpenCode 1.18.35: el ask se responde por el evento `permission.asked` y el veto va por `tool.execute.before` (ver «Clasificador de auto-aprobación») |
-| `gentle-notifications` (sonido y escritorio) | Eventos `session.status`/`session.error` → `notify-send` filtrado + pack de tonos nativo | Avisa solo a la sesión principal al pasar de `busy` a `idle`, calla el «listo» tras un error (avisando el error) y silencia a subagentes y sesiones internas del clasificador. Tonos opt-in con `KAIROS_SOUNDS=1`; avisos apagables con `KAIROS_NO_NOTIFY=1` |
+| `gentle-notifications` (sonido y escritorio) | Eventos `session.status`/`session.error` → `notify-send` filtrado + pack de tonos nativo | Avisa solo a la sesión principal al pasar de `busy` a `idle`, calla el «listo» tras un error (avisando el error) y silencia a subagentes y sesiones internas del clasificador. No avisa con subagentes aún corriendo (sale al terminar el último), con un permiso o pregunta pendiente, ni para sesiones jamás vistas; antes de avisar contrasta con el servidor (`session.get` → `parentID`) que la sesión no sea hija. Tonos opt-in con `KAIROS_SOUNDS=1`; avisos apagables con `KAIROS_NO_NOTIFY=1` |
 | Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
 | `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
-| `themes/` y TUI propia | `themes/` (4 temas), `tui-plugins/`, `tui.json` | Tema, logo que sigue al tema y HUD ODD propios (ver «La TUI (mapa)») |
-| Barra fullscreen, paneles, animaciones, regiones de puntero | No portado | Dependen de la API de Pi |
+| `themes/` y TUI propia | `themes/` (4 temas), `tui-plugins/`, `tui.json` | Tema, logo que sigue al tema, HUD ODD y vista de agentes propios (ver «La TUI (mapa)») |
+| Gentle Agents: tarjeta sobre el editor y overlay `alt+a` | `tui-plugins/kairos-agents.tsx` (vista) + `opencode-subagent-statusline` (sidebar) | Sesión, subagentes, agentes y tarea ODD a la izquierda; hilo de la sesión o del subagente, o ficha del agente, a la derecha. El `alt+a` de Pi pasa a `alt+g`/`/agentes`: OpenCode usa `alt+a` en el editor del prompt y `/agents` para cambiar de agente |
+| Barra fullscreen, paneles de uso, animaciones, regiones de puntero | No portado | Dependen de la API de Pi |
 
 ### Derivación de permisos de subagentes
 
@@ -177,11 +178,37 @@ gentle-pi 4.3.0 registra 30 comandos `/gentle:*` (verificado en `extensions/` y 
 | Pieza | Slots | Qué pinta |
 |---|---|---|
 | `gentle-logo.tsx` | `home_logo` | Arco Arch (arte compacto en terminales pequeñas), texto personal (`KAIROS_LOGO_TEXT`) y los atajos principales. Colores del tema: `primary`/`secondary` en el arco y `accent` en el texto y los separadores. |
-| `kairos-hud.tsx` | `session_prompt_right`, `sidebar_content` | Tarea ODD activa (`◆ odd <tarea> n/m`, `✓` al completar) y aviso `sync pendiente`; en la sidebar, los pendientes (tope 3, `… +N`). Refresco cada 4 s con caché por mtime+tamaño. |
+| `kairos-hud.tsx` | `session_prompt_right`, `sidebar_content` | Tarea ODD activa (`◆ odd <tarea> n/m`, `✓` al completar) y aviso `sync pendiente`; en la sidebar, los pendientes (tope 3, `… +N`). Refresco cada 4 s con caché por mtime+tamaño. Presupuestos de ancho medidos en el host: nombre a 12 junto al prompt (~26 columnas) y a 21 en la sidebar (~33), pendientes a 30, para que nada se parta en dos líneas. |
 | `gentle-sounds.ts` | Pack de atención nativo | Tonos `done`, `subagent_done`, `error`, `permission` y `question`; opt-in con `KAIROS_SOUNDS=1`. |
 | `opencode-subagent-statusline` (tercero) | `session_prompt`, `sidebar_content`, `home_bottom` | Panel de subagentes del paquete npm. |
+| `kairos-agents.tsx` | Ruta `kairos-agents` + atajo (sin slots) | Vista unificada a pantalla completa: sesión, subagentes vivos, catálogo de agentes y tarea ODD a la izquierda; hilo de la sesión o del subagente, o ficha del agente, a la derecha. `alt+g`/`/agentes`, modo estrecho y stop con confirmación. Cada fila del catálogo usa el color configurado del agente (el mismo del prompt). |
+| `kairos-shell.tsx` | Slot `session_left` (binario propio) | Panel izquierdo de la sesión: `Agents` (subagentes vivos con estado, tarea y tiempo), `Todos` (tarea ODD con sus pendientes) y el estado de la sesión (modelo, tokens y coste). Ancho por `session_left_width` en `tui.json`. |
+| `subagents.ts` | — (módulo compartido) | Datos de subagentes: llamadas `task` de la sesión cruzadas con las sesiones hijas (estado, tokens y coste), glifos, formato y eventos. Lo usan la vista y el panel. |
+| `odd-tasks.ts` | — (módulo compartido) | Lector de `odd/tasks` del worktree: tarea activa, checkboxes y pendientes, con caché por mtime+tamaño. Lo usan el HUD, la vista y el panel. |
 
 Para apagar una pieza, quita su línea de `plugin` en `tui.json` y reabre kairos.
+
+### La vista unificada
+
+`kairos-agents.tsx` es la única pieza que no usa slots: registra una ruta de plugin (`api.route.register`/`navigate`, nombres reservados `home` y `session`) y se abre desde la sesión con `alt+g` (configurable con `KAIROS_AGENTS_KEY`; `off` deja solo la paleta y `/agentes`). La lista sale de dos fuentes que se cruzan: las partes de la tool `task` de la sesión (descripción, agente, estado y `metadata.sessionId`) y las sesiones hijas reales (`client.session.children`), que aportan estado vivo, tokens y coste. El hilo se pide con `client.session.messages` y se cachea por sesión; un diálogo de confirmación cubre el stop (`client.session.abort`).
+
+La vista es la unión visual de los dos mundos: la primera fila es la **sesión** (estado, modelo, tokens y coste) y su panel derecho es el hilo de la conversación en vivo, que se refresca mientras hay trabajo y se cachea en reposo; al final de la lista va la **tarea ODD** activa con sus pendientes (`tui-plugins/odd-tasks.ts`, el mismo lector que el HUD), en solo lectura. Subagentes y agentes del catálogo conservan su panel derecho (hilo del hijo o ficha del agente).
+
+Dos límites del host 1.18.35 gobiernan el diseño: la sidebar vive solo a la derecha (no hay `sidebar_position`; una columna fija izquierda exigiría upstream), así que la lista a la izquierda solo puede ser una vista a pantalla completa; y `alt+a` ya está tomado por `input_visual_line_home` del editor del prompt, por eso el atajo es `alt+g`.
+
+## Binario propio (panel de gentle-shell a la izquierda)
+
+Kairos es la combinación de los dos harnesses, también en lo visual: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda**, **conversación de OpenCode** en el centro y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins solo pueden poner contenido dentro de la sidebar (no moverla), así que kairos usa un binario propio: el mismo OpenCode 1.18.35 con un parche mínimo de 4 hunks (`patches/opencode-left-panel.patch`):
+
+- `session_left_width` en el schema de la TUI (ancho del panel; sin definir o 0 lo oculta);
+- un slot `session_left` en el layout de la sesión (el panel no se pinta por debajo de ~140 columnas);
+- de propina, `sidebar_position` + `row-reverse` (el port del PR upstream #18497, cerrado para V1 con «portadlo a V2»), que kairos **no activa**: la sidebar de OpenCode se queda a la derecha.
+
+El panel lo pinta `tui-plugins/kairos-shell.tsx` (sección «Agents» con subagentes vivos, «Todos» con la tarea ODD y una línea de estado con modelo, tokens y coste), con los datos compartidos de `subagents.ts` y `odd-tasks.ts`. `scripts/build-opencode-patched.sh [versión] [destino]` construye e instala el binario (descarga el tag, aplica el parche, `bun install`, `bun run script/build.ts --single --skip-embed-web-ui` con `OPENCODE_CHANNEL=kairos` y un test de humo de versión). `bun` solo hace falta para esto; es opcional.
+
+- El lanzador usa `~/.local/share/kairos/opencode-patched/bin/opencode` si existe; `OPENCODE_BIN` explícito gana y `KAIROS_OPENCODE_BIN` cambia la ruta. Cuando usa el binario propio exporta `OPENCODE_DISABLE_CHANNEL_DB=1` para que comparta `opencode.db` (las sesiones normales) en vez de una base por canal.
+- `tui.json` activa el panel (`session_left_width: 40`); el binario oficial ignora esa clave y nunca pinta el slot, así que el repositorio funciona igual con ambos binarios (verificado en pty).
+- El binario oficial del usuario no se toca. Al subir de versión de OpenCode hay que reejecutar el script; el parche y su revisión están en el repositorio.
 
 ## Ciclo de vida de los archivos
 
@@ -196,6 +223,7 @@ Para apagar una pieza, quita su línea de `plugin` en `tui.json` y reabre kairos
 | `opencode.json` | Manual | No |
 | `plugins/`, `commands/` | Manual | No |
 | `themes/`, `tui-plugins/`, `tui.json` | Visual, manual | No |
+| `patches/`, `scripts/build-opencode-patched.sh` | Propio (binario parcheado) | No |
 | `node_modules/`, `package*.json` | Dependencias | No |
 | `.gentle-shell-sync.json` | Marcador local | Sí; no se versiona |
 
