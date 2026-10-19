@@ -27,7 +27,21 @@ if [[ ! -f "$GENTLE_DIR/opencode.json" ]]; then
     exit 1
 fi
 
-OPENCODE_BIN="${OPENCODE_BIN:-$HOME/.opencode/bin/opencode}"
+# Binario de OpenCode. Si está instalado el binario propio de kairos (OpenCode
+# parcheado con la sidebar a la izquierda, ver docs/ARCHITECTURE.md), se usa ese;
+# OPENCODE_BIN explícito siempre gana, y KAIROS_OPENCODE_BIN cambia la ruta del
+# binario propio.
+KAIROS_PATCHED_BIN="${KAIROS_OPENCODE_BIN:-$HOME/.local/share/kairos/opencode-patched/bin/opencode}"
+if [[ -z "${OPENCODE_BIN:-}" ]]; then
+    if [[ -x "$KAIROS_PATCHED_BIN" ]]; then
+        OPENCODE_BIN="$KAIROS_PATCHED_BIN"
+        # El binario propio lleva canal "kairos"; sin esto usaría su propia base
+        # de sesiones. Así comparte la normal (opencode.db) con el binario oficial.
+        export OPENCODE_DISABLE_CHANNEL_DB="${OPENCODE_DISABLE_CHANNEL_DB:-1}"
+    else
+        OPENCODE_BIN="$HOME/.opencode/bin/opencode"
+    fi
+fi
 if [[ ! -x "$OPENCODE_BIN" ]]; then
     echo "kairos: no encuentro OpenCode en $OPENCODE_BIN (define OPENCODE_BIN)" >&2
     exit 1

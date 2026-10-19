@@ -24,9 +24,9 @@ test("la sección lista los pendientes de la tarea ODD con tope", () => {
   assert.match(src, /pending\.length > PENDING_ROWS/, "resume el resto con +N");
 });
 
-test("los pendientes se extraen de los checkboxes sin marcar", () => {
-  assert.match(src, /box\[1\] === " "/, "detecta checkboxes vacíos");
-  assert.match(src, /\.map\(\(box\) => box\[2\]\.trim\(\)\)/, "guarda el texto del pendiente");
+test("el HUD lee la tarea ODD con el lector compartido", () => {
+  assert.match(src, /import \{ readOddTasks \} from "\.\/odd-tasks"/, "usa el módulo compartido");
+  assert.ok(!/const readOddTasks = /.test(src), "sin copia local del lector");
 });
 
 test("el HUD está cargado en tui.json", () => {
@@ -36,14 +36,7 @@ test("el HUD está cargado en tui.json", () => {
   );
 });
 
-test("el HUD lee la tarea ODD del worktree y excluye la plantilla", () => {
-  assert.match(src, /join\(worktree, "odd", "tasks"\)/, "lee odd/tasks del worktree");
-  assert.match(src, /name !== "TEMPLATE\.md"/, "TEMPLATE.md no es una tarea");
-  assert.match(src, /\.endsWith\("\.md"\)/, "solo mira archivos .md");
-});
-
-test("el HUD cuenta checkboxes y prefiere la tarea con pendientes", () => {
-  assert.match(src, /\\\[\( \|x\|X\)\\\]/, "reconoce checkboxes marcados y sin marcar");
+test("el HUD prefiere la tarea con pendientes", () => {
   assert.match(
     src,
     /tasks\.find\(\(entry\) => entry\.done < entry\.total\)/,
@@ -69,7 +62,15 @@ test("el HUD se actualiza periódicamente y limpia su temporizador", () => {
   assert.match(src, /createMemo\(/, "los datos se recalculan de forma reactiva");
 });
 
-test("el HUD tolera proyectos sin odd/ y entornos sin marcador", () => {
-  assert.match(src, /catch \{\s*return \[\]/, "sin odd/tasks devuelve lista vacía");
+test("el HUD tolera entornos sin marcador", () => {
   assert.match(src, /if \(!configDir \|\| !home\) return false/, "sin entorno no avisa");
+});
+
+test("la fila y el panel respetan el ancho del host (sin partirse en dos líneas)", () => {
+  assert.match(src, /ROW_NAME_MAX = 12/, "nombre recortado para el slot del prompt (~26 columnas)");
+  assert.match(src, /short\(task\(\)\.name, ROW_NAME_MAX\)/, "el contador n/m siempre entra en la fila");
+  assert.match(src, /PANEL_NAME_MAX = 21/, "el nombre del panel cabe con el contador (~33 columnas)");
+  assert.match(src, /short\(active\(\)\.name, PANEL_NAME_MAX\)/, "el nombre del panel se recorta a ese ancho");
+  assert.match(src, /PANEL_ITEM_MAX = 30/, "los pendientes caben en el ancho real de la sidebar (~33)");
+  assert.match(src, /short\(item, PANEL_ITEM_MAX\)/, "pendientes recortados a ese ancho");
 });

@@ -4,9 +4,10 @@
 // natively — the active ODD task (checkbox progress from odd/tasks) and a
 // stale gentle-shell sync warning. Colors come from the active theme.
 import type { TuiPlugin } from "@opencode-ai/plugin/tui"
-import { readdirSync, readFileSync, statSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { createMemo, createSignal } from "solid-js"
+import { readOddTasks } from "./odd-tasks"
 
 const id = "kairos-hud"
 
@@ -16,57 +17,16 @@ const REFRESH_MS = 4000
 // Panel rows: pending steps shown before collapsing into "… +N".
 const PENDING_ROWS = 3
 
+// Width budgets measured on the host (1.18.35): the session_prompt_right slot
+// is ~26 columns with the default model chip, and the sidebar section ~33; a
+// longer row makes the host wrap it onto a second line and lose the counter.
+const ROW_NAME_MAX = 12
+const PANEL_NAME_MAX = 21
+const PANEL_ITEM_MAX = 30
+
 const [tick, setTick] = createSignal(0)
 
-type OddTask = { name: string; done: number; total: number; pending: string[] }
-
-type CacheEntry = { stamp: number; task: OddTask }
-
-const cache = new Map<string, CacheEntry>()
-
-const shortName = (name: string) => (name.length > 26 ? `${name.slice(0, 25)}…` : name)
-
 const short = (text: string, max = 44) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
-
-const countCheckboxes = (text: string) => {
-  const boxes = [...text.matchAll(/^[-*]\s+\[( |x|X)\]\s*(.*)$/gm)]
-  const done = boxes.filter((box) => box[1].toLowerCase() === "x").length
-  const pending = boxes.filter((box) => box[1] === " ").map((box) => box[2].trim())
-  return { done, total: boxes.length, pending }
-}
-
-// ODD tasks of the session worktree: newest first, cached by mtime+size.
-const readOddTasks = (worktree: string): Array<OddTask & { mtime: number }> => {
-  const dir = join(worktree, "odd", "tasks")
-  let entries: string[]
-  try {
-    entries = readdirSync(dir).filter((name) => name.endsWith(".md") && name !== "TEMPLATE.md")
-  } catch {
-    return []
-  }
-  const tasks: Array<OddTask & { mtime: number }> = []
-  for (const entry of entries) {
-    const file = join(dir, entry)
-    try {
-      const stat = statSync(file)
-      const stamp = stat.mtimeMs + stat.size
-      const hit = cache.get(file)
-      let task: OddTask
-      if (hit && hit.stamp === stamp) {
-        task = hit.task
-      } else {
-        const { done, total, pending } = countCheckboxes(readFileSync(file, "utf8"))
-        task = { name: shortName(entry.replace(/\.md$/, "")), done, total, pending }
-        cache.set(file, { stamp, task })
-      }
-      if (task.total > 0) tasks.push({ ...task, mtime: stat.mtimeMs })
-    } catch {
-      // unreadable entry: skip
-    }
-  }
-  tasks.sort((a, b) => b.mtime - a.mtime)
-  return tasks
-}
 
 // Is the port behind the installed gentle-shell? (launcher writes the marker;
 // the version file lives behind the ~/.gentle-shell/current symlink)
@@ -105,7 +65,7 @@ const tui: TuiPlugin = async (api) => {
       <box flexDirection="row">
         {task() ? (
           <text fg={task().done >= task().total ? api.theme.current.success : api.theme.current.accent}>
-            {`◆ odd ${task().name} ${task().done}/${task().total}${task().done >= task().total ? " ✓" : ""}`}
+            {`◆ odd ${short(task().name, ROW_NAME_MAX)} ${task().done}/${task().total}${task().done >= task().total ? " ✓" : ""}`}
           </text>
         ) : null}
         {stale() ? <text fg={api.theme.current.warning}>{" · sync pendiente"}</text> : null}
@@ -130,10 +90,10 @@ const tui: TuiPlugin = async (api) => {
       <box flexDirection="column">
         {active() ? (
           <text fg={active().done >= active().total ? api.theme.current.success : api.theme.current.accent}>
-            {`◆ ODD ${active().name} ${active().done}/${active().total}`}
+            {`◆ ODD ${short(active().name, PANEL_NAME_MAX)} ${active().done}/${active().total}`}
           </text>
         ) : null}
-        {active() ? active().pending.slice(0, PENDING_ROWS).map((item) => <text fg={api.theme.current.textMuted}>{`· ${short(item)}`}</text>) : null}
+        {active() ? active().pending.slice(0, PENDING_ROWS).map((item) => <text fg={api.theme.current.textMuted}>{`· ${short(item, PANEL_ITEM_MAX)}`}</text>) : null}
         {active() && active().pending.length > PENDING_ROWS ? (
           <text fg={api.theme.current.textMuted}>{`· … +${active().pending.length - PENDING_ROWS}`}</text>
         ) : null}

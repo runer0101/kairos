@@ -4,7 +4,10 @@
     "opencode-subagent-statusline",
     "./tui-plugins/gentle-logo.tsx",
     "./tui-plugins/gentle-sounds.ts",
-    "./tui-plugins/kairos-hud.tsx"
+    "./tui-plugins/kairos-hud.tsx",
+    "./tui-plugins/kairos-agents.tsx",
+    "./tui-plugins/kairos-shell.tsx"
   ],
-  "theme": "gentleman-kairos"
+  "theme": "gentleman-kairos",
+  "session_left_width": 40
 }
