@@ -1,14 +1,20 @@
-# kairos
+<div align="center">
+  <img src="assets/banner.svg" width="100%" alt="kairos — el harness de gentle-shell sobre OpenCode">
+</div>
 
-[![CI](https://github.com/runer0101/kairos/actions/workflows/ci.yml/badge.svg)](https://github.com/runer0101/kairos/actions/workflows/ci.yml)
-[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-yellow.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg)](https://nodejs.org)
-[![pnpm](https://img.shields.io/badge/pnpm-11.22.0-orange.svg)](https://pnpm.io)
-[![Plataforma](https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1.svg)](#requisitos)
-[![OpenCode](https://img.shields.io/badge/OpenCode-1.18.35-1f6feb.svg)](https://opencode.ai)
-[![gentle-shell](https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2.svg)](https://github.com/Gentleman-Programming/gentle-shell)
+<h1 align="center">kairos</h1>
 
-<img src="assets/home.svg" alt="Pantalla de inicio de kairos: logo Arch en azul, atajos principales y el prompt con Kairos-Auto" width="100%">
+<p align="center">OpenCode con el harness de <a href="https://github.com/Gentleman-Programming/gentle-shell">gentle-shell</a> portado a su base — el flujo «el Gentleman» sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.</p>
+
+<p align="center">
+  <a href="https://github.com/runer0101/kairos/actions/workflows/ci.yml"><img src="https://github.com/runer0101/kairos/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-yellow.svg" alt="Licencia MIT"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A522.13-brightgreen.svg" alt="Node"></a>
+  <a href="https://pnpm.io"><img src="https://img.shields.io/badge/pnpm-11.22.0-orange.svg" alt="pnpm"></a>
+  <a href="#requisitos"><img src="https://img.shields.io/badge/plataforma-Linux%20%C2%B7%20Arch-1793d1.svg" alt="Plataforma"></a>
+  <a href="https://github.com/anomalyco/opencode"><img src="https://img.shields.io/badge/OpenCode-1.18.35-1f6feb.svg" alt="OpenCode"></a>
+  <a href="https://github.com/Gentleman-Programming/gentle-shell"><img src="https://img.shields.io/badge/gentle--shell-4.3.0-8a2be2.svg" alt="gentle-shell"></a>
+</p>
 
 ## Stack
 
@@ -23,8 +29,6 @@
 
 Versiones con las que se desarrolla y prueba kairos. `gentle-shell` es opcional: sin él, kairos abre con la última copia sincronizada.
 
-**OpenCode con el harness de [gentle-shell](https://github.com/Gentleman-Programming/gentle-shell) portado a su base** — el flujo "el Gentleman" sobre tu terminal: ODD con documento de feature, subagentes enfocados, revisión por riesgo, juicio adversarial y verificación independiente, con memoria persistente, guardas de seguridad y temas, logo y sonidos propios.
-
 Dos mundos en uno: la potencia nativa de OpenCode (LSP, formateadores, snapshots, MCP, plugins) y las herramientas de gentle-shell (agentes, skills, comandos, ODD, guardas), sin renunciar a ninguna.
 
 ## Construido sobre
@@ -37,6 +41,10 @@ Kairos no existiría sin los dos proyectos en los que se inspira, y el crédito 
 | [**gentle-shell**](https://github.com/Gentleman-Programming/gentle-shell) | La inspiración y el harness que kairos porta: ODD, agentes, guardas, skills e identidad visual |
 
 Gracias también a [Ponytail](https://github.com/DietrichGebert) por la capa de economía de implementación, y a los servidores MCP de memoria y documentación por el contexto persistente.
+
+<p align="center">
+  <img src="assets/divider.svg" width="480" alt="">
+</p>
 
 Pensado para **Linux** — en especial **Arch Linux**, donde se desarrolla y prueba a diario — aunque funciona en cualquier distribución con glibc.
 
@@ -262,8 +270,6 @@ La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes 
 
 Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
 
-<img src="assets/preview.svg" alt="Sesión de kairos: panel de gentle-shell a la izquierda con subagentes y la tarea ODD, conversación de OpenCode en el centro y su sidebar a la derecha" width="100%">
-
 - **Construir e instalar**: `scripts/build-opencode-patched.sh` (requiere `bun`; descarga OpenCode 1.18.35, aplica el parche, compila e instala en `~/.local/share/kairos/opencode-patched/`; tarda unos minutos).
 - El panel lo pinta `tui-plugins/kairos-shell.tsx` (subagentes, tarea ODD y coste; mismo lector que el HUD y la vista `alt+g`); su ancho se ajusta en `tui.json` (`session_left_width`, por defecto 40). En terminales de menos de ~140 columnas el panel se oculta solo.
 - El lanzador usa el binario propio **solo si existe**; `OPENCODE_BIN` explícito siempre gana y `KAIROS_OPENCODE_BIN` cambia la ruta. Comparte la base de sesiones normal (`OPENCODE_DISABLE_CHANNEL_DB=1`).
@@ -355,7 +361,7 @@ Las pruebas de extremo a extremo llaman al binario de OpenCode y al modelo, por 
 kairos/
 ├── bin/kairos              Lanzador: fija variables, detecta IA local, sincroniza
 ├── install.sh                       Instalador para Linux
-├── assets/                          Imágenes del README (home y sesión) y sonidos del pack kairos
+├── assets/                          Banner animado, divisor y sonidos del pack kairos
 ├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
 ├── tui.json                         Tema, logo y statusline
 ├── prompts/orchestrator.md          Prompt común + Ponytail (generado)
@@ -429,6 +435,10 @@ Resumen: detalle completo, límites y cómo ajustarlo en [SECURITY.md](SECURITY.
 - ¿Código? Pasa `pnpm test` antes de enviar. El proyecto sigue su propio flujo ODD (`/odd-task`) y los commits van por unidad de trabajo.
 - Los commits no llevan co-autor: el hook `hooks/commit-msg` (que `install.sh` activa en el clon) rechaza los mensajes con `Co-authored-by`. Para un caso puntual, `git commit --no-verify` lo omite.
 - No incluyas datos personales en issues, logs ni capturas: el repositorio mantiene una prueba de privacidad que falla ante rutas o correos.
+
+<p align="center">
+  <img src="assets/divider.svg" width="480" alt="">
+</p>
 
 ## Créditos y licencia
 

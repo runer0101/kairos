@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" font-family="ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace" role="img" aria-label="kairos — el harness de gentle-shell sobre OpenCode">
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="46%" r="55%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.22"/>
+      <stop offset="55%" stop-color="#3b82f6" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#191724" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arch" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#93c5fd"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <clipPath id="kaiclip"><rect x="440" y="205" width="340" height="76"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="320" fill="#191724"/>
+  <rect width="1200" height="320" fill="url(#halo)"/>
+
+  <!-- Partículas: titilan alrededor del arco -->
+  <g fill="#3b82f6">
+    <circle cx="470" cy="70" r="1.6" opacity="0.5"><animate attributeName="opacity" values="0.15;0.7;0.15" dur="3.4s" repeatCount="indefinite"/></circle>
+    <circle cx="735" cy="58" r="1.4" opacity="0.5"><animate attributeName="opacity" values="0.6;0.15;0.6" dur="4.1s" repeatCount="indefinite"/></circle>
+    <circle cx="410" cy="150" r="1.8" opacity="0.5"><animate attributeName="opacity" values="0.2;0.75;0.2" dur="2.8s" repeatCount="indefinite"/></circle>
+    <circle cx="790" cy="140" r="1.5" opacity="0.5"><animate attributeName="opacity" values="0.65;0.1;0.65" dur="3.7s" repeatCount="indefinite"/></circle>
+    <circle cx="520" cy="215" r="1.3" opacity="0.5"><animate attributeName="opacity" values="0.1;0.6;0.1" dur="4.6s" repeatCount="indefinite"/></circle>
+    <circle cx="688" cy="212" r="1.7" opacity="0.5"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.1s" repeatCount="indefinite"/></circle>
+    <circle cx="600" cy="42" r="1.4" opacity="0.5"><animate attributeName="opacity" values="0.3;0.85;0.3" dur="2.6s" repeatCount="indefinite"/></circle>
+    <circle cx="452" cy="212" r="1.2" opacity="0.4"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="5s" repeatCount="indefinite"/></circle>
+    <circle cx="748" cy="206" r="1.2" opacity="0.4"><animate attributeName="opacity" values="0.15;0.65;0.15" dur="4.4s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- El arco: flota, el halo pulsa, el contorno se traza -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -8; 0 0" keyTimes="0;0.5;1" dur="7s" repeatCount="indefinite"/>
+    <path d="M600 28 L452 196 L748 196 Z M600 116 L516 196 L684 196 Z" fill="#3b82f6" opacity="0.45" filter="url(#soft)">
+      <animate attributeName="opacity" values="0.25;0.6;0.25" dur="3.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M600 28 L452 196 L748 196 Z M600 116 L516 196 L684 196 Z" fill="url(#arch)" fill-rule="evenodd"/>
+    <path d="M600 28 L452 196 L748 196 Z M600 116 L516 196 L684 196 Z" fill="none" stroke="#bfdbfe" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="1240" stroke-dashoffset="0" opacity="0.9">
+      <animate attributeName="stroke-dashoffset" from="1240" to="0" dur="2.4s" fill="freeze"/>
+    </path>
+  </g>
+
+  <!-- kairos: revelado tipo máquina de escribir + barrido de brillo -->
+  <text x="600" y="266" text-anchor="middle" font-size="58" font-weight="700" letter-spacing="10" fill="#e0def4" clip-path="url(#kaiclip)">kairos</text>
+  <g clip-path="url(#kaiclip)">
+    <rect x="430" y="205" width="340" height="76" fill="#191724" opacity="0">
+      <animate attributeName="x" from="430" to="780" dur="1.1s" begin="1.3s" fill="freeze"/>
+      <animate attributeName="opacity" from="1" to="1" dur="1.3s" begin="0s" fill="freeze"/>
+      <animate attributeName="opacity" from="1" to="0" dur="0.01s" begin="2.5s" fill="freeze"/>
+    </rect>
+    <rect x="470" y="206" width="120" height="74" fill="url(#sweep)" opacity="0.25">
+      <animateTransform attributeName="transform" type="translate" values="-160 0; 200 0" dur="3.8s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- Subtítulo con los dos mundos -->
+  <text x="600" y="300" text-anchor="middle" font-size="19" fill="#908caa">el harness de <tspan fill="#f5c2e7" font-weight="700">gentle-shell</tspan> sobre <tspan fill="#60a5fa" font-weight="700">OpenCode</tspan></text>
+</svg>
