@@ -13,14 +13,14 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const LAUNCHER = join(ROOT, "bin", "kairos");
 const OPENCODE = process.env.OPENCODE_BIN || join(homedir(), ".opencode", "bin", "opencode");
 const enabled = process.env.KAIROS_E2E === "1";
-const CFG = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
+const CFG = JSON.parse(readFileSync(join(ROOT, "config", "opencode.json"), "utf8"));
 
 const env = {
     ...process.env,
     KAIROS_NO_SYNC: "1",
-    OPENCODE_CONFIG: join(ROOT, "opencode.json"),
-    OPENCODE_CONFIG_DIR: ROOT,
-    OPENCODE_TUI_CONFIG: join(ROOT, "tui.json"),
+    OPENCODE_CONFIG: join(ROOT, "config", "opencode.json"),
+    OPENCODE_CONFIG_DIR: join(ROOT, "config"),
+    OPENCODE_TUI_CONFIG: join(ROOT, "config", "tui.json"),
 };
 
 test("el binario de OpenCode existe", { skip: !enabled && "usa KAIROS_E2E=1" }, () => {

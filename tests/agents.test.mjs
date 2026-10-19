@@ -14,7 +14,7 @@ function frontmatter(path) {
     return { raw: m[1], body: text.slice(m[0].length) };
 }
 
-const agentFiles = readdirSync(join(ROOT, "agents")).filter((f) => f.endsWith(".md"));
+const agentFiles = readdirSync(join(ROOT, "config", "agents")).filter((f) => f.endsWith(".md"));
 
 test("hay subagentes generados desde gentle-shell", () => {
     assert.ok(agentFiles.length >= 10, `solo ${agentFiles.length} agentes`);
@@ -22,7 +22,7 @@ test("hay subagentes generados desde gentle-shell", () => {
 
 test("cada subagente declara descripción y modo subagent", () => {
     for (const f of agentFiles) {
-        const { raw } = frontmatter(join(ROOT, "agents", f));
+        const { raw } = frontmatter(join(ROOT, "config", "agents", f));
         assert.match(raw, /^description:/m, `${f} sin description`);
         assert.match(raw, /^mode: subagent$/m, `${f} debe ser subagent`);
     }
@@ -30,18 +30,18 @@ test("cada subagente declara descripción y modo subagent", () => {
 
 test("los revisores y el explorador no pueden editar archivos", () => {
     for (const f of agentFiles.filter((x) => /^(review-|gentle-ai-explore)/.test(x))) {
-        const { raw } = frontmatter(join(ROOT, "agents", f));
+        const { raw } = frontmatter(join(ROOT, "config", "agents", f));
         assert.match(raw, /edit: deny/, `${f} debe denegar edit`);
     }
 });
 
 test("solo el ejecutor de correcciones puede editar (jd-fix-agent)", () => {
-    const { raw } = frontmatter(join(ROOT, "agents", "jd-fix-agent.md"));
+    const { raw } = frontmatter(join(ROOT, "config", "agents", "jd-fix-agent.md"));
     assert.match(raw, /edit: allow/);
 });
 
 test("ningún prompt conserva placeholders sin resolver", () => {
-    for (const dir of ["agents", "prompts", "gentle-assets"]) {
+    for (const dir of ["config/agents", "config/prompts", "config/gentle-assets"]) {
         for (const f of readdirSync(join(ROOT, dir), { recursive: true })) {
             if (!String(f).endsWith(".md")) continue;
             const text = readFileSync(join(ROOT, dir, String(f)), "utf8");
@@ -51,34 +51,34 @@ test("ningún prompt conserva placeholders sin resolver", () => {
 });
 
 test("el prompt del orquestador lleva la nota de equivalencias de runtime", () => {
-    const text = readFileSync(join(ROOT, "prompts", "orchestrator.md"), "utf8");
+    const text = readFileSync(join(ROOT, "config", "prompts", "orchestrator.md"), "utf8");
     assert.match(text, /Runtime: OpenCode/);
     assert.match(text, /`task`/);
 });
 
-const commandFiles = readdirSync(join(ROOT, "commands")).filter((f) => f.endsWith(".md"));
+const commandFiles = readdirSync(join(ROOT, "config", "commands")).filter((f) => f.endsWith(".md"));
 
 test("cada comando tiene descripción", () => {
     for (const f of commandFiles) {
-        const { raw } = frontmatter(join(ROOT, "commands", f));
+        const { raw } = frontmatter(join(ROOT, "config", "commands", f));
         assert.match(raw, /^description: .+/m, `${f} sin description`);
     }
 });
 
 test("los comandos no contienen rutas personales (usan $OPENCODE_CONFIG_DIR)", () => {
     for (const f of commandFiles) {
-        const text = readFileSync(join(ROOT, "commands", f), "utf8");
+        const text = readFileSync(join(ROOT, "config", "commands", f), "utf8");
         assert.ok(!/\/home\/[a-z0-9_-]+\//i.test(text), `ruta personal en commands/${f}`);
     }
 });
 
 test("el comando de ODD apunta a una plantilla que existe", () => {
-    assert.ok(readFileSync(join(ROOT, "commands", "odd-task.md"), "utf8").includes("odd/TEMPLATE.md"));
-    readFileSync(join(ROOT, "odd", "TEMPLATE.md"), "utf8");
+    assert.ok(readFileSync(join(ROOT, "config", "commands", "odd-task.md"), "utf8").includes("odd/TEMPLATE.md"));
+    readFileSync(join(ROOT, "config", "odd", "TEMPLATE.md"), "utf8");
 });
 
 test("/judge respeta las reglas de la skill judgment-day", () => {
-    const text = readFileSync(join(ROOT, "commands", "judge.md"), "utf8");
+    const text = readFileSync(join(ROOT, "config", "commands", "judge.md"), "utf8");
     assert.match(text, /ciegos/);
     assert.match(text, /BLOCKER o CRITICAL/);
     assert.match(text, /Como máximo dos rondas/);

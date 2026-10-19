@@ -5,7 +5,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const { recognizeDestructiveCommands } = await import(join(ROOT, "lib", "destructive-command-guard.ts"));
+const { recognizeDestructiveCommands } = await import(join(ROOT, "config", "lib", "destructive-command-guard.ts"));
 
 const blocked = (cmd) => recognizeDestructiveCommands(cmd).length > 0;
 

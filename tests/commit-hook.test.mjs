@@ -8,7 +8,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const HOOK = join(ROOT, "hooks", "commit-msg");
+const HOOK = join(ROOT, "scripts", "hooks", "commit-msg");
 
 // Ejecuta el hook como lo haría git: el archivo del mensaje llega como primer argumento.
 function runHook(message) {
@@ -44,8 +44,8 @@ test("el hook deja pasar mensajes sin co-autor", () => {
     assert.equal(result.code, 0, `no debería rechazar: ${result.stderr}`);
 });
 
-test("hooks/commit-msg es ejecutable e install.sh lo activa en el checkout", () => {
-    assert.ok(statSync(HOOK).mode & 0o111, "hooks/commit-msg debe ser ejecutable");
+test("scripts/hooks/commit-msg es ejecutable e install.sh lo activa en el checkout", () => {
+    assert.ok(statSync(HOOK).mode & 0o111, "scripts/hooks/commit-msg debe ser ejecutable");
     const install = readFileSync(join(ROOT, "install.sh"), "utf8");
-    assert.match(install, /link "\$REPO\/hooks\/commit-msg" "\$REPO\/\.git\/hooks\/commit-msg"/, "falta activar el hook en install.sh");
+    assert.match(install, /link "\$REPO\/scripts\/hooks\/commit-msg" "\$REPO\/\.git\/hooks\/commit-msg"/, "falta activar el hook en install.sh");
 });

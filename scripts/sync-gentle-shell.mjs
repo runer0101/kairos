@@ -2,19 +2,20 @@
 // Sincroniza kairos con la versión instalada de gentle-shell (gentle-pi).
 //
 // Regenera SOLO lo derivado de gentle-shell, más la capa propia de kairos-auto:
-//   agents/            subagentes (los generados; se borran los que ya no existan upstream)
-//   prompts/           orchestrator.md (común + Ponytail)
-//   gentle-assets/     referencias perezosas del orchestrator (orchestrator*.md, chains/)
-//   lib/destructive-command-guard.ts
+//   config/agents/            subagentes (los generados; se borran los que ya no existan upstream)
+//   config/prompts/           orchestrator.md (común + Ponytail)
+//   config/gentle-assets/     referencias perezosas del orchestrator (orchestrator*.md, chains/)
+//   config/lib/destructive-command-guard.ts
 //   licenses/LICENSE-gentle-shell
-//   skills/gentle-ai, skills/rdd-defect-workflow (skills que vienen de gentle-shell)
+//   config/skills/gentle-ai, config/skills/rdd-defect-workflow (skills que vienen de gentle-shell)
 //
-// NO toca: themes/, tui-plugins/, tui.json, opencode.json, resto de skills/, plugins/,
-//          commands/, node_modules/, package*.json, LEEME.md.
+// NO toca: config/themes/, config/tui-plugins/, config/tui.json, config/opencode.json,
+//          resto de config/skills/, config/plugins/, config/commands/, node_modules/,
+//          package*.json, LEEME.md.
 //
 // Los archivos generados no llevan rutas de esta máquina: el repo se publica tal cual
-// (ver tests/privacy.test.mjs). La raíz de gentle-assets se referencia con
-// $OPENCODE_CONFIG_DIR, que el lanzador exporta en tiempo de ejecución.
+// (ver tests/privacy.test.mjs). La raíz de configuración se referencia con
+// $OPENCODE_CONFIG_DIR (config/, la exporta el lanzador) en tiempo de ejecución.
 //
 // Uso:
 //   node scripts/sync-gentle-shell.mjs              sincroniza solo si cambió la versión
@@ -40,7 +41,7 @@ const KAIROS = dirname(dirname(fileURLToPath(import.meta.url)));
 const MARKER = join(KAIROS, ".gentle-shell-sync.json");
 const GS_CURRENT = join(HOME, ".gentle-shell", "current");
 const GS_PKG = join(GS_CURRENT, "node_modules", "gentle-pi");
-const ASSETS_OUT = join(KAIROS, "gentle-assets");
+const ASSETS_OUT = join(KAIROS, "config", "gentle-assets");
 const MANAGED_SKILLS = ["gentle-ai", "rdd-defect-workflow"];
 const BG_POLICY = "Ejecuta tareas en primer plano salvo que el usuario pida lo contrario.";
 
@@ -96,7 +97,7 @@ const RUNTIME_NOTE = [
   "> - `codegraph`, `gentle_review`, `web_*`, `source_check`, `fetch_content`: úsalos solo si aparecen en tu lista de herramientas; si no, repórtalo como capacidad no disponible. No hay `gentle_review` ni assess: decide la verificación independiente por la lista de alto riesgo de Task Size.",
   "> - `orchestrator_session_id`, `orchestrator_list`, `subagent_status` y `subagent_result` no existen en OpenCode: usa el título de la sesión, `todo` y `task`; el progreso del todo no se actualiza solo, usa `todowrite`.",
   "> - Las reglas que Pi aplica en runtime (admisión de writers y verifier, `Allowed edit surfaces`, context backstop, señal de commit-slice) no las impone OpenCode: el prompt es la única guía, así que respétalas explícitamente. Aplica el context backstop al pasar el menor de ~150k tokens o el 15% de la ventana del modelo (indicador de contexto de OpenCode).",
-  "> - `$OPENCODE_CONFIG_DIR` es la raíz de kairos (la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
+  "> - `$OPENCODE_CONFIG_DIR` es la raíz de configuración de kairos (config/, la exporta el lanzador); las rutas de gentle-assets se resuelven como `$OPENCODE_CONFIG_DIR/gentle-assets` (para la ruta absoluta: `echo \"$OPENCODE_CONFIG_DIR\"`).",
   `> - Política de ejecución en segundo plano: ${BG_POLICY}`,
   "",
 ].join("\n");
@@ -207,7 +208,7 @@ const guardSrc = join(GS_PKG, "lib", "destructive-command-guard.ts");
 const guardText = readFileSync(guardSrc, "utf8");
 writeFileSync(
   join(STAGE, "destructive-command-guard.ts"),
-  "// Copiado de gentle-pi (gentle-shell), licencia MIT. Ver ../licenses/LICENSE-gentle-shell.\n" + guardText,
+  "// Copiado de gentle-pi (gentle-shell), licencia MIT. Ver ../../licenses/LICENSE-gentle-shell.\n" + guardText,
 );
 
 // 5) Skills de gentle-shell que se refrescan
@@ -289,16 +290,16 @@ if (CHECK) {
     else if (!readFileSync(targetFile).equals(readFileSync(stagedFile))) differences.push(`${label}: difiere`);
   };
 
-  compareDir(stageAgents, join(KAIROS, "agents"), "agents");
-  compareDir(stagePrompts, join(KAIROS, "prompts"), "prompts");
-  compareDir(stageAssets, ASSETS_OUT, "gentle-assets", true);
+  compareDir(stageAgents, join(KAIROS, "config", "agents"), "config/agents");
+  compareDir(stagePrompts, join(KAIROS, "config", "prompts"), "config/prompts");
+  compareDir(stageAssets, ASSETS_OUT, "config/gentle-assets", true);
   for (const s of MANAGED_SKILLS) {
-    compareDir(join(stageSkills, s), join(KAIROS, "skills", s), `skills/${s}`, true);
+    compareDir(join(stageSkills, s), join(KAIROS, "config", "skills", s), `config/skills/${s}`, true);
   }
   compareFile(
     join(STAGE, "destructive-command-guard.ts"),
-    join(KAIROS, "lib", "destructive-command-guard.ts"),
-    "lib/destructive-command-guard.ts",
+    join(KAIROS, "config", "lib", "destructive-command-guard.ts"),
+    "config/lib/destructive-command-guard.ts",
   );
   compareFile(join(GS_PKG, "LICENSE"), join(KAIROS, "licenses", "LICENSE-gentle-shell"), "licenses/LICENSE-gentle-shell");
   for (const f of prev?.generatedAgents ?? []) {
@@ -321,33 +322,33 @@ if (CHECK) {
 // ---------------------------------------------------------------- aplicar
 // Agentes: borrar solo los que generamos antes (no tocar agentes propios del usuario).
 for (const f of prev?.generatedAgents ?? []) {
-  rmSync(join(KAIROS, "agents", f), { force: true });
+  rmSync(join(KAIROS, "config", "agents", f), { force: true });
 }
-mkdirSync(join(KAIROS, "agents"), { recursive: true });
+mkdirSync(join(KAIROS, "config", "agents"), { recursive: true });
 for (const f of generatedAgents) {
-  cpSync(join(stageAgents, f), join(KAIROS, "agents", f));
+  cpSync(join(stageAgents, f), join(KAIROS, "config", "agents", f));
 }
 
 // Prompts de perfiles: se borran los generados antes y se escriben los nuevos.
 for (const f of prev?.generatedPrompts ?? []) {
-  rmSync(join(KAIROS, "prompts", f), { force: true });
+  rmSync(join(KAIROS, "config", "prompts", f), { force: true });
 }
-mkdirSync(join(KAIROS, "prompts"), { recursive: true });
+mkdirSync(join(KAIROS, "config", "prompts"), { recursive: true });
 for (const f of generatedPrompts) {
-  cpSync(join(stagePrompts, f), join(KAIROS, "prompts", f));
+  cpSync(join(stagePrompts, f), join(KAIROS, "config", "prompts", f));
 }
 
 rmSync(ASSETS_OUT, { recursive: true, force: true });
 cpSync(stageAssets, ASSETS_OUT, { recursive: true });
 
-mkdirSync(join(KAIROS, "lib"), { recursive: true });
+mkdirSync(join(KAIROS, "config", "lib"), { recursive: true });
 mkdirSync(join(KAIROS, "licenses"), { recursive: true });
-cpSync(join(STAGE, "destructive-command-guard.ts"), join(KAIROS, "lib", "destructive-command-guard.ts"));
+cpSync(join(STAGE, "destructive-command-guard.ts"), join(KAIROS, "config", "lib", "destructive-command-guard.ts"));
 cpSync(join(GS_PKG, "LICENSE"), join(KAIROS, "licenses", "LICENSE-gentle-shell"));
 
 for (const s of MANAGED_SKILLS) {
-  rmSync(join(KAIROS, "skills", s), { recursive: true, force: true });
-  cpSync(join(stageSkills, s), join(KAIROS, "skills", s), { recursive: true });
+  rmSync(join(KAIROS, "config", "skills", s), { recursive: true, force: true });
+  cpSync(join(stageSkills, s), join(KAIROS, "config", "skills", s), { recursive: true });
 }
 
 writeFileSync(

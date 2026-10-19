@@ -12,7 +12,7 @@ El agente trabaja en tu máquina con tus permisos. Las defensas son **capas heur
 |---|---|
 | Guarda de comandos destructivos | Bloquea (fail-closed) formas reconocibles: `rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE`, `DELETE` sin `WHERE`, etc. Aplica a todos los perfiles, también `kairos-auto`. |
 | Rutas sensibles (piso inviolable) | El plugin bloquea **leer o escribir** en `~/.ssh`, `~/.gnupg`, `~/.aws`, `.git-credentials`, `.netrc`, claves `id_rsa`/`id_dsa`/`id_ecdsa`/`id_ed25519` y `auth.json` — en las herramientas de archivo **y** en comandos bash que las referencien (p. ej. `cat ~/.ssh/id_rsa`). No se puede aprobar ni saltar con `kairos-auto`. |
-| Rutas sensibles (perfiles) | `opencode.json` añade `deny` para credenciales y `ask` para `.env`, `*.pem`, `.kube/config` y `.docker/config.json`. En el perfil normal eso pide confirmación; en `kairos-auto` las reglas `ask` no preguntan (ver límites). |
+| Rutas sensibles (perfiles) | `config/opencode.json` añade `deny` para credenciales y `ask` para `.env`, `*.pem`, `.kube/config` y `.docker/config.json`. En el perfil normal eso pide confirmación; en `kairos-auto` las reglas `ask` no preguntan (ver límites). |
 | Directorios externos | Leer o escribir fuera del proyecto pide confirmación (`external_directory: ask`). |
 | Permisos por perfil | `kairos-auto` (el perfil de arranque) no pregunta; `kairos-control` pregunta antes de editar y ejecutar. Las guardas de arriba siguen aplicando en ambos. |
 | Clasificador de auto-aprobación | Consejo contextual, nunca autoridad ni respuesta a consentimientos humanos: solo aprueba un `ask` cuando el veredicto es seguro y está dentro del pedido vivo, y solo veta en sesiones con permiso `allow` confirmado. Veredictos peligrosos o dudosos y cualquier fallo (timeout, error, veredicto inválido o concurrencia) dejan la decisión como está; no debilita la guarda ni el piso de rutas sensibles. Se apaga con `KAIROS_NO_CLASSIFIER=1`. |
@@ -31,8 +31,8 @@ El agente trabaja en tu máquina con tus permisos. Las defensas son **capas heur
 
 ## Ajustar si te bloquea de más
 
-- Rutas sensibles de lectura: edita `permission.read` en `opencode.json`.
-- Piso inviolable (credenciales): edita `SENSITIVE_PATH` en `plugins/gentle-shell.ts`.
+- Rutas sensibles de lectura: edita `permission.read` en `config/opencode.json`.
+- Piso inviolable (credenciales): edita `SENSITIVE_PATH` en `config/plugins/gentle-shell.ts`.
 - Después de cualquier cambio: `pnpm test` (hay pruebas de comportamiento para la guarda y las rutas sensibles).
 
 ## Reportar

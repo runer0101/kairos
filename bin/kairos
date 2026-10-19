@@ -22,8 +22,8 @@ if [[ "${1:-}" == "--where" ]]; then
     exit 0
 fi
 
-if [[ ! -f "$GENTLE_DIR/opencode.json" ]]; then
-    echo "kairos: falta $GENTLE_DIR/opencode.json (repositorio incompleto)" >&2
+if [[ ! -f "$GENTLE_DIR/config/opencode.json" ]]; then
+    echo "kairos: falta $GENTLE_DIR/config/opencode.json (repositorio incompleto)" >&2
     exit 1
 fi
 
@@ -73,8 +73,8 @@ if [[ "$NO_LOCAL" != "1" && -f "$DETECT_SCRIPT" ]] && command -v node >/dev/null
     fi
 fi
 
-export OPENCODE_CONFIG="$GENTLE_DIR/opencode.json"
-export OPENCODE_CONFIG_DIR="$GENTLE_DIR"
-export OPENCODE_TUI_CONFIG="$GENTLE_DIR/tui.json"
+export OPENCODE_CONFIG="$GENTLE_DIR/config/opencode.json"
+export OPENCODE_CONFIG_DIR="$GENTLE_DIR/config"
+export OPENCODE_TUI_CONFIG="$GENTLE_DIR/config/tui.json"
 
 exec "$OPENCODE_BIN" "$@"

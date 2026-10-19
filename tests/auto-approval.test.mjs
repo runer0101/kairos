@@ -11,7 +11,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const { AutoApprovalPlugin } = await import(join(ROOT, "plugins", "auto-approval.ts"));
+const { AutoApprovalPlugin } = await import(join(ROOT, "config", "plugins", "auto-approval.ts"));
 
 const E2E = process.env.KAIROS_E2E === "1";
 const OPENCODE = process.env.OPENCODE_BIN || join(homedir(), ".opencode", "bin", "opencode");
@@ -346,9 +346,9 @@ test(
             ...process.env,
             KAIROS_NO_SYNC: "1",
             KAIROS_CLASSIFIER_STUB: "allow",
-            OPENCODE_CONFIG: join(ROOT, "opencode.json"),
-            OPENCODE_CONFIG_DIR: ROOT,
-            OPENCODE_TUI_CONFIG: join(ROOT, "tui.json"),
+            OPENCODE_CONFIG: join(ROOT, "config", "opencode.json"),
+            OPENCODE_CONFIG_DIR: join(ROOT, "config"),
+            OPENCODE_TUI_CONFIG: join(ROOT, "config", "tui.json"),
             TERM: "xterm",
         };
         try {

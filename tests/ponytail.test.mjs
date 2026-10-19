@@ -19,7 +19,7 @@ function frontmatter(path) {
 
 test("las tres skills de Ponytail existen con frontmatter válido", () => {
     for (const name of SKILLS) {
-        const path = join(ROOT, "skills", name, "SKILL.md");
+        const path = join(ROOT, "config", "skills", name, "SKILL.md");
         assert.ok(existsSync(path), `falta skills/${name}/SKILL.md`);
         const { raw, body } = frontmatter(path);
         assert.match(raw, new RegExp(`^name: ${name}$`, "m"), `${name}: name no coincide con el directorio`);
@@ -31,7 +31,7 @@ test("las tres skills de Ponytail existen con frontmatter válido", () => {
 
 test("los tres comandos de Ponytail existen y describen su uso", () => {
     for (const name of COMMANDS) {
-        const path = join(ROOT, "commands", `${name}.md`);
+        const path = join(ROOT, "config", "commands", `${name}.md`);
         assert.ok(existsSync(path), `falta commands/${name}.md`);
         const { raw, body } = frontmatter(path);
         assert.match(raw, /^description: .+/m, `${name}: falta description`);
@@ -40,21 +40,21 @@ test("los tres comandos de Ponytail existen y describen su uso", () => {
 });
 
 test("los comandos de Ponytail no colisionan con los existentes", () => {
-    const all = readdirSync(join(ROOT, "commands"))
+    const all = readdirSync(join(ROOT, "config", "commands"))
         .filter((f) => f.endsWith(".md"))
         .map((f) => f.slice(0, -3));
     assert.equal(new Set(all).size, all.length, "hay nombres de comando duplicados");
 });
 
 test("/ponytail cubre los niveles y /ponytail-review exige veredicto", () => {
-    const level = readFileSync(join(ROOT, "commands", "ponytail.md"), "utf8");
+    const level = readFileSync(join(ROOT, "config", "commands", "ponytail.md"), "utf8");
     assert.match(level, /lite/);
     assert.match(level, /full/);
     assert.match(level, /ultra/);
-    const review = readFileSync(join(ROOT, "commands", "ponytail-review.md"), "utf8");
+    const review = readFileSync(join(ROOT, "config", "commands", "ponytail-review.md"), "utf8");
     assert.match(review, /Verdict/i);
     assert.match(review, /Must fix/);
-    const debt = readFileSync(join(ROOT, "commands", "ponytail-debt.md"), "utf8");
+    const debt = readFileSync(join(ROOT, "config", "commands", "ponytail-debt.md"), "utf8");
     assert.match(debt, /shortcut:/);
 });
 
@@ -68,12 +68,12 @@ test("la licencia MIT de Ponytail se conserva y se atribuye", () => {
 });
 
 test("los dos perfiles integran Ponytail en el prompt común", () => {
-    const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
+    const cfg = JSON.parse(readFileSync(join(ROOT, "config", "opencode.json"), "utf8"));
     for (const name of ["kairos-control", "kairos-auto"]) {
         assert.equal(cfg.agent[name].prompt, "{file:./prompts/orchestrator.md}", `${name} debe usar el prompt común`);
     }
-    assert.equal(existsSync(join(ROOT, "prompts", "orchestrator-auto.md")), false, "el prompt auto ya no debe existir");
-    const prompt = readFileSync(join(ROOT, "prompts", "orchestrator.md"), "utf8");
+    assert.equal(existsSync(join(ROOT, "config", "prompts", "orchestrator-auto.md")), false, "el prompt auto ya no debe existir");
+    const prompt = readFileSync(join(ROOT, "config", "prompts", "orchestrator.md"), "utf8");
     assert.match(prompt, /Runtime: OpenCode/);
     assert.match(prompt, /Implementation Economy \(Ponytail, fused\)/);
     assert.match(prompt, /kairos wins/);
@@ -88,13 +88,13 @@ test("el sincronizador integra la capa de Ponytail en el prompt común", () => {
 });
 
 test("/review incorpora la lente lean de Ponytail", () => {
-    const review = readFileSync(join(ROOT, "commands", "review.md"), "utf8");
+    const review = readFileSync(join(ROOT, "config", "commands", "review.md"), "utf8");
     assert.match(review, /ponytail-review/);
     assert.match(review, /lean/i);
 });
 
 test("la plantilla ODD registra la deuda deliberada", () => {
-    const template = readFileSync(join(ROOT, "odd", "TEMPLATE.md"), "utf8");
+    const template = readFileSync(join(ROOT, "config", "odd", "TEMPLATE.md"), "utf8");
     assert.match(template, /Deuda deliberada/);
     assert.match(template, /shortcut:/);
 });

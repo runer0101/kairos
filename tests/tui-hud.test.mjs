@@ -7,8 +7,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const src = readFileSync(join(ROOT, "tui-plugins", "kairos-hud.tsx"), "utf8");
-const tuiJson = JSON.parse(readFileSync(join(ROOT, "tui.json"), "utf8"));
+const src = readFileSync(join(ROOT, "config", "tui-plugins", "kairos-hud.tsx"), "utf8");
+const tuiJson = JSON.parse(readFileSync(join(ROOT, "config", "tui.json"), "utf8"));
 
 test("el HUD se pinta junto al prompt de sesión", () => {
   assert.match(src, /api\.slots\.register\(/, "debe registrar slots");

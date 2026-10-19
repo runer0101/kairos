@@ -6,7 +6,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
+const cfg = JSON.parse(readFileSync(join(ROOT, "config", "opencode.json"), "utf8"));
 const DEEPSEEK = "opencode-go/deepseek-v4.1-flash";
 
 test("el agente por defecto es el perfil automático", () => {
@@ -33,7 +33,7 @@ test("existen los perfiles como agentes primarios con el mismo prompt", () => {
     assert.equal(a.prompt, "{file:./prompts/orchestrator.md}", `${name} debe usar el prompt común`);
     assert.ok(a.description && a.description.length > 10, `${name} necesita descripción`);
   }
-  assert.ok(existsSync(join(ROOT, "prompts", "orchestrator.md")), "falta prompts/orchestrator.md");
+  assert.ok(existsSync(join(ROOT, "config", "prompts", "orchestrator.md")), "falta prompts/orchestrator.md");
 });
 
 test("todos los perfiles usan DeepSeek v4.1 Flash", () => {
@@ -64,7 +64,7 @@ test("las lecturas habituales de bash están permitidas y van después del comod
 
 test("modo automático (kairos-auto) permite todo; la guarda de comandos sigue en el plugin", () => {
   assert.equal(cfg.agent["kairos-auto"].permission, "allow");
-  assert.ok(existsSync(join(ROOT, "plugins", "gentle-shell.ts")));
+  assert.ok(existsSync(join(ROOT, "config", "plugins", "gentle-shell.ts")));
 });
 
 test("build, plan y el perfil duplicado quedan fuera del selector", () => {

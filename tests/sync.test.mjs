@@ -44,13 +44,13 @@ function snapshot() {
         for (const e of readdirSync(p, { withFileTypes: true })) walk(join(p, e.name), `${rel}/${e.name}`);
     };
     const roots = [
-        "agents",
-        "prompts",
-        "gentle-assets",
-        "lib/destructive-command-guard.ts",
+        "config/agents",
+        "config/prompts",
+        "config/gentle-assets",
+        "config/lib/destructive-command-guard.ts",
         "licenses/LICENSE-gentle-shell",
-        "skills/gentle-ai",
-        "skills/rdd-defect-workflow",
+        "config/skills/gentle-ai",
+        "config/skills/rdd-defect-workflow",
         ".gentle-shell-sync.json",
     ];
     for (const r of roots) walk(join(ROOT, r), r);

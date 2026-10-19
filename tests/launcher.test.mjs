@@ -126,7 +126,7 @@ test("OPENCODE_BIN explícito gana al binario parcheado", async () => {
 });
 
 test("el parche del binario propio toca lo esperado", () => {
-    const patch = readFileSync(join(ROOT, "patches", "opencode-left-panel.patch"), "utf8");
+    const patch = readFileSync(join(ROOT, "scripts", "patches", "opencode-left-panel.patch"), "utf8");
     assert.match(patch, /packages\/tui\/src\/config\/index\.tsx/, "schema de la TUI");
     assert.match(patch, /packages\/tui\/src\/routes\/session\/index\.tsx/, "layout de la sesión");
     assert.match(patch, /session_left_width/, "ancho del panel izquierdo");

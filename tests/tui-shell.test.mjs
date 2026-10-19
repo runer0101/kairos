@@ -9,10 +9,10 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const src = readFileSync(join(ROOT, "tui-plugins", "kairos-shell.tsx"), "utf8");
-const subSrc = readFileSync(join(ROOT, "tui-plugins", "subagents.ts"), "utf8");
-const viewSrc = readFileSync(join(ROOT, "tui-plugins", "kairos-agents.tsx"), "utf8");
-const tuiJson = JSON.parse(readFileSync(join(ROOT, "tui.json"), "utf8"));
+const src = readFileSync(join(ROOT, "config", "tui-plugins", "kairos-shell.tsx"), "utf8");
+const subSrc = readFileSync(join(ROOT, "config", "tui-plugins", "subagents.ts"), "utf8");
+const viewSrc = readFileSync(join(ROOT, "config", "tui-plugins", "kairos-agents.tsx"), "utf8");
+const tuiJson = JSON.parse(readFileSync(join(ROOT, "config", "tui.json"), "utf8"));
 
 test("el panel está cargado en tui.json y pide su ancho", () => {
   assert.ok(tuiJson.plugin.includes("./tui-plugins/kairos-shell.tsx"), "tui.json debe cargar kairos-shell.tsx");

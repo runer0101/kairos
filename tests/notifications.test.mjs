@@ -11,7 +11,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const { GentleShellPlugin } = await import(join(ROOT, "plugins", "gentle-shell.ts"));
+const { GentleShellPlugin } = await import(join(ROOT, "config", "plugins", "gentle-shell.ts"));
 
 const DONE_TEXT = "Listo para tu siguiente mensaje";
 const ERROR_TEXT = "Error en la sesión";

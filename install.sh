@@ -104,7 +104,7 @@ link() { # link ORIGEN DESTINO
 # Bootstrap para `curl ... | bash`: si no hay checkout, clona el repo en la ubicación
 # canónica y continúa la instalación desde ahí (re-ejecuta este mismo script).
 ensure_checkout() {
-    if [[ -n "$REPO" && -f "$REPO/package.json" && -f "$REPO/opencode.json" ]]; then
+    if [[ -n "$REPO" && -f "$REPO/package.json" && -f "$REPO/config/opencode.json" ]]; then
         return
     fi
     say "instalador fuera de un checkout: preparando $CANON"
@@ -291,22 +291,22 @@ setup_repo() {
     say "instalando dependencias con pnpm (lockfile congelado)"
     (cd "$REPO" && "$PNPM_BIN" install --frozen-lockfile --config.confirmModulesPurge=false)
 
-    chmod +x "$REPO/bin/kairos" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs" "$REPO/hooks/commit-msg"
+    chmod +x "$REPO/bin/kairos" "$REPO/scripts/sync-gentle-shell.mjs" "$REPO/scripts/detect-local-models.mjs" "$REPO/scripts/hooks/commit-msg"
     link "$REPO/bin/kairos" "$BIN_DIR/kairos"
     link "$REPO/bin/kairos" "$BIN_DIR/kai"
     link "$REPO/bin/kairos" "$BIN_DIR/ks"
     # El hook commit-msg rechaza los commits con co-autor: la historia publicada no los lleva.
     if [[ -d "$REPO/.git" ]]; then
-        link "$REPO/hooks/commit-msg" "$REPO/.git/hooks/commit-msg"
+        link "$REPO/scripts/hooks/commit-msg" "$REPO/.git/hooks/commit-msg"
     fi
     # Retira enlaces rotos que apuntaban a temas de este repo y ya no existen (p. ej. tras un renombrado).
     for stale in "$OC_THEMES"/*.json; do
         [[ -L "$stale" && ! -e "$stale" ]] || continue
         case "$(readlink "$stale")" in
-            "$REPO"/themes/*) rm -f "$stale" ;;
+            "$REPO"/config/themes/*) rm -f "$stale" ;;
         esac
     done
-    for theme_file in "$REPO"/themes/*.json; do
+    for theme_file in "$REPO"/config/themes/*.json; do
         link "$theme_file" "$OC_THEMES/$(basename "$theme_file")"
     done
 
@@ -336,7 +336,7 @@ function editJson(file, mutate) {
 const portable = (p) => (p.startsWith(home + "/") ? "{env:HOME}" + p.slice(home.length) : p);
 
 if (engram) {
-    editJson("opencode.json", (o) => {
+    editJson("config/opencode.json", (o) => {
         const cmd = o.mcp && o.mcp.engram && o.mcp.engram.command;
         if (!Array.isArray(cmd)) return;
         if (cmd[0] === portable(engram)) return;

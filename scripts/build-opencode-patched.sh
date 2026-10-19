@@ -20,7 +20,7 @@ set -euo pipefail
 VERSION="${1:-v1.18.35}"
 DEST="${2:-$HOME/.local/share/kairos/opencode-patched}"
 ROOT="$(cd -P "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
-PATCH_FILE="$ROOT/patches/opencode-left-panel.patch"
+PATCH_FILE="$ROOT/scripts/patches/opencode-left-panel.patch"
 
 for tool in curl tar patch; do
     command -v "$tool" >/dev/null 2>&1 || { echo "kairos: falta $tool" >&2; exit 1; }

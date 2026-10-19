@@ -7,7 +7,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const src = readFileSync(join(ROOT, "tui-plugins", "gentle-logo.tsx"), "utf8");
+const src = readFileSync(join(ROOT, "config", "tui-plugins", "gentle-logo.tsx"), "utf8");
 
 function arrayLines(name) {
   const m = src.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\n\\]`));

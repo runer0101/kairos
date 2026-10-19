@@ -7,7 +7,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const THEMES_DIR = join(ROOT, "themes");
+const THEMES_DIR = join(ROOT, "config", "themes");
 
 // Resuelve un valor de tema: "#rrggbb", clave de defs, o {dark, light} de ambos.
 function resolves(defs, value) {

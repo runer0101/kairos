@@ -8,8 +8,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const cfg = JSON.parse(readFileSync(join(ROOT, "opencode.json"), "utf8"));
-const { GentleShellPlugin } = await import(join(ROOT, "plugins", "gentle-shell.ts"));
+const cfg = JSON.parse(readFileSync(join(ROOT, "config", "opencode.json"), "utf8"));
+const { GentleShellPlugin } = await import(join(ROOT, "config", "plugins", "gentle-shell.ts"));
 
 const hooks = await GentleShellPlugin({ $: () => {} });
 const before = hooks["tool.execute.before"];

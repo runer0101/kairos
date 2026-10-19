@@ -13,12 +13,12 @@ Este documento describe cómo está construido kairos, qué se portó desde gent
                                 ▼
         ┌───────────────────────────────────────────────────┐
         │ OpenCode 1.18.x                                    │
-        │  opencode.json  → modelos, MCPs, permisos, agente  │
-        │  agents/        → orchestrator + subagentes        │
-        │  commands/      → /gentle-*                        │
-        │  plugins/       → guarda bash + avisos al terminar │
-        │  skills/        → instrucciones bajo demanda       │
-        │  tui.json       → tema + logo + statusline         │
+        │  config/opencode.json  → modelos, MCPs, permisos   │
+        │  config/agents/        → orchestrator + subagentes │
+        │  config/commands/      → /gentle-*                 │
+        │  config/plugins/       → guarda bash + avisos      │
+        │  config/skills/        → instrucciones bajo demanda│
+        │  config/tui.json       → tema + logo + statusline  │
         └───────────────────────────────────────────────────┘
 ```
 
@@ -28,18 +28,18 @@ OpenCode carga la configuración desde las variables de entorno que define el la
 
 | Componente en gentle-shell | Equivalente en kairos | Notas |
 |---|---|---|
-| `assets/orchestrator.md` | `prompts/orchestrator.md` (común + Ponytail) + perfiles `kairos-control`, `kairos-auto` en `opencode.json` | Placeholders resueltos; la capa de economía de implementación va integrada en el prompt común de los dos perfiles |
-| `assets/orchestrator-*.md`, `chains/` | `gentle-assets/` | Se leen bajo demanda, igual que en Pi |
-| `assets/agents/*.md` | `agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
+| `assets/orchestrator.md` | `config/prompts/orchestrator.md` (común + Ponytail) + perfiles `kairos-control`, `kairos-auto` en `config/opencode.json` | Placeholders resueltos; la capa de economía de implementación va integrada en el prompt común de los dos perfiles |
+| `assets/orchestrator-*.md`, `chains/` | `config/gentle-assets/` | Se leen bajo demanda, igual que en Pi |
+| `assets/agents/*.md` | `config/agents/*.md` (modo `subagent`) | Permisos derivados de la lista `tools` original (ver abajo) |
 | Lista `tools` de cada agente | `permission.edit`, `permission.bash`, `permission.webfetch` | Ver reglas de derivación |
-| `registerCommand("gentle:…")` | `commands/gentle-*.md` | Solo los comandos con equivalente directo en OpenCode |
-| `lib/destructive-command-guard.ts` | `lib/destructive-command-guard.ts` + `plugins/gentle-shell.ts` | El plugin llama a la guarda en `tool.execute.before` |
-| Clasificador de auto-aprobación (`lib/auto-permission-classifier.ts` + runtime) | `plugins/auto-approval.ts` + `lib/auto-approval/` | Mecanismo verificado en OpenCode 1.18.35: el ask se responde por el evento `permission.asked` y el veto va por `tool.execute.before` (ver «Clasificador de auto-aprobación») |
+| `registerCommand("gentle:…")` | `config/commands/gentle-*.md` | Solo los comandos con equivalente directo en OpenCode |
+| `lib/destructive-command-guard.ts` | `config/lib/destructive-command-guard.ts` + `config/plugins/gentle-shell.ts` | El plugin llama a la guarda en `tool.execute.before` |
+| Clasificador de auto-aprobación (`lib/auto-permission-classifier.ts` + runtime) | `config/plugins/auto-approval.ts` + `config/lib/auto-approval/` | Mecanismo verificado en OpenCode 1.18.35: el ask se responde por el evento `permission.asked` y el veto va por `tool.execute.before` (ver «Clasificador de auto-aprobación») |
 | `gentle-notifications` (sonido y escritorio) | Eventos `session.status`/`session.error` → `notify-send` filtrado + pack de tonos nativo | Avisa solo a la sesión principal al pasar de `busy` a `idle`, calla el «listo» tras un error (avisando el error) y silencia a subagentes y sesiones internas del clasificador. No avisa con subagentes aún corriendo (sale al terminar el último), con un permiso o pregunta pendiente, ni para sesiones jamás vistas; antes de avisar contrasta con el servidor (`session.get` → `parentID`) que la sesión no sea hija. Tonos opt-in con `KAIROS_SOUNDS=1`; avisos apagables con `KAIROS_NO_NOTIFY=1` |
-| Memoria Engram | MCP `engram` en `opencode.json` | Usa el binario de gentle-shell |
-| `skills/*/SKILL.md` | `skills/` | Mismo formato; dos skills se refrescan al sincronizar |
-| `themes/` y TUI propia | `themes/` (4 temas), `tui-plugins/`, `tui.json` | Tema, logo que sigue al tema, HUD ODD y vista de agentes propios (ver «La TUI (mapa)») |
-| Gentle Agents: tarjeta sobre el editor y overlay `alt+a` | `tui-plugins/kairos-agents.tsx` (vista) + `opencode-subagent-statusline` (sidebar) | Sesión, subagentes, agentes y tarea ODD a la izquierda; hilo de la sesión o del subagente, o ficha del agente, a la derecha. El `alt+a` de Pi pasa a `alt+g`/`/agentes`: OpenCode usa `alt+a` en el editor del prompt y `/agents` para cambiar de agente |
+| Memoria Engram | MCP `engram` en `config/opencode.json` | Usa el binario de gentle-shell |
+| `skills/*/SKILL.md` | `config/skills/` | Mismo formato; dos skills se refrescan al sincronizar |
+| `themes/` y TUI propia | `config/themes/` (4 temas), `config/tui-plugins/`, `config/tui.json` | Tema, logo que sigue al tema, HUD ODD y vista de agentes propios (ver «La TUI (mapa)») |
+| Gentle Agents: tarjeta sobre el editor y overlay `alt+a` | `config/tui-plugins/kairos-agents.tsx` (vista) + `opencode-subagent-statusline` (sidebar) | Sesión, subagentes, agentes y tarea ODD a la izquierda; hilo de la sesión o del subagente, o ficha del agente, a la derecha. El `alt+a` de Pi pasa a `alt+g`/`/agentes`: OpenCode usa `alt+a` en el editor del prompt y `/agents` para cambiar de agente |
 | Barra fullscreen, paneles de uso, animaciones, regiones de puntero | No portado | Dependen de la API de Pi |
 
 ### Derivación de permisos de subagentes
@@ -74,7 +74,7 @@ La configuración de modelos se reparte en dos capas:
 
 | Capa | Dónde | Qué aporta |
 |---|---|---|
-| Modelo por defecto | `opencode.json` (`model`, `small_model`) | `opencode-go/deepseek-v4.1-flash` (requiere suscripción OpenCode Go) |
+| Modelo por defecto | `config/opencode.json` (`model`, `small_model`) | `opencode-go/deepseek-v4.1-flash` (requiere suscripción OpenCode Go) |
 | Proveedores locales | Detectados en cada arranque | Ollama, LM Studio, llama.cpp, vLLM y endpoints de `local-providers.json` |
 
 En cada arranque, `bin/kairos` ejecuta `scripts/detect-local-models.mjs`. El script sondea los puertos por defecto con un timeout de 800 ms y devuelve un JSON de proveedores. El lanzador lo pasa en `OPENCODE_CONFIG_CONTENT`, que OpenCode fusiona por encima de la configuración del proyecto.
@@ -82,7 +82,7 @@ En cada arranque, `bin/kairos` ejecuta `scripts/detect-local-models.mjs`. El scr
 Dos decisiones de diseño:
 
 - **IDs propios**: los proveedores detectados usan IDs `local-*`. Si usaran `ollama`, se fusionarían con el proveedor `ollama` de la configuración global del usuario (`~/.config/opencode/opencode.jsonc`), que puede declarar modelos que ya no existen.
-- **`disabled_providers: ["ollama"]`** en `opencode.json`: oculta ese proveedor global. El `ollama-cloud` global se conserva porque son modelos de nube, no locales.
+- **`disabled_providers: ["ollama"]`** en `config/opencode.json`: oculta ese proveedor global. El `ollama-cloud` global se conserva porque son modelos de nube, no locales.
 
 ## Perfiles, modos de permiso y comandos
 
@@ -90,23 +90,23 @@ Los perfiles equivalen a `/gentle:profiles` de gentle-shell, pero se implementan
 
 | Pieza | Dónde | Qué hace |
 |---|---|---|
-| Agentes primarios | `opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`; el de arranque es `kairos-auto` (`default_agent`). |
-| Prompt común | `prompts/orchestrator.md` | Lo usan los dos perfiles con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell e incluye la capa de Ponytail. |
+| Agentes primarios | `config/opencode.json` → `agent` | Un agente por perfil, con su modelo y permisos. Se cambian con `Tab`; el de arranque es `kairos-auto` (`default_agent`). |
+| Prompt común | `config/prompts/orchestrator.md` | Lo usan los dos perfiles con `{file:./prompts/orchestrator.md}`. Se genera desde gentle-shell e incluye la capa de Ponytail. |
 | Herencia de modelo | OpenCode | Un subagente sin `model` usa el del agente que lo invoca. Así el perfil activo decide el modelo de todo el trabajo. |
-| Excepciones de subagentes | `opencode.json` | `gentle-ai-explore` (15 pasos) y `jd-judge-b` usan el modelo por defecto (DeepSeek v4.1 Flash). |
+| Excepciones de subagentes | `config/opencode.json` | `gentle-ai-explore` (15 pasos) y `jd-judge-b` usan el modelo por defecto (DeepSeek v4.1 Flash). |
 
 Permisos:
 
 - **Normal** (global): lectura, búsqueda y subagentes permitidos. Edición y bash piden confirmación. Un conjunto de lecturas habituales de bash está permitido. El comodín `*` va primero, porque la última regla que coincide gana.
 - **Automático** (`kairos-auto`): `permission: "allow"` a nivel de agente. Como la última regla que coincide gana, sobrescribe las de `ask`.
 - **Auto de OpenCode**: `kairos --auto` pasa el flag al binario. Respeta los `deny`.
-- **Guarda de comandos**: `plugins/gentle-shell.ts` la aplica en `tool.execute.before`, en todos los modos.
+- **Guarda de comandos**: `config/plugins/gentle-shell.ts` la aplica en `tool.execute.before`, en todos los modos.
 
-Comandos del flujo (`commands/`): cada uno usa `!\`...\`` para incluir contexto real del repositorio (diff, estado, estadísticas) y delega en subagentes con la herramienta `task`. `/judge` sigue las reglas de la skill `judgment-day`: jueces ciegos en paralelo, corrección solo de hallazgos confirmados por ambos y como máximo dos rondas. `/review` elige las lentes `review-*` por tamaño y riesgo, con la tabla de gentle-shell.
+Comandos del flujo (`config/commands/`): cada uno usa `!\`...\`` para incluir contexto real del repositorio (diff, estado, estadísticas) y delega en subagentes con la herramienta `task`. `/judge` sigue las reglas de la skill `judgment-day`: jueces ciegos en paralelo, corrección solo de hallazgos confirmados por ambos y como máximo dos rondas. `/review` elige las lentes `review-*` por tamaño y riesgo, con la tabla de gentle-shell.
 
 ### Ponytail integrado en los perfiles
 
-La capa de economía de implementación (Ponytail v5.3.2, MIT) se genera dentro de `prompts/orchestrator.md`, el prompt común de `kairos-control` y `kairos-auto`. No sustituye ODD, delegación, riesgo, revisión ni verificación: si hay conflicto, manda el proceso de kairos. `/review` incorpora además la lente lean en `review-readability`, y la plantilla ODD tiene una sección «Deuda deliberada» para los comentarios `shortcut:`.
+La capa de economía de implementación (Ponytail v5.3.2, MIT) se genera dentro de `config/prompts/orchestrator.md`, el prompt común de `kairos-control` y `kairos-auto`. No sustituye ODD, delegación, riesgo, revisión ni verificación: si hay conflicto, manda el proceso de kairos. `/review` incorpora además la lente lean en `review-readability`, y la plantilla ODD tiene una sección «Deuda deliberada» para los comentarios `shortcut:`.
 
 ### Clasificador de auto-aprobación
 
@@ -126,22 +126,22 @@ gentle-pi 4.3.0 registra 30 comandos `/gentle:*` (verificado en `extensions/` y 
 
 | Comando de Pi | Estado en kairos | Equivalente nativo |
 |---|---|---|
-| `gentle:doctor` | portado (`commands/gentle-doctor.md`) | Diagnóstico de la instalación kairos |
-| `gentle:models` | portado (`commands/gentle-models.md`) | Lista modelos con `opencode models`; los modelos por defecto se editan en `opencode.json` |
-| `gentle:status` | portado (`commands/gentle-status.md`) | Reorientado al repositorio y la sesión (`git status`); el estado de la instalación lo cubre `/gentle-doctor` |
-| `gentle:usage` | portado (`commands/gentle-usage.md`) | Usa `opencode stats` |
+| `gentle:doctor` | portado (`config/commands/gentle-doctor.md`) | Diagnóstico de la instalación kairos |
+| `gentle:models` | portado (`config/commands/gentle-models.md`) | Lista modelos con `opencode models`; los modelos por defecto se editan en `config/opencode.json` |
+| `gentle:status` | portado (`config/commands/gentle-status.md`) | Reorientado al repositorio y la sesión (`git status`); el estado de la instalación lo cubre `/gentle-doctor` |
+| `gentle:usage` | portado (`config/commands/gentle-usage.md`) | Usa `opencode stats` |
 | `gentle:profiles` | no aplica | Perfiles de kairos con `Tab` (selector de agente primario) |
 | `gentle:mode` | no aplica | Perfiles con `Tab` para el modo automático y `kairos --auto` para el auto de OpenCode |
 | `gentle:yolo` | no aplica | Perfil `kairos-auto` (`Tab`) o `kairos --auto` |
 | `gentle:persona` | no aplica | Sin equivalente: kairos no tiene personas intercambiables |
-| `gentle:customize` | no aplica | `tui.json` (tema, logo, sonidos, atajos) y `opencode.json` (permisos) |
-| `gentle:animations` | no aplica | Sin ajuste equivalente en `tui.json` |
-| `gentle:vim` | no aplica | Sin equivalente; la edición del prompt usa los atajos de la TUI (`keybinds` en `tui.json`) |
-| `gentle:double-esc-cancel` | no aplica | Sin ajuste equivalente; las teclas se personalizan con `keybinds` en `tui.json` |
-| `gentle:banner` | no aplica | Logo propio (`tui-plugins/gentle-logo.tsx`, `KAIROS_LOGO_TEXT`) |
-| `gentle:banner-color` | no aplica | `theme` en `tui.json`: el logo sigue al tema activo |
-| `gentle:toggle-rose` | no aplica | `theme` en `tui.json` (temas gentleman) |
-| `gentle:toggle-text-logo` | no aplica | Editar `tui-plugins/gentle-logo.tsx` o quitarlo de `tui.json` |
+| `gentle:customize` | no aplica | `config/tui.json` (tema, logo, sonidos, atajos) y `config/opencode.json` (permisos) |
+| `gentle:animations` | no aplica | Sin ajuste equivalente en `config/tui.json` |
+| `gentle:vim` | no aplica | Sin equivalente; la edición del prompt usa los atajos de la TUI (`keybinds` en `config/tui.json`) |
+| `gentle:double-esc-cancel` | no aplica | Sin ajuste equivalente; las teclas se personalizan con `keybinds` en `config/tui.json` |
+| `gentle:banner` | no aplica | Logo propio (`config/tui-plugins/gentle-logo.tsx`, `KAIROS_LOGO_TEXT`) |
+| `gentle:banner-color` | no aplica | `theme` en `config/tui.json`: el logo sigue al tema activo |
+| `gentle:toggle-rose` | no aplica | `theme` en `config/tui.json` (temas gentleman) |
+| `gentle:toggle-text-logo` | no aplica | Editar `config/tui-plugins/gentle-logo.tsx` o quitarlo de `config/tui.json` |
 | `gentle:dev-binary` | no aplica | Kairos usa el binario de OpenCode instalado |
 | `gentle:telemetry` | no aplica | Sin equivalente: kairos no incluye telemetría |
 | `gentle:commands` | no aplica | Paleta de comandos de la TUI (`ctrl+p`) |
@@ -173,7 +173,7 @@ gentle-pi 4.3.0 registra 30 comandos `/gentle:*` (verificado en `extensions/` y 
 
 ## La TUI (mapa)
 
-`tui.json` configura la TUI de OpenCode (tema y plugins). Los plugins propios viven en `tui-plugins/` — manuales, la sincronización no los toca — y leen el tema activo con `api.theme.current`.
+`config/tui.json` configura la TUI de OpenCode (tema y plugins). Los plugins propios viven en `config/tui-plugins/` — manuales, la sincronización no los toca — y leen el tema activo con `api.theme.current`.
 
 | Pieza | Slots | Qué pinta |
 |---|---|---|
@@ -182,48 +182,48 @@ gentle-pi 4.3.0 registra 30 comandos `/gentle:*` (verificado en `extensions/` y 
 | `gentle-sounds.ts` | Pack de atención nativo | Tonos `done`, `subagent_done`, `error`, `permission` y `question`; opt-in con `KAIROS_SOUNDS=1`. |
 | `opencode-subagent-statusline` (tercero) | `session_prompt`, `sidebar_content`, `home_bottom` | Panel de subagentes del paquete npm. |
 | `kairos-agents.tsx` | Ruta `kairos-agents` + atajo (sin slots) | Vista unificada a pantalla completa: sesión, subagentes vivos, catálogo de agentes y tarea ODD a la izquierda; hilo de la sesión o del subagente, o ficha del agente, a la derecha. `alt+g`/`/agentes`, modo estrecho y stop con confirmación. Cada fila del catálogo usa el color configurado del agente (el mismo del prompt). |
-| `kairos-shell.tsx` | Slot `session_left` (binario propio) | Panel izquierdo de la sesión: `Agents` (subagentes vivos con estado, tarea y tiempo), `Todos` (tarea ODD con sus pendientes) y el estado de la sesión (modelo, tokens y coste). Ancho por `session_left_width` en `tui.json`. |
+| `kairos-shell.tsx` | Slot `session_left` (binario propio) | Panel izquierdo con la rail de gentle-shell: `Status` (proyecto, rama, sucio, perfil, modelo, tokens, coste e integraciones MCP/LSP), `Changes`, `TODO`, `ODD` y `Agents`. Ancho por `session_left_width` en `config/tui.json`. |
 | `subagents.ts` | — (módulo compartido) | Datos de subagentes: llamadas `task` de la sesión cruzadas con las sesiones hijas (estado, tokens y coste), glifos, formato y eventos. Lo usan la vista y el panel. |
 | `odd-tasks.ts` | — (módulo compartido) | Lector de `odd/tasks` del worktree: tarea activa, checkboxes y pendientes, con caché por mtime+tamaño. Lo usan el HUD, la vista y el panel. |
 
-Para apagar una pieza, quita su línea de `plugin` en `tui.json` y reabre kairos.
+Para apagar una pieza, quita su línea de `plugin` en `config/tui.json` y reabre kairos.
 
 ### La vista unificada
 
 `kairos-agents.tsx` es la única pieza que no usa slots: registra una ruta de plugin (`api.route.register`/`navigate`, nombres reservados `home` y `session`) y se abre desde la sesión con `alt+g` (configurable con `KAIROS_AGENTS_KEY`; `off` deja solo la paleta y `/agentes`). La lista sale de dos fuentes que se cruzan: las partes de la tool `task` de la sesión (descripción, agente, estado y `metadata.sessionId`) y las sesiones hijas reales (`client.session.children`), que aportan estado vivo, tokens y coste. El hilo se pide con `client.session.messages` y se cachea por sesión; un diálogo de confirmación cubre el stop (`client.session.abort`).
 
-La vista es la unión visual de los dos mundos: la primera fila es la **sesión** (estado, modelo, tokens y coste) y su panel derecho es el hilo de la conversación en vivo, que se refresca mientras hay trabajo y se cachea en reposo; al final de la lista va la **tarea ODD** activa con sus pendientes (`tui-plugins/odd-tasks.ts`, el mismo lector que el HUD), en solo lectura. Subagentes y agentes del catálogo conservan su panel derecho (hilo del hijo o ficha del agente).
+La vista es la unión visual de los dos mundos: la primera fila es la **sesión** (estado, modelo, tokens y coste) y su panel derecho es el hilo de la conversación en vivo, que se refresca mientras hay trabajo y se cachea en reposo; al final de la lista va la **tarea ODD** activa con sus pendientes (`config/tui-plugins/odd-tasks.ts`, el mismo lector que el HUD), en solo lectura. Subagentes y agentes del catálogo conservan su panel derecho (hilo del hijo o ficha del agente).
 
 Dos límites del host 1.18.35 gobiernan el diseño: la sidebar vive solo a la derecha (no hay `sidebar_position`; una columna fija izquierda exigiría upstream), así que la lista a la izquierda solo puede ser una vista a pantalla completa; y `alt+a` ya está tomado por `input_visual_line_home` del editor del prompt, por eso el atajo es `alt+g`.
 
 ## Binario propio (panel de gentle-shell a la izquierda)
 
-Kairos es la combinación de los dos harnesses, también en lo visual: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda**, **conversación de OpenCode** en el centro y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins solo pueden poner contenido dentro de la sidebar (no moverla), así que kairos usa un binario propio: el mismo OpenCode 1.18.35 con un parche mínimo de 4 hunks (`patches/opencode-left-panel.patch`):
+Kairos es la combinación de los dos harnesses, también en lo visual: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda**, **conversación de OpenCode** en el centro y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins solo pueden poner contenido dentro de la sidebar (no moverla), así que kairos usa un binario propio: el mismo OpenCode 1.18.35 con un parche mínimo de 4 hunks (`scripts/patches/opencode-left-panel.patch`):
 
 - `session_left_width` en el schema de la TUI (ancho del panel; sin definir o 0 lo oculta);
 - un slot `session_left` en el layout de la sesión (el panel no se pinta por debajo de ~140 columnas);
 - de propina, `sidebar_position` + `row-reverse` (el port del PR upstream #18497, cerrado para V1 con «portadlo a V2»), que kairos **no activa**: la sidebar de OpenCode se queda a la derecha.
 
-El panel lo pinta `tui-plugins/kairos-shell.tsx` (sección «Agents» con subagentes vivos, «Todos» con la tarea ODD y una línea de estado con modelo, tokens y coste), con los datos compartidos de `subagents.ts` y `odd-tasks.ts`. `scripts/build-opencode-patched.sh [versión] [destino]` construye e instala el binario (descarga el tag, aplica el parche, `bun install`, `bun run script/build.ts --single --skip-embed-web-ui` con `OPENCODE_CHANNEL=kairos` y un test de humo de versión). `bun` solo hace falta para esto; es opcional.
+El panel lo pinta `config/tui-plugins/kairos-shell.tsx` (rail `Status` → `Changes` → `TODO`, más `ODD` y `Agents` vivos), con los datos compartidos de `subagents.ts` y `odd-tasks.ts`. `scripts/build-opencode-patched.sh [versión] [destino]` construye e instala el binario (descarga el tag, aplica el parche, `bun install`, `bun run script/build.ts --single --skip-embed-web-ui` con `OPENCODE_CHANNEL=kairos` y un test de humo de versión). `bun` solo hace falta para esto; es opcional.
 
 - El lanzador usa `~/.local/share/kairos/opencode-patched/bin/opencode` si existe; `OPENCODE_BIN` explícito gana y `KAIROS_OPENCODE_BIN` cambia la ruta. Cuando usa el binario propio exporta `OPENCODE_DISABLE_CHANNEL_DB=1` para que comparta `opencode.db` (las sesiones normales) en vez de una base por canal.
-- `tui.json` activa el panel (`session_left_width: 40`); el binario oficial ignora esa clave y nunca pinta el slot, así que el repositorio funciona igual con ambos binarios (verificado en pty).
+- `config/tui.json` activa el panel (`session_left_width: 40`); el binario oficial ignora esa clave y nunca pinta el slot, así que el repositorio funciona igual con ambos binarios (verificado en pty).
 - El binario oficial del usuario no se toca. Al subir de versión de OpenCode hay que reejecutar el script; el parche y su revisión están en el repositorio.
 
 ## Ciclo de vida de los archivos
 
 | Archivo o carpeta | Origen | ¿Lo modifica la sincronización? |
 |---|---|---|
-| `agents/` (orchestrator y subagentes de gentle-shell) | Generado | Sí, reemplaza los suyos y borra los que ya no existan upstream |
-| `prompts/orchestrator.md` | Generado | Sí, se regenera con la capa de Ponytail incluida |
-| `gentle-assets/` | Generado | Sí, se regenera completo |
-| `lib/destructive-command-guard.ts`, `licenses/LICENSE-gentle-shell` | Copiado | Sí |
-| `skills/gentle-ai`, `skills/rdd-defect-workflow` | Copiado | Sí, se refrescan |
-| Resto de `skills/` | Propio / incorporado | No |
-| `opencode.json` | Manual | No |
-| `plugins/`, `commands/` | Manual | No |
-| `themes/`, `tui-plugins/`, `tui.json` | Visual, manual | No |
-| `patches/`, `scripts/build-opencode-patched.sh` | Propio (binario parcheado) | No |
+| `config/agents/` (orchestrator y subagentes de gentle-shell) | Generado | Sí, reemplaza los suyos y borra los que ya no existan upstream |
+| `config/prompts/orchestrator.md` | Generado | Sí, se regenera con la capa de Ponytail incluida |
+| `config/gentle-assets/` | Generado | Sí, se regenera completo |
+| `config/lib/destructive-command-guard.ts`, `licenses/LICENSE-gentle-shell` | Copiado | Sí |
+| `config/skills/gentle-ai`, `config/skills/rdd-defect-workflow` | Copiado | Sí, se refrescan |
+| Resto de `config/skills/` | Propio / incorporado | No |
+| `config/opencode.json` | Manual | No |
+| `config/plugins/`, `config/commands/` | Manual | No |
+| `config/themes/`, `config/tui-plugins/`, `config/tui.json` | Visual, manual | No |
+| `scripts/patches/`, `scripts/build-opencode-patched.sh` | Propio (binario parcheado) | No |
 | `node_modules/`, `package*.json` | Dependencias | No |
 | `.gentle-shell-sync.json` | Marcador local | Sí; no se versiona |
 
@@ -259,15 +259,15 @@ Esa comprobación está en la copia local de `gentle-sync` (`~/.local/bin/gentle
 
 ### Qué puede romperse en una actualización
 
-- Si gentle-shell cambia la firma de la guarda, la validación lo detecta y la sincronización no se aplica. Hay que adaptar `plugins/gentle-shell.ts` a mano.
-- Si gentle-shell agrega MCPs, modelos o permisos que deberían estar en OpenCode, no se propagan: hay que editar `opencode.json`.
-- Si cambia la estructura de `assets/agents/*.md` (frontmatter o campo `tools`), la derivación de permisos puede no reflejar la intención original. Conviene revisar `agents/` tras una actualización mayor.
+- Si gentle-shell cambia la firma de la guarda, la validación lo detecta y la sincronización no se aplica. Hay que adaptar `config/plugins/gentle-shell.ts` a mano.
+- Si gentle-shell agrega MCPs, modelos o permisos que deberían estar en OpenCode, no se propagan: hay que editar `config/opencode.json`.
+- Si cambia la estructura de `assets/agents/*.md` (frontmatter o campo `tools`), la derivación de permisos puede no reflejar la intención original. Conviene revisar `config/agents/` tras una actualización mayor.
 
 ## Seguridad
 
 - **Secretos**: el repositorio no debe contener claves. Las claves de proveedores viven en `~/.local/share/opencode/auth.json` y `~/.gentle-shell/agent/auth.json`, fuera del árbol del proyecto.
 - **Guarda de comandos**: reconoce formas ejecutables comunes (`rm -rf` sobre rutas peligrosas, `git push --force`, `DROP`/`TRUNCATE`, `DELETE` sin `WHERE`) tras normalizar comillas, heredocs y envoltorios como `sudo`/`env`. Es un filtro heurístico, no un sandbox: no interpreta shell arbitraria ni scripts externos.
-- **Permisos**: la configuración base permite herramientas sin confirmación (`"permission": "allow"`). Para un modo más restrictivo, cambia a `ask` por herramienta en `opencode.json`.
+- **Permisos**: la configuración base permite herramientas sin confirmación (`"permission": "allow"`). Para un modo más restrictivo, cambia a `ask` por herramienta en `config/opencode.json`.
 - **Sincronización**: solo lee de `~/.gentle-shell` y solo escribe dentro del repositorio.
 
 ## Limitaciones conocidas
@@ -277,5 +277,5 @@ Esa comprobación está en la copia local de `gentle-sync` (`~/.local/bin/gentle
 - El clasificador de auto-aprobación usa el evento `permission.asked` y el cliente de bajo nivel (`client._client.post`). Si una actualización de OpenCode cambia esa superficie, el plugin degrada sin romper: la decisión queda como está.
 - En `opencode run` (no interactivo) el CLI auto-rechaza el ask antes de que el clasificador responda; el camino automático es práctico en la TUI.
 - Las herramientas que el orchestrator espera de Pi (`codegraph`, `gentle_review`, `web_*`) no están configuradas en OpenCode. Los agentes deben reportar esa ausencia en lugar de simularla.
-- La ruta del binario de `engram` en `opencode.json` se ajusta con `{env:HOME}` al instalar; `tui.json` usa rutas relativas al repositorio. En otra máquina basta ejecutar `install.sh`.
+- La ruta del binario de `engram` en `config/opencode.json` se ajusta con `{env:HOME}` al instalar; `config/tui.json` usa rutas relativas al repositorio. En otra máquina basta ejecutar `install.sh`.
 - Lo visual se verifica con pruebas estáticas y capturas pty por tema; no hay captura visual automatizada en CI (evidencia en `odd/tasks/visual-statusline.md`).

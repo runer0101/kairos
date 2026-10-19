@@ -6,7 +6,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const lib = await import(join(ROOT, "lib", "auto-approval", "index.ts"));
+const lib = await import(join(ROOT, "config", "lib", "auto-approval", "index.ts"));
 
 // Valores sintéticos: jamás credenciales reales.
 const GITHUB_TOKEN = "ghp_" + "Ab1Cd2Ef3Gh4Ij5Kl6Mn7Op8Qr9St0Uv1Wx2";

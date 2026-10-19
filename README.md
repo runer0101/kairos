@@ -1,7 +1,7 @@
 <a id="top"></a>
 
 <div align="center">
-  <img src="assets/banner.svg" width="100%" alt="kairos — el harness de gentle-shell sobre OpenCode">
+  <img src="config/assets/banner.svg" width="100%" alt="kairos — el harness de gentle-shell sobre OpenCode">
 </div>
 
 <h1 align="center">kairos</h1>
@@ -159,7 +159,7 @@ Los diez pasos del instalador:
 5. Descarga engram 3.4.0 si falta, verificando su SHA-256.
 6. Instala las dependencias con `pnpm install --frozen-lockfile`.
 7. Enlaza el lanzador en `~/.local/bin/kairos` (con los alias cortos `kai` y `ks`) y los temas en `~/.config/opencode/themes/`.
-8. Ajusta las rutas locales de `tui.json` y `opencode.json`.
+8. Ajusta las rutas locales de `config/opencode.json`.
 9. Sincroniza con gentle-shell si está instalado.
 10. Verifica que OpenCode carga los perfiles antes de terminar.
 
@@ -175,7 +175,7 @@ Para abrirlo usa `kairos` o sus alias cortos `kai` y `ks` (el instalador crea lo
 
 ## 🎛️ Perfiles de agente
 
-Pulsa `Tab` para cambiar de perfil durante una sesión. Arranca en `kairos-auto` (`default_agent` en `opencode.json`).
+Pulsa `Tab` para cambiar de perfil durante una sesión. Arranca en `kairos-auto` (`default_agent` en `config/opencode.json`).
 
 | Perfil | Modelo | Permisos | Para qué |
 |---|---|---|---|
@@ -186,9 +186,9 @@ Cada perfil lleva su color en la interfaz: `kairos-control` en amarillo y `kairo
 
 Los dos perfiles usan el mismo modelo (DeepSeek v4.1 Flash, requiere suscripción OpenCode Go). Los subagentes sin modelo propio heredan el modelo del perfil activo. `gentle-ai-explore` limita a 15 pasos para acotar el costo de la exploración; el resto de subagentes (incluido `jd-judge-b`) usa DeepSeek v4.1 Flash.
 
-Los dos perfiles comparten el prompt común (`prompts/orchestrator.md`), que incluye la capa de economía de implementación de Ponytail: se aplica en cada turno, sin comando. Los comandos `/ponytail*` quedan para ajustes explícitos de nivel, revisión y deuda.
+Los dos perfiles comparten el prompt común (`config/prompts/orchestrator.md`), que incluye la capa de economía de implementación de Ponytail: se aplica en cada turno, sin comando. Los comandos `/ponytail*` quedan para ajustes explícitos de nivel, revisión y deuda.
 
-Para cambiar los modelos, edita `agent` en `opencode.json`. No necesitas tocar los prompts.
+Para cambiar los modelos, edita `agent` en `config/opencode.json`. No necesitas tocar los prompts.
 
 <a id="modos-de-permiso"></a>
 
@@ -254,7 +254,7 @@ Todo lo que puedes invocar desde la TUI:
 
 ### Ponytail
 
-Ponytail (v5.3.2, MIT) aporta una lente de implementación mínima integrada en el prompt común de los dos perfiles (`prompts/orchestrator.md`, generado): se aplica en cada turno, sin comando. Los comandos quedan para uso explícito:
+Ponytail (v5.3.2, MIT) aporta una lente de implementación mínima integrada en el prompt común de los dos perfiles (`config/prompts/orchestrator.md`, generado): se aplica en cada turno, sin comando. Los comandos quedan para uso explícito:
 
 - `/ponytail [nivel]`: ajusta el nivel en la conversación actual (`lite`, `full`, `ultra` u `off`). No se persiste entre sesiones.
 - `/ponytail-review [alcance]`: informe de revisión con la lente lean. `/review` ya aplica esta lente en `review-readability`; este comando es la pasada completa.
@@ -277,24 +277,24 @@ La precedencia es explícita: kairos manda en proceso, riesgo y verificación; P
 
 Cuatro temas, sonidos opt-in y una TUI con identidad propia.
 
-| Tema (`tui.json`) | Estilo |
+| Tema (`config/tui.json`) | Estilo |
 |---|---|
 | `gentleman-kairos` (por defecto) | Rosé Pine con azules profundos |
 | `gentle` | Azul frío con acento dorado |
 | `gentleman-cute` | Rosas suaves |
 | `gentleman-sexy` | Rosas intensos con violeta |
 
-Los cuatro temas viven en `themes/` (los tres de gentle-shell portados a OpenCode, MIT). Para cambiar de tema, edita `tui.json` y ajusta `"theme"` con el nombre de la tabla (sin `.json`), o usa el selector de temas de la TUI. `install.sh` enlaza todos los temas en `~/.config/opencode/themes/`.
+Los cuatro temas viven en `config/themes/` (los tres de gentle-shell portados a OpenCode, MIT). Para cambiar de tema, edita `config/tui.json` y ajusta `"theme"` con el nombre de la tabla (sin `.json`), o usa el selector de temas de la TUI. `install.sh` enlaza todos los temas en `~/.config/opencode/themes/`.
 
 ### Sonidos de aviso (opcional)
 
-`assets/sounds/` trae los tres tonos originales de gentle-shell (MIT), integrados con el **sistema nativo de atención de OpenCode** como pack `kairos`: `done` y `subagent_done` usan `success`, `error` usa `error`, y `permission`/`question` usan `attention`. Actívalo al lanzar:
+`config/assets/sounds/` trae los tres tonos originales de gentle-shell (MIT), integrados con el **sistema nativo de atención de OpenCode** como pack `kairos`: `done` y `subagent_done` usan `success`, `error` usa `error`, y `permission`/`question` usan `attention`. Actívalo al lanzar:
 
 ```bash
 KAIROS_SOUNDS=1 kairos
 ```
 
-Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo a mano en la configuración de atención de OpenCode (`tui.json`), donde se controlan el volumen y si suenan solo cuando la ventana no tiene foco.
+Eso lo registra y lo deja activo de forma persistente; también puedes elegirlo a mano en la configuración de atención de OpenCode (`config/tui.json`), donde se controlan el volumen y si suenan solo cuando la ventana no tiene foco.
 
 ### Avisos de escritorio
 
@@ -306,7 +306,7 @@ KAIROS_NO_NOTIFY=1 kairos
 
 ### Logo
 
-El arco lleva debajo un texto personal (`kairos` por defecto). Cámbialo editando `LOGO_TEXT` en `tui-plugins/gentle-logo.tsx` o al lanzar:
+El arco lleva debajo un texto personal (`kairos` por defecto). Cámbialo editando `LOGO_TEXT` en `config/tui-plugins/gentle-logo.tsx` o al lanzar:
 
 ```bash
 KAIROS_LOGO_TEXT=otro-texto kairos
@@ -320,7 +320,7 @@ El arco y el texto siguen el tema activo: el arco usa `primary`/`secondary` del 
 
 El HUD de kairos suma a la TUI lo que el host no pinta: junto al prompt aparece la tarea ODD activa (`◆ odd <tarea> n/m`, con `✓` al completarla) y, si el port quedó atrás de gentle-shell, la advertencia `sync pendiente`. La sidebar muestra la misma tarea con sus siguientes pasos pendientes (hasta 3, con `… +N`). Usa los colores del tema activo y se refresca cada 4 s. El nombre se recorta al presupuesto real de cada zona (26 columnas junto al prompt, 33 en la sidebar) para que el contador `n/m` y los pendientes nunca se partan en dos líneas.
 
-Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `tui.json` y vuelve a abrir kairos.
+Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `config/tui.json` y vuelve a abrir kairos.
 
 ### Vista unificada (`alt+g`)
 
@@ -331,8 +331,8 @@ Para apagarlo, quita `"./tui-plugins/kairos-hud.tsx"` de `tui.json` y vuelve a a
 - `f` sigue el hilo en vivo; `pgup`/`pgdn` lo recorren; `s` detiene un subagente en marcha con confirmación.
 - En terminales de menos de 100 columnas se muestra una sola columna: `enter` abre el detalle y `esc` vuelve a la lista.
 - `alt+a` no se usa porque OpenCode ya lo ocupa en el editor del prompt. El atajo se cambia con `KAIROS_AGENTS_KEY` (o se apaga con `off`); el slash `/agents` tampoco, porque OpenCode lo usa para cambiar de agente.
-- Los subagentes se leen de las llamadas `task` de la sesión y de sus sesiones hijas; la tarea ODD, del worktree, con el mismo lector que el HUD (`tui-plugins/odd-tasks.ts`). Si el servidor falla, la vista conserva lo cacheado y lo avisa, nunca rompe la TUI. Cada agente del catálogo se pinta con su color configurado, el mismo que el host usa junto al prompt (por ejemplo `kairos-control` en ámbar y `kairos-auto` en el acento del tema).
-- Para apagarla, quita `"./tui-plugins/kairos-agents.tsx"` de `tui.json` y vuelve a abrir kairos.
+- Los subagentes se leen de las llamadas `task` de la sesión y de sus sesiones hijas; la tarea ODD, del worktree, con el mismo lector que el HUD (`config/tui-plugins/odd-tasks.ts`). Si el servidor falla, la vista conserva lo cacheado y lo avisa, nunca rompe la TUI. Cada agente del catálogo se pinta con su color configurado, el mismo que el host usa junto al prompt (por ejemplo `kairos-control` en ámbar y `kairos-auto` en el acento del tema).
+- Para apagarla, quita `"./tui-plugins/kairos-agents.tsx"` de `config/tui.json` y vuelve a abrir kairos.
 
 La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes de terceros y el HUD siguen ahí, y esta vista es la unión a pantalla completa. Para tener el panel de gentle-shell junto a la conversación, kairos trae un binario propio (siguiente sección).
 
@@ -342,10 +342,10 @@ La sidebar de OpenCode 1.18.35 vive solo a la derecha: el monitor de subagentes 
 
 Opcional: el panel de gentle-shell junto a la conversación.
 
-Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
+Kairos es la combinación de los dos proyectos, también visualmente: con el binario propio, la pantalla de sesión queda **panel de gentle-shell a la izquierda** (agentes vivos, todos y estado, como su TUI), **conversación de OpenCode en el centro** y **sidebar de OpenCode a la derecha** como siempre. OpenCode 1.x no permite columnas propias en la sesión y los plugins no pueden mover la sidebar (el PR upstream que lo implementaba quedó cerrado con «portadlo a V2»), así que kairos incluye un **parche mínimo** (`scripts/patches/opencode-left-panel.patch`) y un binario propio que expone el slot `session_left`.
 
 - **Construir e instalar**: `scripts/build-opencode-patched.sh` (requiere `bun`; descarga OpenCode 1.18.35, aplica el parche, compila e instala en `~/.local/share/kairos/opencode-patched/`; tarda unos minutos).
-- El panel lo pinta `tui-plugins/kairos-shell.tsx` (subagentes, tarea ODD y coste; mismo lector que el HUD y la vista `alt+g`); su ancho se ajusta en `tui.json` (`session_left_width`, por defecto 40). En terminales de menos de ~140 columnas el panel se oculta solo.
+- El panel lo pinta `config/tui-plugins/kairos-shell.tsx` (subagentes, tarea ODD y coste; mismo lector que el HUD y la vista `alt+g`); su ancho se ajusta en `config/tui.json` (`session_left_width`, por defecto 40). En terminales de menos de ~140 columnas el panel se oculta solo.
 - El lanzador usa el binario propio **solo si existe**; `OPENCODE_BIN` explícito siempre gana y `KAIROS_OPENCODE_BIN` cambia la ruta. Comparte la base de sesiones normal (`OPENCODE_DISABLE_CHANNEL_DB=1`).
 - Tu binario oficial (`~/.opencode/bin/opencode`) no se toca; con él, el slot izquierdo simplemente no se pinta y todo queda como antes (verificado).
 - Mantenimiento: al subir de versión de OpenCode, vuelve a ejecutar el script; el parche vive en el repositorio.
@@ -407,7 +407,7 @@ node scripts/sync-gentle-shell.mjs --force       # sincronizar ahora
 KAIROS_NO_SYNC=1 kairos        # abrir sin sincronizar
 ```
 
-La sincronización no cambia `opencode.json`, el tema, el logo ni las skills propias. Si una versión nueva de gentle-shell requiere cambios de configuración, hay que aplicarlos a mano.
+La sincronización no cambia `config/opencode.json`, el tema, el logo ni las skills propias. Si una versión nueva de gentle-shell requiere cambios de configuración, hay que aplicarlos a mano.
 
 > **No uses `gentle-sync` sobre este directorio.** Reemplaza el directorio entero con la salida de gentle-ai y borraría esta instalación. La copia local de `gentle-sync` lo bloquea; `GENTLE_SYNC_FORCE=1` lo salta.
 
@@ -459,38 +459,34 @@ El mapa del repositorio, de un vistazo.
 ```
 kairos/
 ├── bin/kairos              Lanzador: fija variables, detecta IA local, sincroniza
-├── install.sh                       Instalador para Linux
-├── assets/                          Banner animado y sonidos del pack kairos
-├── opencode.json                    Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
-├── tui.json                         Tema, logo y statusline
-├── prompts/orchestrator.md          Prompt común + Ponytail (generado)
-├── agents/                          Subagentes de gentle-shell (generados)
-├── gentle-assets/                   Referencias perezosas del orquestador (generadas)
-├── commands/                        Comandos /gentle-*, /odd-task, /review, /judge, /verify, /ponytail*
-├── odd/                             Plantilla y guía del flujo ODD
-├── plugins/gentle-shell.ts          Guarda de comandos destructivos y avisos de escritorio
-├── lib/destructive-command-guard.ts Lógica de la guarda (copia de gentle-pi)
-├── hooks/commit-msg                 Hook: rechaza commits con co-autor
-├── scripts/
-│   ├── detect-local-models.mjs      Detección de runtimes de IA local
+├── config/                 Superficie de configuración que carga OpenCode
+│   ├── opencode.json       Perfiles, modo normal, modelo por defecto, MCP, LSP y formateo
+│   ├── tui.json            Tema, logo y statusline
+│   ├── agents/             Subagentes de gentle-shell (generados)
+│   ├── commands/           Comandos /gentle-*, /odd-task, /review, /judge, /verify, /ponytail*
+│   ├── prompts/            Prompt común + Ponytail (generado)
+│   ├── plugins/            Guarda de comandos destructivos y avisos de escritorio
+│   ├── lib/                Lógica del plugin: guarda y clasificador (copia de gentle-pi)
+│   ├── skills/             Skills (36)
+│   ├── themes/             Temas (gentleman-kairos, gentle, gentleman-cute, gentleman-sexy)
+│   ├── tui-plugins/        Logo, sonidos, HUD, vista unificada y panel izquierdo
+│   ├── gentle-assets/      Referencias perezosas del orquestador (generadas)
+│   ├── odd/                Plantilla y guía del flujo ODD
+│   └── assets/             Banner del README y sonidos del pack kairos
+├── docs/ARCHITECTURE.md    Arquitectura y decisiones de diseño
+├── licenses/               Licencias de terceros (gentle-shell y Ponytail)
+├── scripts/                Sincronización, detección de IA local y binario propio
 │   ├── sync-gentle-shell.mjs        Sincronización con gentle-shell
-│   └── build-opencode-patched.sh    Binario propio con el panel izquierdo
-├── patches/opencode-left-panel.patch    Parche mínimo sobre OpenCode 1.18.35
-├── skills/                          Skills (36)
-├── themes/                          Temas (gentleman-kairos, gentle, gentleman-cute, gentleman-sexy)
-├── tui-plugins/gentle-logo.tsx      Logo de la TUI (sigue el tema activo)
-├── tui-plugins/gentle-sounds.ts     Pack de sonidos kairos (opt-in con KAIROS_SOUNDS=1)
-├── tui-plugins/kairos-hud.tsx       Tarea ODD junto al prompt y en la sidebar
-├── tui-plugins/kairos-agents.tsx    Vista unificada: lista a la izquierda, hilo/ficha a la derecha
-├── tui-plugins/kairos-shell.tsx     Panel izquierdo: agentes, todos y estado (slot session_left)
-├── tui-plugins/subagents.ts         Datos de subagentes compartidos (vista y panel)
-├── tui-plugins/odd-tasks.ts         Lector compartido de la tarea ODD (HUD, vista y panel)
-├── tests/                           Pruebas (node:test)
-├── docs/ARCHITECTURE.md             Arquitectura y decisiones de diseño
-├── pnpm-workspace.yaml              Ajustes de pnpm y políticas de seguridad
-├── pnpm-lock.yaml                   Versiones fijadas
-├── licenses/                        Licencias de terceros (gentle-shell y Ponytail)
-└── LICENSE                          Licencia MIT de kairos
+│   ├── detect-local-models.mjs      Detección de runtimes de IA local
+│   ├── build-opencode-patched.sh    Binario propio con el panel izquierdo
+│   ├── hooks/commit-msg             Hook: rechaza commits con co-autor
+│   └── patches/                     Parche mínimo sobre OpenCode 1.18.35
+├── tests/                  Pruebas (node:test)
+├── install.sh              Instalador para Linux
+├── pnpm-workspace.yaml     Ajustes de pnpm y políticas de seguridad
+├── pnpm-lock.yaml          Versiones fijadas
+├── LICENSE                 Licencia MIT de kairos
+└── SECURITY.md             Guardas, rutas sensibles y límites
 ```
 
 </details>
@@ -523,7 +519,7 @@ Empieza por el destino que necesites.
 |---|---|
 | [Arquitectura](docs/ARCHITECTURE.md) | Mapeo de gentle-shell a OpenCode, la TUI, el binario propio y las decisiones de diseño |
 | [Seguridad](SECURITY.md) | Guardas, rutas sensibles, límites y cómo ajustarlos |
-| [Plantilla y flujo ODD](odd/) | Documentos de feature, tareas y criterios observables del proyecto |
+| [Plantilla y flujo ODD](config/odd/) | Documentos de feature, tareas y criterios observables del proyecto |
 | [Licencias](licenses/) | MIT de kairos y las atribuciones de gentle-shell y Ponytail |
 
 <p align="right"><a href="#top">Volver arriba ↑</a></p>
@@ -548,7 +544,7 @@ Los fallos conocidos y su arreglo:
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
-| `falta .../opencode.json` | Repositorio incompleto o enlace roto | `kairos --where` muestra la ruta real |
+| `falta .../config/opencode.json` | Repositorio incompleto o enlace roto | `kairos --where` muestra la ruta real |
 | El tema no cambia | Enlace de tema ausente | Vuelve a ejecutar `./install.sh` |
 | `no se pudo sincronizar con gentle-shell` | gentle-shell no instalado o con una API distinta | `node scripts/sync-gentle-shell.mjs --force` para ver el detalle |
 | `ERR_PNPM_TRUST_DOWNGRADE` al instalar | Un paquete reciente perdió evidencia de confianza | No lo ignores: revisa la procedencia del paquete en el registro (atestaciones) y, si es legítimo, añade una excepción estrecha en `trustPolicyExclude` |
@@ -567,7 +563,7 @@ Issues concretos y `pnpm test` antes de enviar.
 
 - ¿Ideas o fallos? Abre un *issue* con el caso concreto: comando o ruta, resultado esperado y resultado observado.
 - ¿Código? Pasa `pnpm test` antes de enviar. El proyecto sigue su propio flujo ODD (`/odd-task`) y los commits van por unidad de trabajo.
-- Los commits no llevan co-autor: el hook `hooks/commit-msg` (que `install.sh` activa en el clon) rechaza los mensajes con `Co-authored-by`. Para un caso puntual, `git commit --no-verify` lo omite.
+- Los commits no llevan co-autor: el hook `scripts/hooks/commit-msg` (que `install.sh` activa en el clon) rechaza los mensajes con `Co-authored-by`. Para un caso puntual, `git commit --no-verify` lo omite.
 - No incluyas datos personales en issues, logs ni capturas: el repositorio mantiene una prueba de privacidad que falla ante rutas o correos.
 
 <p align="center">
@@ -596,8 +592,8 @@ Mantenido por [@runer0101](https://github.com/runer0101). Todo el proyecto —el
 
 - Los subagentes, la guarda de comandos, los prompts del orquestador y las skills `gentle-ai` y `rdd-defect-workflow` se derivan de **gentle-pi** (gentle-shell), de [Gentleman Programming](https://github.com/Gentleman-Programming), bajo licencia MIT.
 - Las skills `ponytail`, `ponytail-review` y `ponytail-debt`, y sus comandos, se derivan de **Ponytail**, de [Dietrich Gebert](https://github.com/DietrichGebert), bajo licencia MIT.
-- Las demás skills de `skills/` se incorporaron desde el ecosistema gentle-ai. Revisa su licencia de origen antes de redistribuirlas.
-- Los tonos de `assets/sounds/` son originales de gentle-pi (MIT); su nota de licencia está junto a los archivos.
+- Las demás skills de `config/skills/` se incorporaron desde el ecosistema gentle-ai. Revisa su licencia de origen antes de redistribuirlas.
+- Los tonos de `config/assets/sounds/` son originales de gentle-pi (MIT); su nota de licencia está junto a los archivos.
 - Los servidores MCP (`engram`, `context7`) son proyectos externos, cada uno con su propia licencia.
 
 <p align="center"><strong>Hecho con el flujo que trae a OpenCode.</strong></p>

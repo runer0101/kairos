@@ -8,11 +8,11 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const helperSrc = readFileSync(join(ROOT, "tui-plugins", "odd-tasks.ts"), "utf8");
-const hudSrc = readFileSync(join(ROOT, "tui-plugins", "kairos-hud.tsx"), "utf8");
-const viewSrc = readFileSync(join(ROOT, "tui-plugins", "kairos-agents.tsx"), "utf8");
+const helperSrc = readFileSync(join(ROOT, "config", "tui-plugins", "odd-tasks.ts"), "utf8");
+const hudSrc = readFileSync(join(ROOT, "config", "tui-plugins", "kairos-hud.tsx"), "utf8");
+const viewSrc = readFileSync(join(ROOT, "config", "tui-plugins", "kairos-agents.tsx"), "utf8");
 
-const { readOddTasks } = await import(join(ROOT, "tui-plugins", "odd-tasks.ts"));
+const { readOddTasks } = await import(join(ROOT, "config", "tui-plugins", "odd-tasks.ts"));
 
 const worktreeWith = (files) => {
   const dir = mkdtempSync(join(tmpdir(), "kairos-odd-"));

@@ -7,10 +7,10 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SOUNDS = join(ROOT, "assets", "sounds");
-const tuiPlugin = readFileSync(join(ROOT, "tui-plugins", "gentle-sounds.ts"), "utf8");
-const serverPlugin = readFileSync(join(ROOT, "plugins", "gentle-shell.ts"), "utf8");
-const tuiConfig = JSON.parse(readFileSync(join(ROOT, "tui.json"), "utf8"));
+const SOUNDS = join(ROOT, "config", "assets", "sounds");
+const tuiPlugin = readFileSync(join(ROOT, "config", "tui-plugins", "gentle-sounds.ts"), "utf8");
+const serverPlugin = readFileSync(join(ROOT, "config", "plugins", "gentle-shell.ts"), "utf8");
+const tuiConfig = JSON.parse(readFileSync(join(ROOT, "config", "tui.json"), "utf8"));
 
 test("los tres tonos portados existen y son WAV válidos", () => {
     for (const name of ["success", "error", "attention"]) {

@@ -1,4 +1,4 @@
-// Copiado de gentle-pi (gentle-shell), licencia MIT. Ver ../licenses/LICENSE-gentle-shell.
+// Copiado de gentle-pi (gentle-shell), licencia MIT. Ver ../../licenses/LICENSE-gentle-shell.
 // Recognizable executable forms only. This is deliberately not a shell/SQL
 // interpreter or a sandbox: no expansion, script loading or remote inspection.
 const DESTRUCTION_KIND = { DATABASE: "database", FILESYSTEM: "filesystem", GIT: "git" } as const;
